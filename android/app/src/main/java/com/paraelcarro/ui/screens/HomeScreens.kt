@@ -1,0 +1,76 @@
+package com.paraelcarro.ui.screens
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.paraelcarro.domain.model.OPEN_SECONDS
+import com.paraelcarro.domain.model.TURN_SECONDS
+import com.paraelcarro.ui.components.Panel
+import com.paraelcarro.ui.components.Title
+import com.paraelcarro.ui.components.Tone
+import com.paraelcarro.ui.components.WoodButton
+import com.paraelcarro.ui.theme.Rustic
+
+@Composable
+fun HomeScreen(onPlay: () -> Unit, onRules: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().padding(top = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("🐴🛒", fontSize = 64.sp)
+        Text("Para el Carro", color = Rustic.Ambar, fontSize = 38.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
+        Text(
+            "Sube la cifra, carga el carro… y reza para que el puente aguante.",
+            color = Rustic.TextoSuave, textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(16.dp))
+        WoodButton("Nueva partida", onPlay, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
+        WoodButton("Cómo se juega", onRules, Modifier.fillMaxWidth(), tone = Tone.FANTASMA)
+    }
+}
+
+@Composable
+fun RulesScreen(onBack: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Title("Cómo se juega")
+        Panel {
+            Text("1. Sale una pregunta cuya respuesta es un año o un número.")
+            Text("2. El primer jugador tiene $OPEN_SECONDS s para decir una cifra. Se monta en la burra: es el conductor.")
+            Text("3. Por turnos, cada jugador tiene $TURN_SECONDS s para:\n  ⬆️ Subir la cifra (pasa a conductor y el anterior se sube al carro)\n  🛒 Quedarse en el carro\n  🚶 Bajarse (ya no puede volver ni pujar en la ronda)")
+            Text("4. Se dan vueltas hasta que nadie sube la cifra.")
+            Text("5. El carro cruza si la respuesta real es IGUAL O MAYOR que la cifra del conductor. Si no… ¡al río!")
+        }
+        Title("Puntos")
+        Panel {
+            RuleRow("", "Cruza", "Al río")
+            RuleRow("🐴 Conductor", "+3 +1/pasajero", "−3 −1/bajado")
+            RuleRow("🛒 En el carro", "+3", "−2")
+            RuleRow("🚶 Bajados", "0", "+3")
+            Text("🎯 ¡Clavada! +2 al conductor si cruza y su cifra está a menos del 10 % (o a 5 años) de la respuesta.", color = Rustic.TextoSuave)
+        }
+        WoodButton("Volver", onBack, Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun RuleRow(who: String, ok: String, ko: String) {
+    Row(Modifier.fillMaxWidth()) {
+        Text(who, Modifier.weight(1.2f))
+        Text(ok, Modifier.weight(1f), color = Rustic.Verde, textAlign = TextAlign.End)
+        Text(ko, Modifier.weight(1f), color = Rustic.Rojo, textAlign = TextAlign.End)
+    }
+}

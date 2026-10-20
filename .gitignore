@@ -1,0 +1,17 @@
+# Android
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.iml
+*.apk
+*.aab
+*.jks
+*.keystore
+hs_err_pid*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
