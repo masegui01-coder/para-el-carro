@@ -12,6 +12,12 @@ android/.idea/
 *.keystore
 hs_err_pid*.log
 
+# Herramientas locales
+.claude/
+.firebase/
+firebase-debug.log
+database-debug.log
+
 # Sistema
 .DS_Store
 Thumbs.db

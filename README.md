@@ -9,6 +9,25 @@ del conductor, cruza; si no… ¡al río!
 - **App Android** (Kotlin + Jetpack Compose + AdMob): carpeta `android/`.
 - **Preguntas**: `shared/fechas.json` (158) y `shared/numeros.json` (155).
 
+## Salas privadas online
+
+Cada jugador juega desde su propio móvil:
+
+1. Uno pulsa **🌐 Crear sala privada**: es el **jefe de sala** (elige rondas y tipo de preguntas, y empieza).
+2. Invita con **📤 Invitar amigos** (WhatsApp, Telegram… con el menú de compartir del móvil) o pasando el
+   código de 5 letras. El enlace tiene la forma `https://masegui01-coder.github.io/para-el-carro/?sala=ABCDE`.
+3. Los amigos abren el enlace (o pulsan **🔑 Unirme con un código**), ponen su nombre y eligen avatar.
+4. Con 3 o más conectados, el jefe empieza. Si alguien recarga la página, vuelve a entrar como él mismo.
+
+Funciona con **Firebase Realtime Database** (proyecto `para-el-carro-91ke5`, separado de Cifras y Letras):
+
+- `js/online.js` — salas, invitaciones y partida online. El móvil del jefe es el árbitro: aplica las
+  jugadas, los plazos de 50 s / 15 s y la puntuación con la misma lógica que el modo de un solo móvil.
+  La respuesta no se publica hasta que se resuelve la ronda.
+- `firebase/database.rules.json` — reglas de seguridad: no se pueden listar las salas (solo entra quien
+  conoce el código) y se valida la forma de los datos. Para desplegarlas: `firebase deploy --only database`.
+- Si el jefe cierra la app a mitad de partida, la partida se queda en pausa hasta que vuelva.
+
 ## Reglas
 
 1. El jugador que abre tiene **50 s** para decir una cifra y se monta en la burra (conductor).

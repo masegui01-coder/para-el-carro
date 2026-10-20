@@ -134,13 +134,17 @@
 
   let timer = null;
   function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
-  /** Cuenta atrás que actualiza la barra; llama a onEnd al llegar a cero. */
-  function startTimer(seconds, onEnd) {
+  /**
+   * Cuenta atrás que actualiza la barra; llama a onEnd al llegar a cero.
+   * En las salas online, `endAt` es la hora de fin compartida y `now` el reloj del servidor.
+   */
+  function startTimer(seconds, onEnd, endAt, now = Date.now) {
     stopTimer();
-    const end = Date.now() + seconds * 1000;
+    const end = endAt || now() + seconds * 1000;
+    const clock = endAt ? now : Date.now;
     let lastSec = seconds + 1;
     const tickFn = () => {
-      const left = Math.max(0, end - Date.now());
+      const left = Math.min(seconds * 1000, Math.max(0, end - clock()));
       const sec = Math.ceil(left / 1000);
       const bar = document.querySelector('.temporizador > div');
       const num = document.querySelector('.segundos');
@@ -182,8 +186,8 @@
     openAttempts: 0,
   };
 
-  function pickQuestion() {
-    const all = window.PREGUNTAS.filter((q) => G.mode === 'mezcla' || q.tipo === G.mode);
+  function pickQuestion(mode = G.mode) {
+    const all = window.PREGUNTAS.filter((q) => mode === 'mezcla' || q.tipo === mode);
     let used = store.get('used', []);
     let pool = all.filter((q) => !used.includes(q.id));
     if (pool.length === 0) { used = used.filter((id) => !all.some((q) => q.id === id)); pool = all; }
@@ -198,16 +202,35 @@
   function screenHome() {
     render(`
       <section class="portada">
-        <div class="burra">🐴🛒</div>
+        <img class="portada-img" src="img/portada.jpg" alt="Un campesino salta del carro mientras el caballo frena al borde del barranco"
+          onerror="this.outerHTML='&lt;div class=&quot;burra&quot;&gt;🐴🛒&lt;/div&gt;'">
         <h1>Para el Carro</h1>
         <p class="suave">Sube la cifra, carga el carro… y reza para que el puente aguante.</p>
         <div class="col" style="margin-top:24px">
-          <button class="btn ambar bloque" id="jugar">Nueva partida</button>
+          <button class="btn ambar bloque" id="crear">🌐 Crear sala privada</button>
+          <button class="btn musgo bloque" id="unirse">🔑 Unirme con un código</button>
+          <button class="btn bloque" id="jugar">📱 Jugar en un solo móvil</button>
           <button class="btn fantasma bloque" id="reglas">Cómo se juega</button>
         </div>
       </section>`, true);
     on('#jugar', 'click', () => { sfx.click(); screenLobby(); });
+    on('#crear', 'click', () => { sfx.click(); window.Online.screenCreate(); });
+    on('#unirse', 'click', () => { sfx.click(); window.Online.screenJoin(''); });
     on('#reglas', 'click', screenRules);
+  }
+
+  /** Rejilla de avatares en un modal; los ocupados salen desactivados. */
+  function avatarPicker(current, used, onPick) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `<div class="panel"><h2>Elige avatar</h2><div class="rejilla-avatares">
+      ${AVATARS.map((a) => `<button data-a="${a}" class="${a === current ? 'sel' : ''}" ${used.includes(a) ? 'disabled' : ''}>${a}</button>`).join('')}
+      </div></div>`;
+    modal.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-a]');
+      if (a || e.target === modal) { modal.remove(); onPick(a ? a.dataset.a : null); }
+    });
+    document.body.appendChild(modal);
   }
 
   function screenRules() {
@@ -279,18 +302,10 @@
     }));
     $app.querySelectorAll('[data-avatar]').forEach((el) => el.addEventListener('click', () => {
       const p = playerById(+el.dataset.avatar);
-      const used = taken(p.id);
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.innerHTML = `<div class="panel"><h2>Elige avatar</h2><div class="rejilla-avatares">
-        ${AVATARS.map((a) => `<button data-a="${a}" class="${a === p.avatar ? 'sel' : ''}" ${used.includes(a) ? 'disabled' : ''}>${a}</button>`).join('')}
-        </div></div>`;
-      modal.addEventListener('click', (e) => {
-        const a = e.target.closest('[data-a]');
-        if (a) { p.avatar = a.dataset.a; save(); }
-        if (a || e.target === modal) { modal.remove(); screenLobby(); }
+      avatarPicker(p.avatar, taken(p.id), (a) => {
+        if (a) { p.avatar = a; save(); }
+        screenLobby();
       });
-      document.body.appendChild(modal);
     }));
     on('#add', 'click', () => {
       const id = Math.max(...G.players.map((p) => p.id)) + 1;
@@ -402,16 +417,18 @@
     });
   }
 
-  function cartPanel() {
-    const R = G.R;
-    const chips = G.players.map((p) => {
+  /** Quién va en la burra, en el carro o bajado, y las últimas jugadas. `turnId` resalta a quien le toca. */
+  function cartPanel(players = G.players, R = G.R, turnId = null) {
+    const chips = players.map((p) => {
       const st = R.status[p.id];
       const cls = st === 'conductor' ? 'conductor' : st === 'bajado' ? 'bajado' : '';
       const ico = st === 'conductor' ? '🐴' : st === 'bajado' ? '🚶' : '🛒';
-      return `<span class="chip ${cls}">${ico} ${p.avatar} ${esc(p.name)}</span>`;
+      const off = p.online === false ? ' 📴' : '';
+      return `<span class="chip ${cls}${p.id === turnId ? ' turno' : ''}">${ico} ${p.avatar} ${esc(p.name)}${off}</span>`;
     }).join('');
-    const log = R.log.slice(-6).reverse().map((l) => {
-      const p = playerById(l.id);
+    const log = (R.log || []).slice(-6).reverse().map((l) => {
+      const p = players.find((x) => x.id === l.id);
+      if (!p) return '';
       const txt = { abre: `abre con ${fmtQ(l.value, R.q)}`, subir: `sube a ${fmtQ(l.value, R.q)}`, quedar: 'se queda en el carro', bajar: 'se baja del carro', tiempo: 'se queda (tiempo)' }[l.action];
       return `<li>${p.avatar} ${esc(p.name)} ${txt}</li>`;
     }).join('');
@@ -590,6 +607,15 @@
     on('#sala', 'click', screenLobby);
   }
 
-  window.ParaElCarro = { Logic }; // para pruebas desde la consola
-  screenHome();
+  // Piezas compartidas con el modo online (js/online.js)
+  window.ParaElCarro = {
+    Logic, AVATARS, OPEN_SECONDS, TURN_SECONDS, MIN_PLAYERS, MAX_PLAYERS, AD_EVERY_ROUNDS,
+    esc, fmtQ, parseCifra, store, sfx, vibrate, render, on, startTimer, stopTimer,
+    pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome,
+  };
+
+  // Enlace de invitación: ?sala=CODIGO
+  const invite = new URLSearchParams(location.search).get('sala');
+  if (invite && window.Online) window.Online.screenJoin(invite.toUpperCase());
+  else screenHome();
 })();

@@ -85,6 +85,11 @@ input:focus, select:focus { outline: 2px solid var(--ambar); outline-offset: 1px
 
 /* Portada */
 .portada { text-align: center; padding-top: 8px; }
+.portada-img {
+  display: block; width: 100%; height: auto; aspect-ratio: 1376 / 768; object-fit: cover;
+  border-radius: var(--radio); border: 2px solid var(--madera-clara);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5); margin-bottom: 14px;
+}
 .portada .burra { font-size: 64px; filter: drop-shadow(0 0 16px rgba(242, 169, 59, .4)); }
 
 /* Lobby */
@@ -183,3 +188,16 @@ table.puntos td.num { text-align: right; font-weight: 800; }
 .modal .panel { width: min(420px, 100%); }
 
 .reglas li { margin-bottom: 6px; }
+
+/* Salas online */
+.codigo {
+  font-family: "Courier New", monospace; font-size: 3rem; font-weight: 800; letter-spacing: .35em;
+  color: var(--ambar-claro); text-shadow: 0 0 18px rgba(242, 169, 59, .4); margin: 4px 0 12px; padding-left: .35em;
+}
+.codigo-input { text-transform: uppercase; letter-spacing: .3em; font-family: "Courier New", monospace; font-size: 1.4rem !important; text-align: center; margin-top: 6px; }
+.enlace { font-size: .8rem; margin-top: 10px; word-break: break-all; user-select: all; }
+.error { color: #ff8a73; min-height: 1.2em; font-weight: 700; }
+.aviso { background: rgba(192, 80, 58, .25); border: 1px solid var(--sangre); border-radius: 10px; padding: 8px 12px; margin: 8px 0; font-size: .9rem; }
+.ambar { color: var(--ambar); }
+.chip.turno { outline: 2px solid var(--ambar-claro); animation: latido .6s infinite alternate; }
+label { display: block; }
