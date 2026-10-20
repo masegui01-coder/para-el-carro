@@ -1,6 +1,14 @@
 package com.paraelcarro.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.paraelcarro.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,20 +33,31 @@ import com.paraelcarro.ui.components.WoodButton
 import com.paraelcarro.ui.theme.Rustic
 
 @Composable
-fun HomeScreen(onPlay: () -> Unit, onRules: () -> Unit) {
+fun HomeScreen(onCreateRoom: () -> Unit, onJoinRoom: () -> Unit, onPlay: () -> Unit, onRules: () -> Unit) {
     Column(
-        Modifier.fillMaxWidth().padding(top = 48.dp),
+        Modifier.fillMaxWidth().padding(top = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("🐴🛒", fontSize = 64.sp)
+        Image(
+            painterResource(R.drawable.portada),
+            contentDescription = "Un campesino salta del carro mientras el caballo frena al borde del barranco",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1376f / 768f)
+                .clip(RoundedCornerShape(14.dp))
+                .border(2.dp, Rustic.MaderaClara, RoundedCornerShape(14.dp)),
+        )
         Text("Para el Carro", color = Rustic.Ambar, fontSize = 38.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
         Text(
             "Sube la cifra, carga el carro… y reza para que el puente aguante.",
             color = Rustic.TextoSuave, textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(16.dp))
-        WoodButton("Nueva partida", onPlay, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
+        Spacer(Modifier.height(8.dp))
+        WoodButton("🌐 Crear sala privada", onCreateRoom, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
+        WoodButton("🔑 Unirme con un código", onJoinRoom, Modifier.fillMaxWidth(), tone = Tone.MUSGO)
+        WoodButton("📱 Jugar en un solo móvil", onPlay, Modifier.fillMaxWidth())
         WoodButton("Cómo se juega", onRules, Modifier.fillMaxWidth(), tone = Tone.FANTASMA)
     }
 }

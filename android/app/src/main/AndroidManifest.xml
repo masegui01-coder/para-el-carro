@@ -18,11 +18,21 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Invitación a sala: https://masegui01-coder.github.io/para-el-carro/?sala=ABCDE
+                 (sin verificar, Android pregunta si abrirlo con la app; si no la tienen, se juega en la web) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="masegui01-coder.github.io" android:pathPrefix="/para-el-carro" />
             </intent-filter>
         </activity>
     </application>

@@ -16,6 +16,8 @@ class QuestionRepository(private val context: Context) {
         parse(context.assets.open("preguntas.json").bufferedReader().use { it.readText() })
     }
 
+    fun byId(id: String): Question? = all.firstOrNull { it.id == id }
+
     fun next(mode: QuestionMode): Question {
         val pool = all.filter {
             when (mode) {

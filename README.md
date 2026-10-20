@@ -27,6 +27,9 @@ Funciona con **Firebase Realtime Database** (proyecto `para-el-carro-91ke5`, sep
 - `firebase/database.rules.json` — reglas de seguridad: no se pueden listar las salas (solo entra quien
   conoce el código) y se valida la forma de los datos. Para desplegarlas: `firebase deploy --only database`.
 - Si el jefe cierra la app a mitad de partida, la partida se queda en pausa hasta que vuelva.
+- **La app Android usa el mismo Firebase y el mismo formato**: en una sala pueden jugar a la vez
+  móviles con la app y navegadores (cualquiera puede ser el jefe). En la app, el enlace de invitación
+  abre directamente la pantalla de unirse con el código puesto (`data/online/`, `ui/online/`).
 
 ## Reglas
 

@@ -39,6 +39,7 @@ import com.paraelcarro.domain.model.MAX_PLAYERS
 import com.paraelcarro.domain.model.MIN_PLAYERS
 import com.paraelcarro.domain.model.QuestionMode
 import com.paraelcarro.ui.GameViewModel
+import com.paraelcarro.ui.components.AvatarPickerDialog
 import com.paraelcarro.ui.components.Panel
 import com.paraelcarro.ui.components.Title
 import com.paraelcarro.ui.components.Tone
@@ -106,26 +107,6 @@ fun LobbyScreen(state: GameState, vm: GameViewModel) {
     pickingFor?.let { id ->
         val me = players.first { it.id == id }
         val taken = players.filter { it.id != id }.map { it.avatar }.toSet()
-        AlertDialog(
-            onDismissRequest = { pickingFor = null },
-            confirmButton = { TextButton({ pickingFor = null }) { Text("Cerrar") } },
-            title = { Text("Elige avatar") },
-            text = {
-                LazyVerticalGrid(GridCells.Fixed(6), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    items(AVATARS) { a ->
-                        val free = a !in taken
-                        Box(
-                            Modifier
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (a == me.avatar) Rustic.Ambar.copy(alpha = .3f) else Color.Black.copy(alpha = .3f))
-                                .alpha(if (free) 1f else .25f)
-                                .clickable(enabled = free) { vm.setAvatar(id, a); pickingFor = null },
-                            contentAlignment = Alignment.Center,
-                        ) { Text(a, fontSize = 24.sp) }
-                    }
-                }
-            },
-        )
+        AvatarPickerDialog(me.avatar, taken, onPick = { vm.setAvatar(id, it); pickingFor = null }, onDismiss = { pickingFor = null })
     }
 }

@@ -57,9 +57,14 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.coroutines.android)
+    implementation(libs.coroutines.play.services)
 
     implementation(libs.play.services.ads)
     implementation(libs.ump)
+
+    // Salas online: el mismo proyecto Firebase que la web (ver data/online/FirebaseSetup.kt)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.database)
 
     testImplementation(libs.junit)
     // org.json real para los tests de JVM (en Android lo da el sistema)
