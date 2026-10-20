@@ -268,7 +268,8 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun onState(st: OnlineState?) {
         _ui.update { it.copy(state = st) }
-        if (st == null || st.seq == lastSeq) return
+        if (st == null) { lastSeq = -1; ticker?.cancel(); return } // de vuelta en la sala
+        if (st.seq == lastSeq) return
         lastSeq = st.seq
         val me = _ui.value.me
         _ui.update { it.copy(draft = Draft(), sent = false) }
@@ -445,7 +446,8 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             if (players.size < MIN_PLAYERS) return
             // Los que no estén conectados al empezar se quedan fuera de la partida
             s.players.filter { !it.online }.forEach { kick(it.id) }
-            g = HostGame(players, s.meta?.rounds ?: 6, s.meta?.mode ?: "mezcla", players.associate { it.id to 0 }.toMutableMap(), s.state?.seq ?: 0)
+            // seq empieza en la hora actual: así nunca coincide con el de una partida anterior de la sala
+            g = HostGame(players, s.meta?.rounds ?: 6, s.meta?.mode ?: "mezcla", players.associate { it.id to 0 }.toMutableMap(), System.currentTimeMillis())
             adShownRound = 0
             repo.room(code ?: return).child("meta/status").setValue("playing")
             nextRound()

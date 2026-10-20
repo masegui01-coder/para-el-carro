@@ -37,7 +37,7 @@
 
   const S = {
     code: null, me: null, meta: null, players: {}, state: null,
-    listeners: [], lastSeq: -1, lastBridgeSeq: -1, adShownRound: 0, sent: false,
+    listeners: [], lastSeq: -1, adShownRound: 0, sent: false,
   };
 
   const playerList = () => Object.entries(S.players)
@@ -58,7 +58,7 @@
     H.stop();
     S.code = S.me = S.meta = S.state = null;
     S.players = {};
-    S.lastSeq = S.lastBridgeSeq = -1;
+    S.lastSeq = -1;
     P().store.set('online', null);
     history.replaceState(null, '', location.pathname);
   }
@@ -204,6 +204,12 @@
       st.R.log = st.R.log || [];
       st.R.status = st.R.status || {};
       st.R.q = st.q;
+    }
+    if (st.result) {
+      // Si todos se bajan del carro, "passengers" llega vacío y Firebase lo elimina
+      st.result.passengers = st.result.passengers || [];
+      st.result.off = st.result.off || [];
+      st.result.delta = st.result.delta || {};
     }
   }
 
@@ -461,8 +467,6 @@
         <div class="revelacion" id="rev">${driver.avatar} apuesta por <span style="color:var(--ambar-claro)">${P().esc(P().fmtQ(R.bid, q))}</span></div>
       </div>
       <button class="btn fantasma bloque peq" id="saltar" style="margin-top:10px">Saltar ⏩</button>`);
-    if (S.lastBridgeSeq === st.seq) return;
-    S.lastBridgeSeq = st.seq;
     const scene = window.BridgeScene.play(document.querySelector('#puente'), {
       driver: driver.avatar,
       passengers: res.passengers.map((id) => (pl(id) || {}).avatar || '🙂'),
@@ -593,7 +597,8 @@
       if (players.length < P().MIN_PLAYERS) return;
       // Los que no estén conectados al empezar se quedan fuera de la partida
       playerList().filter((p) => p.online === false).forEach((p) => roomRef(`players/${p.id}`).remove());
-      this.g = { players, rounds: S.meta.rounds, mode: S.meta.mode, round: 0, scores: Object.fromEntries(players.map((p) => [p.id, 0])), seq: (S.state && S.state.seq) || 0 };
+      this.g = { players, rounds: S.meta.rounds, mode: S.meta.mode, round: 0, scores: Object.fromEntries(players.map((p) => [p.id, 0])), seq: Date.now() };
+      // seq empieza en la hora actual: así nunca coincide con el de una partida anterior de la sala
       S.adShownRound = 0;
       roomRef('meta/status').set('playing');
       this.nextRound();
