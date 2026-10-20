@@ -501,6 +501,7 @@
         <div class="pregunta" style="font-size:1rem">${P().esc(q.q)}</div>
         <p>Respuesta: <b style="color:var(--ambar-claro)">${P().esc(P().fmtQ(res.a, q))}</b> · ${tag(driver)} dijo <b>${P().esc(P().fmtQ(R.bid, q))}</b></p>
         ${res.n ? `<p class="suave" style="margin:0">💡 ${P().esc(res.n)}</p>` : ''}
+        ${P().Ratings.widget(q.id)}
       </div>
       <div class="panel"><table class="puntos">
         <tr class="suave"><td>Jugador</td><td class="num">Ronda</td><td class="num">Total</td></tr>${rows}
@@ -508,6 +509,7 @@
       ${isHost() ? `<button class="btn ambar bloque" id="seguir">${last ? '🏆 Ver el podio' : 'Siguiente ronda ➜'}</button>`
         : `<p class="suave centro">⏳ Esperando a que el jefe pase a ${last ? 'el podio' : 'la siguiente ronda'}…</p>`}`, true);
     P().on('#seguir', 'click', () => H.next());
+    P().Ratings.bind();
     // Anuncio cada 2 rondas y antes del podio, en la pantalla de puntos (no hay cuenta atrás corriendo)
     if ((last || st.round % P().AD_EVERY_ROUNDS === 0) && S.adShownRound !== st.round) {
       S.adShownRound = st.round;
@@ -716,5 +718,26 @@
     },
   };
 
-  window.Online = { screenCreate, screenJoin };
+  // ------------------------------------------------------------ Valoraciones de preguntas (ratings/QID)
+
+  let ratingsPromise = null;
+  /** Contadores 👍 😐 👎 de todas las preguntas (una lectura por sesión). */
+  function loadRatings() {
+    if (!ratingsPromise) {
+      ratingsPromise = Promise.resolve()
+        .then(() => { connect(); return db.ref('ratings').once('value'); })
+        .then((s) => s.val() || {})
+        .catch(() => ({}));
+    }
+    return ratingsPromise;
+  }
+
+  function rate(qid, kind) {
+    try {
+      connect();
+      db.ref(`ratings/${qid}/${kind}`).set(firebase.database.ServerValue.increment(1)).catch(() => {});
+    } catch (e) { /* sin conexión: el voto se pierde */ }
+  }
+
+  window.Online = { screenCreate, screenJoin, loadRatings, rate };
 })();

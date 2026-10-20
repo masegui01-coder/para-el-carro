@@ -8,6 +8,7 @@ import com.paraelcarro.data.QuestionRepository
 import com.paraelcarro.data.online.CODE_CHARS
 import com.paraelcarro.data.online.CODE_REGEX
 import com.paraelcarro.data.online.OnlineResult
+import com.paraelcarro.data.online.QuestionRatings
 import com.paraelcarro.data.online.OnlineState
 import com.paraelcarro.data.online.RoomMeta
 import com.paraelcarro.data.online.RoomPlayer
@@ -92,7 +93,15 @@ private const val AD_EVERY_ROUNDS = 2
 class OnlineViewModel(app: Application) : AndroidViewModel(app) {
     private val repo by lazy { RoomRepository(app) }
     private val questions = QuestionRepository(app)
+    private val ratings = QuestionRatings(app)
     private val prefs = app.getSharedPreferences("online", Context.MODE_PRIVATE)
+
+    init {
+        viewModelScope.launch { ratings.refresh() }
+    }
+
+    fun isRated(qid: String) = ratings.isRated(qid)
+    fun rate(qid: String, kind: String) = ratings.rate(qid, kind)
 
     private val _ui = MutableStateFlow(
         OnlineUi(
@@ -459,7 +468,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             game.openerIdx = (game.round - 1) % game.players.size
             game.openAttempts = 0
             val mode = when (game.mode) { "fecha" -> QuestionMode.FECHAS; "numero" -> QuestionMode.NUMEROS; else -> QuestionMode.MEZCLA }
-            val q = questions.next(mode)
+            val q = questions.next(mode, ratings.excluded)
             game.question = q
             game.rs = RoundState(q, game.openerIdx)
             game.result = null

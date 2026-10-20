@@ -231,7 +231,11 @@ class MainActivity : ComponentActivity() {
             is GamePhase.Handoff -> HandoffScreen(state, phase, vm)
             is GamePhase.OpeningBid -> OpeningBidScreen(state, phase, vm)
             is GamePhase.Turn -> TurnScreen(state, phase, vm)
-            is GamePhase.RoundScore -> RoundScoreScreen(state, phase.result) {
+            is GamePhase.RoundScore -> RoundScoreScreen(
+                state, phase.result,
+                alreadyRated = vm.isRated(phase.result.question.id),
+                onRate = { vm.rate(phase.result.question.id, it) },
+            ) {
                 if (vm.shouldShowAdBeforeNext()) ads.showInterstitial(this@MainActivity, vm::nextAfterScore)
                 else vm.nextAfterScore()
             }

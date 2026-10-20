@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.paraelcarro.data.LobbyStore
 import com.paraelcarro.data.QuestionRepository
+import com.paraelcarro.data.online.QuestionRatings
 import com.paraelcarro.domain.GameEngine
 import com.paraelcarro.domain.model.AVATARS
 import com.paraelcarro.domain.model.Draft
@@ -40,6 +41,14 @@ private const val AD_EVERY_ROUNDS = 2
 class GameViewModel(app: Application) : AndroidViewModel(app) {
     private val questions = QuestionRepository(app)
     private val lobby = LobbyStore(app)
+    private val ratings = QuestionRatings(app)
+
+    init {
+        viewModelScope.launch { ratings.refresh() }
+    }
+
+    fun isRated(qid: String) = ratings.isRated(qid)
+    fun rate(qid: String, kind: String) = ratings.rate(qid, kind)
 
     private val _state = MutableStateFlow(GameState(players = lobby.loadPlayers(), config = lobby.loadConfig()))
     val state: StateFlow<GameState> = _state.asStateFlow()
@@ -111,7 +120,7 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
         val s = _state.value
         val number = s.roundNumber + 1
         val opener = (number - 1) % s.players.size
-        val round = RoundState(question = questions.next(s.config.mode), openerIndex = opener)
+        val round = RoundState(question = questions.next(s.config.mode, ratings.excluded), openerIndex = opener)
         _state.update {
             it.copy(
                 roundNumber = number, round = round, openAttempts = 0, draft = Draft(),

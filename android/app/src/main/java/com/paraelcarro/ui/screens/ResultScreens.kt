@@ -27,13 +27,14 @@ import com.paraelcarro.domain.model.GameState
 import com.paraelcarro.domain.model.Player
 import com.paraelcarro.domain.model.RoundResult
 import com.paraelcarro.ui.components.Panel
+import com.paraelcarro.ui.components.RatingRow
 import com.paraelcarro.ui.components.RoundHeader
 import com.paraelcarro.ui.components.Tone
 import com.paraelcarro.ui.components.WoodButton
 import com.paraelcarro.ui.theme.Rustic
 
 @Composable
-fun RoundScoreScreen(state: GameState, result: RoundResult, onNext: () -> Unit) {
+fun RoundScoreScreen(state: GameState, result: RoundResult, alreadyRated: Boolean, onRate: (String) -> Unit, onNext: () -> Unit) {
     val q = result.question
     val driver = state.player(result.driverId)!!
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -51,6 +52,7 @@ fun RoundScoreScreen(state: GameState, result: RoundResult, onNext: () -> Unit) 
             Text(q.text, fontFamily = FontFamily.Serif)
             Text("Respuesta: ${q.format(q.answer)} · ${driver.avatar} ${driver.name} dijo ${q.format(result.bid)}", fontWeight = FontWeight.Bold, color = Rustic.AmbarClaro)
             if (q.note.isNotEmpty()) Text("💡 ${q.note}", color = Rustic.TextoSuave)
+            RatingRow(q.id, alreadyRated, onRate)
         }
         Panel {
             Row { Text("Jugador", Modifier.weight(1f), color = Rustic.TextoSuave); Text("Ronda", Modifier.weight(.4f), color = Rustic.TextoSuave, textAlign = TextAlign.End); Text("Total", Modifier.weight(.4f), color = Rustic.TextoSuave, textAlign = TextAlign.End) }

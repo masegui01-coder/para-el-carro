@@ -18,9 +18,10 @@ class QuestionRepository(private val context: Context) {
 
     fun byId(id: String): Question? = all.firstOrNull { it.id == id }
 
-    fun next(mode: QuestionMode): Question {
+    /** Siguiente pregunta sin repetir; [excluded] son las que la gente ha valorado mal. */
+    fun next(mode: QuestionMode, excluded: Set<String> = emptySet()): Question {
         val pool = all.filter {
-            when (mode) {
+            it.id !in excluded && when (mode) {
                 QuestionMode.FECHAS -> it.type == QuestionType.FECHA
                 QuestionMode.NUMEROS -> it.type == QuestionType.NUMERO
                 QuestionMode.MEZCLA -> true

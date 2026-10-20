@@ -3,6 +3,17 @@
     // Nadie puede listar las salas: solo entra quien conoce el código.
     ".read": false,
     ".write": false,
+    // Valoraciones de las preguntas: solo contadores que suben de uno en uno. Se pueden leer (el juego
+    // aparta las peores) pero no borrar ni poner a mano.
+    "ratings": {
+      ".read": true,
+      "$qid": {
+        "$kind": {
+          ".write": "$qid.matches(/^[fn][0-9]{3,4}$/) && ($kind === 'up' || $kind === 'meh' || $kind === 'down')",
+          ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+        }
+      }
+    },
     "rooms": {
       "$code": {
         ".read": "$code.matches(/^[A-HJ-NP-Z2-9]{5}$/)",

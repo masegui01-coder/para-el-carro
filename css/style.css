@@ -201,3 +201,10 @@ table.puntos td.num { text-align: right; font-weight: 800; }
 .ambar { color: var(--ambar); }
 .chip.turno { outline: 2px solid var(--ambar-claro); animation: latido .6s infinite alternate; }
 label { display: block; }
+
+/* Valorar la pregunta */
+.valorar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(160, 112, 60, .35);
+}
+.valorar .btn { font-size: 1.3rem; min-width: 48px; }

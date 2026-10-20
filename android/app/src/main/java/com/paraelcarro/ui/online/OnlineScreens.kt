@@ -49,6 +49,7 @@ import com.paraelcarro.ui.Feedback
 import com.paraelcarro.ui.components.AvatarPickerDialog
 import com.paraelcarro.ui.components.CifraField
 import com.paraelcarro.ui.components.Panel
+import com.paraelcarro.ui.components.RatingRow
 import com.paraelcarro.ui.components.QuestionCard
 import com.paraelcarro.ui.components.RoundHeader
 import com.paraelcarro.ui.components.TimerBar
@@ -402,6 +403,7 @@ private fun ScoreView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
             Text(q.text, fontFamily = FontFamily.Serif)
             Text("Respuesta: ${q.format(res.answer)} · ${ui.player(r.driver).tag()} dijo ${q.format(r.bid)}", fontWeight = FontWeight.Bold, color = Rustic.AmbarClaro)
             if (res.note.isNotEmpty()) Text("💡 ${res.note}", color = Rustic.TextoSuave)
+            RatingRow(q.id, vm.isRated(q.id)) { vm.rate(q.id, it) }
         }
         Panel {
             Row {

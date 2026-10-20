@@ -30,7 +30,7 @@ private val OPTIONS = FirebaseOptions.Builder()
 
 /** Acceso a rooms/CODIGO en Realtime Database. */
 class RoomRepository(context: Context) {
-    private val db: FirebaseDatabase = run {
+    val db: FirebaseDatabase = run {
         val app = FirebaseApp.getApps(context).firstOrNull() ?: FirebaseApp.initializeApp(context, OPTIONS)
         FirebaseDatabase.getInstance(app)
     }

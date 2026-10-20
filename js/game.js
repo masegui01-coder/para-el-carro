@@ -186,8 +186,53 @@
     openAttempts: 0,
   };
 
+  // ---------------------------------------------------------------- Valoraciones de preguntas
+
+  const Ratings = {
+    MIN_VOTES: 5,
+    excluded: new Set(),
+
+    /**
+     * Preguntas apartadas: con al menos MIN_VOTES votos, nota negativa (más 👎 que 👍)
+     * y en el 20 % peor de las preguntas valoradas.
+     */
+    computeExcluded(map) {
+      const scored = Object.entries(map || {}).map(([id, c]) => {
+        const up = c.up || 0, meh = c.meh || 0, down = c.down || 0;
+        const votes = up + meh + down;
+        return { id, votes, score: votes ? (up - down) / votes : 0 };
+      }).filter((x) => x.votes >= Ratings.MIN_VOTES);
+      if (!scored.length) return new Set();
+      const sorted = scored.map((x) => x.score).sort((a, b) => a - b);
+      const p20 = sorted[Math.floor(sorted.length * 0.2)];
+      return new Set(scored.filter((x) => x.score < 0 && x.score <= p20).map((x) => x.id));
+    },
+
+    refresh() {
+      if (!window.Online) return;
+      window.Online.loadRatings().then((map) => { Ratings.excluded = Ratings.computeExcluded(map); });
+    },
+
+    /** Botones 👍 😐 👎 (opcionales). Cada dispositivo vota una vez por pregunta. */
+    widget(qid) {
+      const done = store.get('rated', []).includes(qid);
+      return `<div class="valorar" data-q="${esc(qid)}">${done ? '<span class="suave">✅ Ya has valorado esta pregunta</span>'
+        : '<span class="suave">¿Qué te ha parecido la pregunta?</span><span class="fila"><button class="btn fantasma peq" data-r="up" aria-label="Me ha gustado">👍</button><button class="btn fantasma peq" data-r="meh" aria-label="Sin más">😐</button><button class="btn fantasma peq" data-r="down" aria-label="No me ha gustado">👎</button></span>'}</div>`;
+    },
+
+    bind() {
+      $app.querySelectorAll('.valorar [data-r]').forEach((b) => b.addEventListener('click', () => {
+        const box = b.closest('.valorar');
+        const qid = box.dataset.q;
+        if (window.Online) window.Online.rate(qid, b.dataset.r);
+        store.set('rated', [...store.get('rated', []), qid].slice(-3000));
+        box.innerHTML = '<span class="suave">¡Gracias! Tu voto ayuda a elegir las mejores preguntas.</span>';
+      }));
+    },
+  };
+
   function pickQuestion(mode = G.mode) {
-    const all = window.PREGUNTAS.filter((q) => mode === 'mezcla' || q.tipo === mode);
+    const all = window.PREGUNTAS.filter((q) => (mode === 'mezcla' || q.tipo === mode) && !Ratings.excluded.has(q.id));
     let used = store.get('used', []);
     let pool = all.filter((q) => !used.includes(q.id));
     if (pool.length === 0) { used = used.filter((id) => !all.some((q) => q.id === id)); pool = all; }
@@ -560,6 +605,7 @@
         <div class="pregunta" style="font-size:1rem">${esc(q.q)}</div>
         <p>Respuesta: <b style="color:var(--ambar-claro)">${esc(fmtQ(q.a, q))}</b> · ${tag(driver)} dijo <b>${esc(fmtQ(R.bid, q))}</b></p>
         ${q.n ? `<p class="suave" style="margin:0">💡 ${esc(q.n)}</p>` : ''}
+        ${Ratings.widget(q.id)}
       </div>
       <div class="panel"><table class="puntos">
         <tr class="suave"><td>Jugador</td><td class="num">Ronda</td><td class="num">Total</td></tr>${rows}
@@ -569,6 +615,7 @@
       const next = last ? screenFinal : nextRound;
       if (last || G.round % AD_EVERY_ROUNDS === 0) showInterstitial(next); else next();
     });
+    Ratings.bind();
   }
 
   /** Simulación del anuncio intersticial (en Android lo sirve AdMob). */
@@ -611,8 +658,9 @@
   window.ParaElCarro = {
     Logic, AVATARS, OPEN_SECONDS, TURN_SECONDS, MIN_PLAYERS, MAX_PLAYERS, AD_EVERY_ROUNDS,
     esc, fmtQ, parseCifra, store, sfx, vibrate, render, on, startTimer, stopTimer,
-    pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome,
+    pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome, Ratings,
   };
+  Ratings.refresh();
 
   // Enlace de invitación: ?sala=CODIGO
   const invite = new URLSearchParams(location.search).get('sala');

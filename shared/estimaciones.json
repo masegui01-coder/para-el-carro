@@ -1,0 +1,926 @@
+[
+ {
+  "q": "Si cambias 100 € a dongs vietnamitas (Vietnam), ¿cuántos te dan?",
+  "a": 2900000,
+  "u": "dongs vietnamitas",
+  "n": "A 1 € = 29.019,19 dongs vietnamitas (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a rupias indonesias (Indonesia), ¿cuántos te dan?",
+  "a": 2020000,
+  "u": "rupias indonesias",
+  "n": "A 1 € = 20.170,57 rupias indonesias (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a riales iraníes (Irán), ¿cuántos te dan?",
+  "a": 201000000,
+  "u": "riales iraníes",
+  "n": "A 1 € = 2.013.339,12 riales iraníes (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a kips laosianos (Laos), ¿cuántos te dan?",
+  "a": 2510000,
+  "u": "kips laosianos",
+  "n": "A 1 € = 25.094,07 kips laosianos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a soms uzbekos (Uzbekistán), ¿cuántos te dan?",
+  "a": 1360000,
+  "u": "soms uzbekos",
+  "n": "A 1 € = 13.604,01 soms uzbekos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a guaraníes paraguayos (Paraguay), ¿cuántos te dan?",
+  "a": 645000,
+  "u": "guaraníes paraguayos",
+  "n": "A 1 € = 6451,91 guaraníes paraguayos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a tugriks mongoles (Mongolia), ¿cuántos te dan?",
+  "a": 403000,
+  "u": "tugriks mongoles",
+  "n": "A 1 € = 4030,55 tugriks mongoles (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a ariarys malgaches (Madagascar), ¿cuántos te dan?",
+  "a": 509000,
+  "u": "ariarys malgaches",
+  "n": "A 1 € = 5085,08 ariarys malgaches (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a rieles camboyanos (Camboya), ¿cuántos te dan?",
+  "a": 455000,
+  "u": "rieles camboyanos",
+  "n": "A 1 € = 4551,11 rieles camboyanos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a pesos colombianos (Colombia), ¿cuántos te dan?",
+  "a": 356000,
+  "u": "pesos colombianos",
+  "n": "A 1 € = 3563,6 pesos colombianos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a pesos argentinos (Argentina), ¿cuántos te dan?",
+  "a": 171000,
+  "u": "pesos argentinos",
+  "n": "A 1 € = 1708,8 pesos argentinos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a pesos chilenos (Chile), ¿cuántos te dan?",
+  "a": 110000,
+  "u": "pesos chilenos",
+  "n": "A 1 € = 1102,7 pesos chilenos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a tenges kazajos (Kazajistán), ¿cuántos te dan?",
+  "a": 50700,
+  "u": "tenges kazajos",
+  "n": "A 1 € = 507,17 tenges kazajos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a francos guineanos (Guinea), ¿cuántos te dan?",
+  "a": 991000,
+  "u": "francos guineanos",
+  "n": "A 1 € = 9913,29 francos guineanos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a chelines ugandeses (Uganda), ¿cuántos te dan?",
+  "a": 453000,
+  "u": "chelines ugandeses",
+  "n": "A 1 € = 4525,07 chelines ugandeses (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a chelines tanzanos (Tanzania), ¿cuántos te dan?",
+  "a": 294000,
+  "u": "chelines tanzanos",
+  "n": "A 1 € = 2940,11 chelines tanzanos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a libras libanesas (Líbano), ¿cuántos te dan?",
+  "a": 10000000,
+  "u": "libras libanesas",
+  "n": "A 1 € = 100.396,05 libras libanesas (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a kyats birmanos (Birmania), ¿cuántos te dan?",
+  "a": 235000,
+  "u": "kyats birmanos",
+  "n": "A 1 € = 2353,14 kyats birmanos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a francos burundeses (Burundi), ¿cuántos te dan?",
+  "a": 337000,
+  "u": "francos burundeses",
+  "n": "A 1 € = 3369,6 francos burundeses (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a wons surcoreanos (Corea del Sur), ¿cuántos te dan?",
+  "a": 149000,
+  "u": "wons surcoreanos",
+  "n": "A 1 € = 1489,17 wons surcoreanos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a yenes japoneses (Japón), ¿cuántos te dan?",
+  "a": 17700,
+  "u": "yenes japoneses",
+  "n": "A 1 € = 177,34 yenes japoneses (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a forintos húngaros (Hungría), ¿cuántos te dan?",
+  "a": 36500,
+  "u": "forintos húngaros",
+  "n": "A 1 € = 364,68 forintos húngaros (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a coronas islandesas (Islandia), ¿cuántos te dan?",
+  "a": 13600,
+  "u": "coronas islandesas",
+  "n": "A 1 € = 136,2 coronas islandesas (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a rupias indias (India), ¿cuántos te dan?",
+  "a": 10600,
+  "u": "rupias indias",
+  "n": "A 1 € = 106,46 rupias indias (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a bahts tailandeses (Tailandia), ¿cuántos te dan?",
+  "a": 3770,
+  "u": "bahts tailandeses",
+  "n": "A 1 € = 37,74 bahts tailandeses (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a pesos filipinos (Filipinas), ¿cuántos te dan?",
+  "a": 7080,
+  "u": "pesos filipinos",
+  "n": "A 1 € = 70,8 pesos filipinos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a liras turcas (Turquía), ¿cuántos te dan?",
+  "a": 5560,
+  "u": "liras turcas",
+  "n": "A 1 € = 55,6 liras turcas (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a libras egipcias (Egipto), ¿cuántos te dan?",
+  "a": 6040,
+  "u": "libras egipcias",
+  "n": "A 1 € = 60,42 libras egipcias (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a dírhams marroquíes (Marruecos), ¿cuántos te dan?",
+  "a": 1100,
+  "u": "dírhams marroquíes",
+  "n": "A 1 € = 10,98 dírhams marroquíes (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a drams armenios (Armenia), ¿cuántos te dan?",
+  "a": 40600,
+  "u": "drams armenios",
+  "n": "A 1 € = 406,05 drams armenios (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a soms kirguises (Kirguistán), ¿cuántos te dan?",
+  "a": 9820,
+  "u": "soms kirguises",
+  "n": "A 1 € = 98,15 soms kirguises (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a rupias nepalíes (Nepal), ¿cuántos te dan?",
+  "a": 17000,
+  "u": "rupias nepalíes",
+  "n": "A 1 € = 170,33 rupias nepalíes (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a colones costarricenses (Costa Rica), ¿cuántos te dan?",
+  "a": 51000,
+  "u": "colones costarricenses",
+  "n": "A 1 € = 509,9 colones costarricenses (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a pesos dominicanos (República Dominicana), ¿cuántos te dan?",
+  "a": 6900,
+  "u": "pesos dominicanos",
+  "n": "A 1 € = 68,99 pesos dominicanos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a nairas nigerianas (Nigeria), ¿cuántos te dan?",
+  "a": 149000,
+  "u": "nairas nigerianas",
+  "n": "A 1 € = 1494,62 nairas nigerianas (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a birrs etíopes (Etiopía), ¿cuántos te dan?",
+  "a": 18500,
+  "u": "birrs etíopes",
+  "n": "A 1 € = 184,89 birrs etíopes (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a leones de Sierra Leona (Sierra Leona), ¿cuántos te dan?",
+  "a": 2730,
+  "u": "leones de Sierra Leona",
+  "n": "A 1 € = 27,32 leones de Sierra Leona (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a coronas checas (República Checa), ¿cuántos te dan?",
+  "a": 2430,
+  "u": "coronas checas",
+  "n": "A 1 € = 24,33 coronas checas (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a zlotys polacos (Polonia), ¿cuántos te dan?",
+  "a": 438,
+  "u": "zlotys polacos",
+  "n": "A 1 € = 4,38 zlotys polacos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a rands sudafricanos (Sudáfrica), ¿cuántos te dan?",
+  "a": 1850,
+  "u": "rands sudafricanos",
+  "n": "A 1 € = 18,48 rands sudafricanos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a reales brasileños (Brasil), ¿cuántos te dan?",
+  "a": 563,
+  "u": "reales brasileños",
+  "n": "A 1 € = 5,63 reales brasileños (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a pesos mexicanos (México), ¿cuántos te dan?",
+  "a": 2080,
+  "u": "pesos mexicanos",
+  "n": "A 1 € = 20,77 pesos mexicanos (cambio del 20/10/2026, sin comisiones)."
+ },
+ {
+  "q": "Si cambias 100 € a escudos caboverdianos (Cabo Verde), ¿cuántos te dan?",
+  "a": 11026.5,
+  "u": "escudos caboverdianos",
+  "n": "Tiene cambio fijo con el euro: 1 € = 110,27 escudos caboverdianos."
+ },
+ {
+  "q": "Si cambias 100 € a francos CFA (Senegal, Costa de Marfil y otros 12 países de África), ¿cuántos te dan?",
+  "a": 65595.7,
+  "u": "francos CFA",
+  "n": "Tiene cambio fijo con el euro: 1 € = 655,96 francos CFA."
+ },
+ {
+  "q": "Si cambias 100 € a francos comorenses (Comoras), ¿cuántos te dan?",
+  "a": 49196.78,
+  "u": "francos comorenses",
+  "n": "Tiene cambio fijo con el euro: 1 € = 491,97 francos comorenses."
+ },
+ {
+  "q": "Si cambias 100 € a dobras (Santo Tomé y Príncipe), ¿cuántos te dan?",
+  "a": 2450,
+  "u": "dobras",
+  "n": "Tiene cambio fijo con el euro: 1 € = 24,5 dobras."
+ },
+ {
+  "q": "Si cambias 100 € a marcos convertibles (Bosnia y Herzegovina), ¿cuántos te dan?",
+  "a": 195.58,
+  "u": "marcos convertibles",
+  "n": "Tiene cambio fijo con el euro: 1 € = 1,96 marcos convertibles."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un bloque de pisos entre medianeras de 4 plantas y 1.000 m² construidos, sin contar el suelo?",
+  "a": 954000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 954 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un edificio de viviendas aislado de 4 plantas y 1.200 m², sin contar el suelo?",
+  "a": 1230000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1023 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un chalet aislado de 180 m², sin contar el suelo?",
+  "a": 241000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1341 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una casa adosada de 140 m², sin contar el suelo?",
+  "a": 155000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1104 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un hotel de 5 estrellas de 8.000 m², sin contar el suelo?",
+  "a": 19600000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 2456 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un hotel de 3 estrellas de 5.000 m², sin contar el suelo?",
+  "a": 8110000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1622 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una piscina descubierta de 8 × 4 metros de lámina de agua, sin contar el suelo?",
+  "a": 19400,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 607 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un hospital de 20.000 m², sin contar el suelo?",
+  "a": 39900000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1995 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un colegio de 3.000 m², sin contar el suelo?",
+  "a": 3200000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1067 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un campo de golf de 60 hectáreas, sin contar el suelo?",
+  "a": 32400000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 54 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una discoteca de 800 m², sin contar el suelo?",
+  "a": 1080000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1353 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un bar de 120 m², sin contar el suelo?",
+  "a": 145000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1205 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una nave industrial sencilla de 1.000 m², sin contar el suelo?",
+  "a": 391000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 391 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una iglesia de 600 m², sin contar el suelo?",
+  "a": 975000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1625 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una residencia de ancianos de 4.000 m², sin contar el suelo?",
+  "a": 5070000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1268 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una terminal de aeropuerto de 50.000 m², sin contar el suelo?",
+  "a": 143000000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 2865 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un tanatorio de 1.500 m², sin contar el suelo?",
+  "a": 2020000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1344 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un gimnasio de 1.000 m², sin contar el suelo?",
+  "a": 999000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 999 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un bloque de pisos entre medianeras de 4 plantas y 1.000 m² construidos, sin contar el suelo?",
+  "a": 814000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 813,94 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un chalet aislado de 150 m², sin contar el suelo?",
+  "a": 149000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 991,98 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un garaje subterráneo de 2.500 m², sin contar el suelo?",
+  "a": 1270000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 508,71 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un teatro de 3.000 m², sin contar el suelo?",
+  "a": 6100000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 2034,84 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un hotel de 5 estrellas de 8.000 m², sin contar el suelo?",
+  "a": 15300000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 1913,1 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un multicine de 2.000 m², sin contar el suelo?",
+  "a": 2650000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 1322,65 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un supermercado de 1.500 m², sin contar el suelo?",
+  "a": 1140000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 763,07 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un restaurante de 200 m², sin contar el suelo?",
+  "a": 183000,
+  "u": "€",
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 915,68 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+ },
+ {
+  "q": "¿Cuántos segundos tiene un año (no bisiesto)?",
+  "a": 31536000,
+  "u": "segundos",
+  "n": "365 × 24 × 60 × 60."
+ },
+ {
+  "q": "¿Cuántos segundos ha vivido una persona que cumple 30 años?",
+  "a": 947000000,
+  "u": "segundos",
+  "n": "Casi mil millones."
+ },
+ {
+  "q": "¿Cuántas veces late el corazón en un día (a 70 pulsaciones por minuto)?",
+  "a": 100800,
+  "u": "latidos",
+  "n": "70 × 1.440 minutos."
+ },
+ {
+  "q": "¿Cuántas veces respiramos al día (a 15 respiraciones por minuto)?",
+  "a": 21600,
+  "u": "respiraciones",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas veces parpadeamos en un año?",
+  "a": 5480000,
+  "u": "parpadeos",
+  "n": "A unos 15.000 parpadeos al día."
+ },
+ {
+  "q": "¿Cuántas veces cabe España en Rusia?",
+  "a": 33.8,
+  "u": "veces",
+  "n": "Rusia: 17.098.246 km²; España: 505.990 km²."
+ },
+ {
+  "q": "¿Cuántas veces cabe Andorra en España?",
+  "a": 1080,
+  "u": "veces",
+  "n": "Andorra mide 468 km²."
+ },
+ {
+  "q": "¿Cuántas Ciudades del Vaticano caben en el municipio de Madrid?",
+  "a": 1230,
+  "u": "veces",
+  "n": "Vaticano: 0,49 km²; Madrid: 604,3 km²."
+ },
+ {
+  "q": "¿Cuántas Lunas cabrían dentro de la Tierra?",
+  "a": 49,
+  "u": "lunas",
+  "n": "Por volumen, unas 49."
+ },
+ {
+  "q": "¿Cuántas Tierras cabrían dentro del Sol?",
+  "a": 1300000,
+  "u": "tierras",
+  "n": "Por volumen, alrededor de 1,3 millones."
+ },
+ {
+  "q": "¿Cuántas piscinas olímpicas harían falta para vaciar el lago Ness?",
+  "a": 2960000,
+  "u": "piscinas",
+  "n": "7,4 billones de litros entre 2,5 millones."
+ },
+ {
+  "q": "¿Cuántos estadios Santiago Bernabéu llenos harían falta para meter a toda la población de España?",
+  "a": 590,
+  "u": "estadios",
+  "n": "Unos 49,1 millones de personas y 83.186 asientos."
+ },
+ {
+  "q": "¿Cuántos días tardarías en contar hasta un millón, diciendo un número por segundo sin parar?",
+  "a": 11.6,
+  "u": "días",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos años tardarías en contar hasta mil millones, diciendo un número por segundo sin parar?",
+  "a": 31.7,
+  "u": "años",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos kilos pesa un millón de euros en monedas de 1 céntimo?",
+  "a": 230000,
+  "u": "kg",
+  "n": "Cada moneda de 1 céntimo pesa 2,30 g."
+ },
+ {
+  "q": "¿Cuántos kilos pesa un millón de euros en monedas de 1 €?",
+  "a": 7500,
+  "u": "kg",
+  "n": "Cada moneda de 1 € pesa 7,5 g."
+ },
+ {
+  "q": "Si alguien de 70 kg se pesara en monedas de 2 €, ¿cuántos euros valdría?",
+  "a": 16500,
+  "u": "€",
+  "n": "Cada moneda de 2 € pesa 8,5 g."
+ },
+ {
+  "q": "¿Cuántos kilómetros recorre la Tierra alrededor del Sol en un solo día?",
+  "a": 2570000,
+  "u": "km",
+  "n": "A unos 107.000 km/h."
+ },
+ {
+  "q": "¿Cuántas vueltas a la Tierra da la luz en un segundo?",
+  "a": 7.48,
+  "u": "vueltas",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos días tardarías en llegar a la Luna en coche a 120 km/h sin parar?",
+  "a": 133,
+  "u": "días",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos años tardarías en llegar al Sol en coche a 120 km/h sin parar?",
+  "a": 142,
+  "u": "años",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos días tardarías en llegar a la Luna andando a 5 km/h sin parar?",
+  "a": 3200,
+  "u": "días",
+  "n": "Más de 8 años andando."
+ },
+ {
+  "q": "¿Cuántos pasos harían falta para dar la vuelta a la Tierra por el ecuador (pasos de 75 cm)?",
+  "a": 53400000,
+  "u": "pasos",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas vueltas a un campo de fútbol (105 × 68 m) hay que dar para correr un maratón?",
+  "a": 122,
+  "u": "vueltas",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos campos de fútbol caben en Mónaco?",
+  "a": 283,
+  "u": "campos",
+  "n": "Mónaco mide 2,02 km²."
+ },
+ {
+  "q": "¿Cuántos campos de fútbol caben en la Ciudad del Vaticano?",
+  "a": 68.6,
+  "u": "campos",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos habitantes por km² hay en Mónaco?",
+  "a": 18800,
+  "u": "hab./km²",
+  "n": "El país más densamente poblado del mundo."
+ },
+ {
+  "q": "Si se repartiera España entre todos sus habitantes, ¿cuántos m² tocarían por persona?",
+  "a": 10300,
+  "u": "m²",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas latas de refresco de 33 cl hacen falta para llenar una bañera de 200 litros?",
+  "a": 606,
+  "u": "latas",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas pelotas de tenis cabrían en una piscina olímpica?",
+  "a": 10200000,
+  "u": "pelotas",
+  "n": "Unos 10 millones, contando los huecos entre pelotas."
+ },
+ {
+  "q": "¿Cuántos granos de arroz hay en un kilo?",
+  "a": 50000,
+  "u": "granos",
+  "n": "A unos 0,02 g por grano."
+ },
+ {
+  "q": "¿Cuántos cafés espresso salen de un kilo de café?",
+  "a": 143,
+  "u": "cafés",
+  "n": "A unos 7 g por café."
+ },
+ {
+  "q": "¿Cuántas veces late el corazón de un colibrí en un día?",
+  "a": 1730000,
+  "u": "latidos",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos días vive una persona que llega a los 80 años?",
+  "a": 29220,
+  "u": "días",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas horas tiene un año bisiesto?",
+  "a": 8784,
+  "u": "horas",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos minutos tiene una semana?",
+  "a": 10080,
+  "u": "minutos",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos litros de sangre bombea el corazón en 80 años?",
+  "a": 219000000,
+  "u": "litros",
+  "n": "A unos 7.500 litros al día."
+ },
+ {
+  "q": "¿Cuántos años tendría que trabajar alguien con el salario medio español para comprar la carta de Pokémon más cara?",
+  "a": 524,
+  "u": "años",
+  "n": "Unos 14,7 millones de € entre unos 28.050 € brutos al año, sin gastar nada."
+ },
+ {
+  "q": "¿Cuántos décimos de la Lotería de Navidad (20 €) se podrían comprar con lo que costó la carta de Pokémon más cara?",
+  "a": 735000,
+  "u": "décimos",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos euros cuesta llenar una piscina olímpica con agua del grifo en España?",
+  "a": 5250,
+  "u": "€",
+  "n": "A unos 2,1 € por m³ de agua (precio medio en España)."
+ },
+ {
+  "q": "¿Cuántos litros de gasolina gasta un coche de Madrid a Barcelona (620 km a 6 L/100 km)?",
+  "a": 37.2,
+  "u": "litros",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas personas caben de pie en un campo de fútbol (a 4 personas por m²)?",
+  "a": 28600,
+  "u": "personas",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos folios A4 hacen falta para cubrir un campo de fútbol?",
+  "a": 114000,
+  "u": "folios",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas horas de vídeo se suben a YouTube en un día?",
+  "a": 720000,
+  "u": "horas",
+  "n": "Se suben unas 500 horas cada minuto."
+ },
+ {
+  "q": "¿Cuántos años tardaría una persona en ver todo lo que se sube a YouTube en un solo día?",
+  "a": 82.1,
+  "u": "años",
+  "n": "Viéndolo 24 horas al día."
+ },
+ {
+  "q": "¿Cuántas vueltas a la Tierra da la Estación Espacial Internacional en una semana?",
+  "a": 112,
+  "u": "vueltas",
+  "n": "Da unas 16 vueltas al día."
+ },
+ {
+  "q": "¿Cuántos kilómetros recorre la Estación Espacial Internacional en un día?",
+  "a": 662000,
+  "u": "km",
+  "n": "A unos 27.600 km/h."
+ },
+ {
+  "q": "¿Cuántos euros hay en una fila de monedas de 1 € puesta de Madrid a Barcelona (505 km en línea recta)?",
+  "a": 21700000,
+  "u": "€",
+  "n": "Cada moneda mide 23,25 mm."
+ },
+ {
+  "q": "¿Cuántos billetes de 10 € puestos en fila hacen falta para dar la vuelta a la Tierra?",
+  "a": 316000000,
+  "u": "billetes",
+  "n": "Un billete de 10 € mide 12,7 cm de largo."
+ },
+ {
+  "q": "¿Cuántas veces cabe la altura de la Torre Eiffel en la altura del Everest?",
+  "a": 26.8,
+  "u": "veces",
+  "n": "Everest 8.849 m; Torre Eiffel 330 m."
+ },
+ {
+  "q": "¿Cuántas personas de 1,70 m subidas una encima de otra igualarían la altura del Everest?",
+  "a": 5210,
+  "u": "personas",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos pisos de 3 metros tendría un edificio tan alto como el Teide?",
+  "a": 1240,
+  "u": "pisos",
+  "n": ""
+ },
+ {
+  "q": "Si la historia de la Tierra fuera un día de 24 horas, ¿cuántos segundos antes de medianoche aparecerían los humanos?",
+  "a": 5.71,
+  "u": "segundos",
+  "n": "Homo sapiens tiene unos 300.000 años; la Tierra, 4.540 millones."
+ },
+ {
+  "q": "¿Cuántos kilos de comida come un elefante en un año?",
+  "a": 54800,
+  "u": "kg",
+  "n": "Unos 150 kg al día."
+ },
+ {
+  "q": "¿Cuántas toneladas de caca hace un elefante en un año?",
+  "a": 29.2,
+  "u": "toneladas",
+  "n": "Unos 80 kg al día."
+ },
+ {
+  "q": "¿Cuántos huevos pone una gallina ponedora en toda su vida productiva (unos 2 años)?",
+  "a": 600,
+  "u": "huevos",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos litros de leche da una vaca lechera española en un año?",
+  "a": 9150,
+  "u": "litros",
+  "n": "Unos 30 L al día durante unos 305 días de lactancia."
+ },
+ {
+  "q": "¿Cuántos kilómetros mide el ADN de una persona si estiráramos el de todas sus células?",
+  "a": 74000000000,
+  "u": "km",
+  "n": "Unos 2 m por célula y unos 37 billones de células."
+ },
+ {
+  "q": "¿Cuántas veces iría y volvería al Sol el ADN estirado de una persona?",
+  "a": 247,
+  "u": "viajes",
+  "n": "Unos 74.000 millones de km de ADN."
+ },
+ {
+  "q": "¿Cuántos días de sueldo medio español cuesta un décimo de la Lotería de Navidad?",
+  "a": 0.26,
+  "u": "días",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas combinaciones distintas tiene el Euromillones?",
+  "a": 139838160,
+  "u": "combinaciones",
+  "n": "C(50,5) × C(12,2)."
+ },
+ {
+  "q": "¿Cuántas combinaciones distintas tiene la Primitiva (6 números de 49)?",
+  "a": 13983816,
+  "u": "combinaciones",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas quinielas distintas se pueden rellenar con 15 partidos (1, X o 2)?",
+  "a": 14348907,
+  "u": "quinielas",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas manos distintas de 5 cartas se pueden sacar de una baraja de póker (52 cartas)?",
+  "a": 2598960,
+  "u": "manos",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas formas distintas hay de ordenar las 10 primeras cartas de una baraja?",
+  "a": 3628800,
+  "u": "formas",
+  "n": "10! = 3.628.800."
+ },
+ {
+  "q": "¿Cuántas matrículas de coche distintas permite el sistema español (4 números y 3 letras)?",
+  "a": 80000000,
+  "u": "matrículas",
+  "n": "Se usan 20 consonantes (sin vocales ni Ñ ni Q)."
+ },
+ {
+  "q": "¿Cuántos números de teléfono móvil de 9 cifras empezando por 6 o 7 hay en España?",
+  "a": 200000000,
+  "u": "números",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos años tardaría en gastar 1.000 millones de euros alguien que gastase 1.000 € al día?",
+  "a": 2740,
+  "u": "años",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos kilos pesa toda la humanidad junta?",
+  "a": 508000000000,
+  "u": "kg",
+  "n": "Unos 8.200 millones de personas a unos 62 kg de media."
+ },
+ {
+  "q": "¿Cuántos estadios Camp Nou llenaría la población de Madrid capital?",
+  "a": 33,
+  "u": "estadios",
+  "n": "Unos 3,46 millones de habitantes y unos 105.000 asientos."
+ },
+ {
+  "q": "¿Cuántas toneladas pesa el agua de una piscina olímpica?",
+  "a": 2500,
+  "u": "toneladas",
+  "n": "2.500 m³ de agua."
+ },
+ {
+  "q": "¿Cuántos kilómetros de largo mediría una fila con todos los coches de España (unos 26 millones, de 4,3 m)?",
+  "a": 112000,
+  "u": "km",
+  "n": "Casi tres vueltas a la Tierra."
+ },
+ {
+  "q": "¿Cuántas vueltas a la Tierra darían todos los coches de España puestos en fila?",
+  "a": 2.79,
+  "u": "vueltas",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántas horas tarda en llegar a la Tierra la luz del Sol que se refleja en Plutón?",
+  "a": 5.47,
+  "u": "horas",
+  "n": "Plutón está a unos 5.900 millones de km del Sol."
+ },
+ {
+  "q": "¿Cuántos segundos tarda la luz de la Luna en llegar a la Tierra?",
+  "a": 1.28,
+  "u": "segundos",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos días tardaría en llegar a la Luna un avión comercial a 900 km/h?",
+  "a": 17.8,
+  "u": "días",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos años tardaría la sonda Voyager 1 (61.000 km/h) en llegar a la estrella más cercana?",
+  "a": 75000,
+  "u": "años",
+  "n": "Próxima Centauri está a 4,24 años luz."
+ },
+ {
+  "q": "¿Cuántos euros cobra por segundo alguien que gane 100 millones al año?",
+  "a": 3.17,
+  "u": "€",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos años tendría que trabajar alguien con el salario medio español para ganar lo que Neymar costó al PSG?",
+  "a": 7910,
+  "u": "años",
+  "n": "222 millones de € en 2017."
+ },
+ {
+  "q": "¿Cuántos jamones ibéricos de 400 € se podrían comprar con el traspaso de Neymar al PSG?",
+  "a": 555000,
+  "u": "jamones",
+  "n": ""
+ },
+ {
+  "q": "¿Cuántos Chupa Chups de 0,30 € se podrían comprar con lo que costó el Salvator Mundi de Leonardo?",
+  "a": 1340000000,
+  "u": "Chupa Chups",
+  "n": "450,3 millones de dólares al cambio de octubre de 2026."
+ }
+]
