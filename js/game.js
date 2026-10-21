@@ -94,10 +94,15 @@
   const fmtQ = (v, q) => fmt(v, q.tipo) + (q.tipo === 'numero' && q.u ? ' ' + q.u : '');
 
   /** "7.400.000" -> 7400000 ; "13,7" -> 13.7 (formato español). */
+  /**
+   * Lee lo que escribe el jugador. Nunca lanza errores: devuelve null si no es una cifra válida
+   * (letras, varias comas, más de 18 cifras, números infinitos…).
+   */
   function parseCifra(str, tipo, antesDeCristo) {
-    const s = String(str).trim().replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
-    if (!/^\d+(\.\d+)?$/.test(s)) return null;
+    const s = String(str == null ? '' : str).trim().replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+    if (s.length > 22 || !/^\d{1,18}(\.\d{1,6})?$/.test(s)) return null;
     let v = Number(s);
+    if (!Number.isFinite(v)) return null;
     if (tipo === 'fecha') { v = Math.round(v); if (antesDeCristo) v = -v; }
     return v;
   }
@@ -107,14 +112,39 @@
     set(k, v) { try { localStorage.setItem('pec.' + k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
   };
 
+  // ---------------------------------------------------------------- Ajustes: sonido, vibración y tema
+
+  const Ajustes = {
+    sonido: store.get('sonido', true),
+    vibracion: store.get('vibracion', true),
+    tema: store.get('tema', 'oscuro'), // 'oscuro' | 'claro' | 'sistema'
+    set(k, v) { Ajustes[k] = v; store.set(k, v); if (k === 'tema') aplicarTema(); pintarBarra(); },
+  };
+
+  function aplicarTema() {
+    const claro = Ajustes.tema === 'claro' || (Ajustes.tema === 'sistema' && window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches);
+    document.documentElement.dataset.theme = claro ? 'light' : 'dark';
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = claro ? '#f3e9d6' : '#14161c';
+  }
+  aplicarTema();
+  try { matchMedia('(prefers-color-scheme: light)').addEventListener('change', aplicarTema); } catch (e) { /* navegador antiguo */ }
+
+  /** Iconos ilustrados de las opciones (img/iconos). */
+  const ico = (nombre) => `<img class="ico" src="img/iconos/${nombre}.svg" alt="">`;
+
   // Sonido sintetizado (sin ficheros) y vibración
   let audio = null;
-  function tone(freq, dur, type = 'sine', vol = .15, delay = 0) {
+  /** Una nota. `to` hace un deslizamiento de frecuencia (para rebuznos, saltos…). */
+  function tone(freq, dur, type = 'sine', vol = .15, delay = 0, to = null) {
+    if (!Ajustes.sonido) return null;
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
       const o = audio.createOscillator(), g = audio.createGain();
       const t0 = audio.currentTime + delay;
       o.type = type; o.frequency.setValueAtTime(freq, t0);
+      if (to) o.frequency.exponentialRampToValueAtTime(to, t0 + dur);
       g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
       o.connect(g).connect(audio.destination); o.start(t0); o.stop(t0 + dur);
       return o;
@@ -123,14 +153,87 @@
   const sfx = {
     tick() { tone(880, .08, 'square', .05); },
     click() { tone(520, .05, 'triangle', .08); },
-    creak() { const o = tone(90, 1.2, 'sawtooth', .05); if (o) o.frequency.linearRampToValueAtTime(140, audio.currentTime + 1.2); },
-    win() { [523, 659, 784, 1046].forEach((f, i) => tone(f, .25, 'triangle', .14, i * .12)); },
-    lose() {
-      const o = tone(400, .9, 'sawtooth', .1); if (o) o.frequency.exponentialRampToValueAtTime(60, audio.currentTime + .9);
-      tone(140, .5, 'sine', .2, .85);
+    creak() { tone(90, 1.2, 'sawtooth', .05, 0, 140); },
+    /** Abrir la ronda: un "¡arre!" corto. */
+    abre() { tone(330, .12, 'triangle', .14); tone(495, .18, 'triangle', .14, .1); },
+    /** Subir la cifra: rebuzno de la burra ("¡hiii-aaa!"). */
+    subir() {
+      tone(620, .22, 'sawtooth', .09, 0, 900); tone(380, .3, 'sawtooth', .09, .22, 260);
+      tone(640, .2, 'sawtooth', .08, .55, 880); tone(360, .32, 'sawtooth', .08, .75, 240);
     },
+    /** Quedarse en el carro: crujido de madera ("toc-toc"). */
+    quedar() { tone(180, .07, 'square', .12); tone(140, .09, 'square', .12, .11); tone(90, .25, 'sawtooth', .04, .2, 120); },
+    /** Bajarse: silbido de salto y golpe al caer. */
+    bajar() { tone(900, .3, 'sine', .12, 0, 180); tone(70, .25, 'triangle', .3, .3); },
+    win() { [523, 659, 784, 1046].forEach((f, i) => tone(f, .25, 'triangle', .14, i * .12)); },
+    lose() { tone(400, .9, 'sawtooth', .1, 0, 60); tone(140, .5, 'sine', .2, .85); },
   };
-  const vibrate = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) { /* no soportado */ } };
+  const vibrate = (p) => {
+    if (!Ajustes.vibracion) return;
+    try { navigator.vibrate && navigator.vibrate(p); } catch (e) { /* no soportado */ }
+  };
+  /** Sonido + vibración propios de cada opción. */
+  const VIB = { abre: 40, subir: [30, 40, 30, 40, 80], quedar: [20, 60, 20], bajar: [120, 40, 200] };
+  function feedback(opcion) { sfx[opcion](); vibrate(VIB[opcion]); }
+
+  // ---------------------------------------------------------------- Barra de ajustes (silencio y ⚙️)
+
+  const $barra = document.createElement('div');
+  $barra.className = 'barra-ajustes';
+  document.body.appendChild($barra);
+  function pintarBarra() {
+    $barra.innerHTML = `
+      <button class="btn-redondo" id="silencio" aria-label="${Ajustes.sonido ? 'Silenciar' : 'Activar sonido'}" title="${Ajustes.sonido ? 'Silenciar' : 'Activar sonido'}">${Ajustes.sonido ? '🔊' : '🔇'}</button>
+      <button class="btn-redondo" id="ajustes" aria-label="Ajustes" title="Ajustes">⚙️</button>`;
+    $barra.querySelector('#silencio').onclick = () => { Ajustes.set('sonido', !Ajustes.sonido); sfx.click(); };
+    $barra.querySelector('#ajustes').onclick = abrirAjustes;
+  }
+  function abrirAjustes() {
+    const m = document.createElement('div');
+    m.className = 'modal';
+    const pintar = () => {
+      m.innerHTML = `<div class="panel col" role="dialog" aria-label="Ajustes">
+        <h2>Ajustes</h2>
+        <label class="fila"><span class="crece">🔊 Sonido</span><input type="checkbox" id="aj-sonido" ${Ajustes.sonido ? 'checked' : ''}></label>
+        <label class="fila"><span class="crece">📳 Vibración</span><input type="checkbox" id="aj-vibracion" ${Ajustes.vibracion ? 'checked' : ''}></label>
+        <div>🌗 Tema</div>
+        <div class="segmentado">${[['oscuro', '🌙 Oscuro'], ['claro', '☀️ Claro'], ['sistema', '📱 Sistema']].map(([k, l]) => `<button data-tema="${k}" class="${Ajustes.tema === k ? 'sel' : ''}">${l}</button>`).join('')}</div>
+        <button class="btn ambar bloque" id="aj-cerrar">Listo</button>
+      </div>`;
+      m.querySelector('#aj-sonido').onchange = (e) => { Ajustes.set('sonido', e.target.checked); sfx.click(); };
+      m.querySelector('#aj-vibracion').onchange = (e) => { Ajustes.set('vibracion', e.target.checked); vibrate(40); };
+      m.querySelectorAll('[data-tema]').forEach((b) => { b.onclick = () => { Ajustes.set('tema', b.dataset.tema); pintar(); }; });
+      m.querySelector('#aj-cerrar').onclick = () => m.remove();
+    };
+    m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
+    pintar();
+    document.body.appendChild(m);
+  }
+  pintarBarra();
+
+  // ---------------------------------------------------------------- Control de fallos
+  // Si algo falla (un dato raro de la red, un error de programación…), el juego no se queda en blanco:
+  // avisa y ofrece seguir o volver al inicio.
+
+  let avisoFallo = null;
+  function mostrarFallo(err) {
+    try { console.error('[Para el Carro]', err); } catch (e) { /* nada */ }
+    if (avisoFallo) return;
+    avisoFallo = document.createElement('div');
+    avisoFallo.className = 'aviso-fallo';
+    avisoFallo.setAttribute('role', 'alert');
+    avisoFallo.innerHTML = '<span>⚠️ Ups, algo ha fallado. Puedes seguir jugando.</span><span class="fila"><button class="btn peq" id="fallo-seguir">Seguir</button><button class="btn fantasma peq" id="fallo-inicio">Inicio</button></span>';
+    document.body.appendChild(avisoFallo);
+    const cerrar = () => { if (avisoFallo) avisoFallo.remove(); avisoFallo = null; };
+    avisoFallo.querySelector('#fallo-seguir').onclick = () => {
+      cerrar();
+      if (!$app.innerHTML.trim()) screenHome(); // pantalla vacía: volver al inicio
+    };
+    avisoFallo.querySelector('#fallo-inicio').onclick = () => { cerrar(); stopTimer(); history.replaceState(null, '', location.pathname); screenHome(); };
+    setTimeout(cerrar, 8000);
+  }
+  window.addEventListener('error', (e) => mostrarFallo(e.error || e.message));
+  window.addEventListener('unhandledrejection', (e) => mostrarFallo(e.reason));
 
   let timer = null;
   function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
@@ -294,9 +397,9 @@
           <li>Sale una pregunta cuya respuesta es <b>un año o un número</b>.</li>
           <li>El primer jugador tiene <b>${OPEN_SECONDS} s</b> para decir una cifra. Se monta en la burra: es el <b>conductor</b>.</li>
           <li>Por turnos, cada jugador tiene <b>${TURN_SECONDS} s</b> para:
-            <br>⬆️ <b>Subir la cifra</b> (pasa a ser el conductor y el anterior se sube al carro),
-            <br>🛒 <b>Quedarse en el carro</b>, o
-            <br>🚶 <b>Bajarse</b> (ya no puede volver a subir ni pujar en esta ronda).</li>
+            <br>${ico('subir')} <b>Subir la cifra</b> (pasa a ser el conductor y el anterior se sube al carro),
+            <br>${ico('carreta')} <b>Quedarse en el carro</b>, o
+            <br>${ico('bajar')} <b>Bajarse</b> (ya no puede volver a subir ni pujar en esta ronda).</li>
           <li>Se sigue dando vueltas hasta que nadie sube la cifra.</li>
           <li>El carro cruza el puente si la <b>respuesta real es igual o mayor</b> que la cifra del conductor. Si no… ¡al río!</li>
         </ol>
@@ -305,9 +408,9 @@
       <div class="panel">
         <table class="puntos">
           <tr><td></td><td class="num">Cruza</td><td class="num">Al río</td></tr>
-          <tr><td>🐴 Conductor</td><td class="num mas">+3 +1 por pasajero</td><td class="num menos">−3 −1 por cada bajado</td></tr>
-          <tr><td>🛒 En el carro</td><td class="num mas">+3</td><td class="num menos">−2</td></tr>
-          <tr><td>🚶 Bajados</td><td class="num">0</td><td class="num mas">+3</td></tr>
+          <tr><td>${ico('burra')} Conductor</td><td class="num mas">+3 +1 por pasajero</td><td class="num menos">−3 −1 por cada bajado</td></tr>
+          <tr><td>${ico('carreta')} En el carro</td><td class="num mas">+3</td><td class="num menos">−2</td></tr>
+          <tr><td>${ico('bajar')} Bajados</td><td class="num">0</td><td class="num mas">+3</td></tr>
         </table>
         <p class="suave">🎯 <b>¡Clavada!</b> +2 extra al conductor si cruza y su cifra está a menos del 10 % de la respuesta (o a 5 años en las fechas).</p>
       </div>
@@ -408,7 +511,7 @@
   /** Teclado de cifra con vista previa formateada y botones rápidos. */
   function cifraInput(q, placeholder) {
     return `
-      <input type="text" id="cifra" inputmode="decimal" autocomplete="off" placeholder="${esc(placeholder)}">
+      <input type="text" id="cifra" inputmode="decimal" autocomplete="off" maxlength="24" placeholder="${esc(placeholder)}">
       ${q.tipo === 'fecha' ? '<label class="fila suave" style="gap:6px"><input type="checkbox" id="ac"> Antes de Cristo (a.C.)</label>' : ''}
       <div class="vista-previa" id="preview"></div>`;
   }
@@ -445,7 +548,7 @@
       <div class="panel col">
         ${cifraInput(q, q.tipo === 'fecha' ? 'Año, p. ej. 1890' : 'Tu cifra')}
         ${q.tipo === 'numero' ? '<div class="botones-rapidos"><button class="btn peq" data-mul="1000">×1.000</button><button class="btn peq" data-mul="1000000">×1 millón</button></div>' : ''}
-        <button class="btn ambar bloque" id="ok" disabled>🐴 ¡Me subo a la burra!</button>
+        <button class="btn ambar bloque" id="ok" disabled>${ico('burra')} ¡Me subo a la burra!</button>
       </div>`);
     const okBtn = $app.querySelector('#ok');
     const field = bindCifra(q, (v) => { okBtn.disabled = v === null; });
@@ -456,7 +559,7 @@
     field.focus();
     const commit = (v) => {
       Logic.open(G.players, G.R, player.id, v);
-      vibrate(30);
+      feedback('abre');
       afterAction();
     };
     okBtn.addEventListener('click', () => { const v = field.read(); if (v !== null) commit(v); });
@@ -475,9 +578,9 @@
     const chips = players.map((p) => {
       const st = R.status[p.id];
       const cls = st === 'conductor' ? 'conductor' : st === 'bajado' ? 'bajado' : '';
-      const ico = st === 'conductor' ? '🐴' : st === 'bajado' ? '🚶' : '🛒';
+      const icon = ico(st === 'conductor' ? 'burra' : st === 'bajado' ? 'bajar' : 'carreta');
       const off = p.online === false ? ' 📴' : '';
-      return `<span class="chip ${cls}${p.id === turnId ? ' turno' : ''}">${ico} ${avatarHTML(p.avatar)} ${esc(p.name)}${off}</span>`;
+      return `<span class="chip ${cls}${p.id === turnId ? ' turno' : ''}">${icon} ${avatarHTML(p.avatar)} ${esc(p.name)}${off}</span>`;
     }).join('');
     const log = (R.log || []).slice(-6).reverse().map((l) => {
       const p = players.find((x) => x.id === l.id);
@@ -510,14 +613,14 @@
       <p class="centro">${tag(player)}, ¿qué haces?</p>
       <div id="rig"></div>
       <div class="col">
-        <button class="btn ambar bloque" id="subir">⬆️ Subir la cifra</button>
+        <button class="btn ambar bloque" id="subir">${ico('subir')} Subir la cifra</button>
         <div class="panel col" id="panel-subir" hidden>
           <div class="botones-rapidos">${stepBtns.map(([l, s]) => `<button class="btn peq" data-step="${s}">${l}</button>`).join('')}</div>
           ${cifraInput(q, 'Nueva cifra (mayor)')}
-          <button class="btn ambar bloque" id="ok-subir" disabled>🐴 Me monto en la burra</button>
+          <button class="btn ambar bloque" id="ok-subir" disabled>${ico('burra')} Me monto en la burra</button>
         </div>
-        <button class="btn musgo bloque" id="quedar">🛒 Me quedo en el carro</button>
-        <button class="btn sangre bloque" id="bajar">🚶 Me bajo del carro</button>
+        <button class="btn musgo bloque" id="quedar">${ico('carreta')} Me quedo en el carro</button>
+        <button class="btn sangre bloque" id="bajar">${ico('bajar')} Me bajo del carro</button>
       </div>
       ${cartPanel()}`);
 
@@ -547,7 +650,7 @@
       const before = JSON.parse(JSON.stringify({ status: G.R.status }));
       Logic.act(G.players, G.R, player.id, action, value);
       if (timedOut) G.R.log[G.R.log.length - 1].action = 'tiempo';
-      if (action === 'subir') vibrate([20, 40, 20]);
+      feedback(action);
       // El muñeco se sube a la burra, se baja o se alegra en el carro; luego sigue el juego
       const anim = action === 'quedar'
         ? window.BridgeScene.cheer(rigEl, player.id)
@@ -612,8 +715,8 @@
     const rows = G.players.slice().sort((a, b) => b.score - a.score).map((p) => {
       const d = result.delta[p.id];
       const st = R.status[p.id];
-      const ico = st === 'conductor' ? '🐴' : st === 'bajado' ? '🚶' : '🛒';
-      return `<tr><td>${ico} ${tag(p)}</td><td class="num ${d > 0 ? 'mas' : d < 0 ? 'menos' : ''}">${d > 0 ? '+' : ''}${d}</td><td class="num">${p.score}</td></tr>`;
+      const icon = ico(st === 'conductor' ? 'burra' : st === 'bajado' ? 'bajar' : 'carreta');
+      return `<tr><td>${icon} ${tag(p)}</td><td class="num ${d > 0 ? 'mas' : d < 0 ? 'menos' : ''}">${d > 0 ? '+' : ''}${d}</td><td class="num">${p.score}</td></tr>`;
     }).join('');
     const last = G.round >= G.rounds;
     render(`
@@ -676,7 +779,7 @@
   // Piezas compartidas con el modo online (js/online.js)
   window.ParaElCarro = {
     Logic, AVATARS, OPEN_SECONDS, TURN_SECONDS, MIN_PLAYERS, MAX_PLAYERS, AD_EVERY_ROUNDS,
-    esc, fmtQ, parseCifra, avatarHTML, store, sfx, vibrate, render, on, startTimer, stopTimer,
+    esc, fmtQ, parseCifra, avatarHTML, ico, feedback, store, sfx, vibrate, render, on, startTimer, stopTimer,
     pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome, Ratings,
   };
   Ratings.refresh();

@@ -1,5 +1,7 @@
 package com.paraelcarro.ui.screens
 
+import com.paraelcarro.ui.components.statusIcon
+import com.paraelcarro.ui.components.Ico
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,10 +62,10 @@ fun RoundScoreScreen(state: GameState, result: RoundResult, alreadyRated: Boolea
             Row { Text("Jugador", Modifier.weight(1f), color = Rustic.TextoSuave); Text("Ronda", Modifier.weight(.4f), color = Rustic.TextoSuave, textAlign = TextAlign.End); Text("Total", Modifier.weight(.4f), color = Rustic.TextoSuave, textAlign = TextAlign.End) }
             state.players.sortedByDescending { it.score }.forEach { p ->
                 val d = result.delta[p.id] ?: 0
-                val icon = when (p.id) { result.driverId -> "🐴"; in result.gotOff -> "🚶"; else -> "🛒" }
+                val icon = statusIcon(when (p.id) { result.driverId -> "conductor"; in result.gotOff -> "bajado"; else -> "carro" })
                 HorizontalDivider(color = Rustic.MaderaClara.copy(alpha = .25f))
                 Row {
-                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) { Text("$icon "); PlayerTag(p.avatar, p.name) }
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) { Ico(icon, 22.dp); Text(" "); PlayerTag(p.avatar, p.name) }
                     Text(if (d > 0) "+$d" else "$d", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold,
                         color = when { d > 0 -> Rustic.Verde; d < 0 -> Rustic.Rojo; else -> Rustic.Texto })
                     Text("${p.score}", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold)

@@ -89,7 +89,7 @@ fun LobbyScreen(state: GameState, vm: GameViewModel) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Número de rondas", Modifier.weight(1f))
                 WoodButton("−", { vm.setRounds(state.config.rounds - 1) }, small = true)
-                Text("${state.config.rounds}", Modifier.size(48.dp, 32.dp), color = Rustic.Ambar, fontSize = 24.sp, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Text("${state.config.rounds}", Modifier.size(48.dp, 32.dp), color = Rustic.AmbarClaro, fontSize = 24.sp, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 WoodButton("+", { vm.setRounds(state.config.rounds + 1) }, small = true)
             }
             Text("Tipo de preguntas")

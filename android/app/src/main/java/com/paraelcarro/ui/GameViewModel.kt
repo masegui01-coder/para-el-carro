@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
 /** Efectos puntuales que la UI convierte en vibración / sonido. */
-enum class GameEvent { TICK, BID, RAISE }
+enum class GameEvent { TICK, BID, RAISE, STAY, GET_OFF }
 
 /** Intersticial cada 2 rondas y antes del podio. */
 private const val AD_EVERY_ROUNDS = 2
@@ -142,7 +142,7 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
         startTimer(if (phase.opening) OPEN_SECONDS else TURN_SECONDS, ::onTimeout)
     }
 
-    fun onDraftText(text: String) = _state.update { it.copy(draft = it.draft.copy(text = text)) }
+    fun onDraftText(text: String) = _state.update { it.copy(draft = it.draft.copy(text = text.take(24))) }
     fun onDraftBeforeChrist(bc: Boolean) = _state.update { it.copy(draft = it.draft.copy(beforeChrist = bc)) }
     fun openRaise(suggested: Double) {
         _state.update { it.copy(draft = it.draft.copy(raiseOpen = true)) }
@@ -190,7 +190,13 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
         if (s.animating) return
         stopTimer()
         val round = GameEngine.act(s.players, s.round!!, phase.playerId, action, timedOut)
-        if (action is TurnAction.Raise) _events.tryEmit(GameEvent.RAISE)
+        _events.tryEmit(
+            when (action) {
+                is TurnAction.Raise -> GameEvent.RAISE
+                TurnAction.Stay -> GameEvent.STAY
+                TurnAction.GetOff -> GameEvent.GET_OFF
+            },
+        )
         // El muñeco salta en la mini escena (se sube a la burra, se baja o bota en el carro) y luego sigue el juego
         _state.update { it.copy(round = round, animating = true, cheerId = if (action == TurnAction.Stay) phase.playerId else null) }
         viewModelScope.launch {

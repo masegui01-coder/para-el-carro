@@ -367,7 +367,7 @@
       ${mine ? `<div class="panel col">
         ${P().cifraInput(st.q, st.q.tipo === 'fecha' ? 'Año, p. ej. 1890' : 'Tu cifra')}
         ${st.q.tipo === 'numero' ? '<div class="botones-rapidos"><button class="btn peq" data-mul="1000">×1.000</button><button class="btn peq" data-mul="1000000">×1 millón</button></div>' : ''}
-        <button class="btn ambar bloque" id="ok" disabled>🐴 ¡Me subo a la burra!</button>
+        <button class="btn ambar bloque" id="ok" disabled>${P().ico('burra')} ¡Me subo a la burra!</button>
       </div>` : ''}`);
     let field = null;
     if (mine) {
@@ -380,7 +380,7 @@
         const v = field.read();
         if (v === null || S.sent) return;
         okBtn.disabled = true; okBtn.textContent = 'Enviado…';
-        P().vibrate(30); send('abre', v);
+        P().feedback('abre'); send('abre', v);
       });
       field.focus();
     }
@@ -404,7 +404,8 @@
       if (s === 'p10') return Math.max(b + 1, Math.ceil(b * 1.1));
       return b > 0 ? b * (s === 'x2' ? 2 : 10) : b + 1;
     };
-    const where = myStatus === 'conductor' ? '🐴 Vas montado en la burra.' : myStatus === 'bajado' ? '🚶 Te has bajado del carro.' : '🛒 Vas en el carro.';
+    const where = myStatus === 'conductor' ? `${P().ico('burra')} Vas montado en la burra.`
+      : myStatus === 'bajado' ? `${P().ico('bajar')} Te has bajado del carro.` : `${P().ico('carreta')} Vas en el carro.`;
     P().render(`
       ${header(st)}<div id="aviso-jefe">${hostOfflineBanner()}</div>
       ${question(st)}
@@ -415,14 +416,14 @@
       <div id="rig"></div>
       ${mine ? `<p class="centro"><b>¡Te toca!</b> ¿Qué haces?</p>
         <div class="col" id="acciones">
-          <button class="btn ambar bloque" id="subir">⬆️ Subir la cifra</button>
+          <button class="btn ambar bloque" id="subir">${P().ico('subir')} Subir la cifra</button>
           <div class="panel col" id="panel-subir" hidden>
             <div class="botones-rapidos">${steps.map(([l, s]) => `<button class="btn peq" data-step="${s}">${l}</button>`).join('')}</div>
             ${P().cifraInput(q, 'Nueva cifra (mayor)')}
-            <button class="btn ambar bloque" id="ok-subir" disabled>🐴 Me monto en la burra</button>
+            <button class="btn ambar bloque" id="ok-subir" disabled>${P().ico('burra')} Me monto en la burra</button>
           </div>
-          <button class="btn musgo bloque" id="quedar">🛒 Me quedo en el carro</button>
-          <button class="btn sangre bloque" id="bajar">🚶 Me bajo del carro</button>
+          <button class="btn musgo bloque" id="quedar">${P().ico('carreta')} Me quedo en el carro</button>
+          <button class="btn sangre bloque" id="bajar">${P().ico('bajar')} Me bajo del carro</button>
         </div>`
         : `<p class="centro">⏳ Le toca a ${tag(pl(turnId))}<br><span class="suave">${where}</span></p>`}
       ${P().cartPanel(players, R, turnId)}`);
@@ -449,7 +450,7 @@
         if (S.sent) return;
         S.sent = true; // evita que el temporizador envíe otra jugada mientras salta el muñeco
         document.querySelectorAll('#acciones button').forEach((b) => { b.disabled = true; });
-        if (a === 'subir') P().vibrate([20, 40, 20]);
+        P().feedback(a);
         // Primero el muñeco se sube, se baja o se alegra; después se envía la jugada
         const after = JSON.parse(JSON.stringify(R));
         let anim;
@@ -515,7 +516,7 @@
     const rows = players.slice().sort((a, b) => (st.scores[b.id] || 0) - (st.scores[a.id] || 0)).map((p) => {
       const d = res.delta[p.id] || 0;
       const s = R.status[p.id];
-      const ico = s === 'conductor' ? '🐴' : s === 'bajado' ? '🚶' : '🛒';
+      const ico = P().ico(s === 'conductor' ? 'burra' : s === 'bajado' ? 'bajar' : 'carreta');
       return `<tr><td>${ico} ${tag(p)}${p.id === S.me ? ' <span class="suave">(tú)</span>' : ''}</td><td class="num ${d > 0 ? 'mas' : d < 0 ? 'menos' : ''}">${d > 0 ? '+' : ''}${d}</td><td class="num">${st.scores[p.id] || 0}</td></tr>`;
     }).join('');
     P().render(`

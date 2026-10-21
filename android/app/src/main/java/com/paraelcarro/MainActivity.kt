@@ -60,7 +60,11 @@ import com.paraelcarro.ui.screens.OpeningBidScreen
 import com.paraelcarro.ui.screens.RoundScoreScreen
 import com.paraelcarro.ui.screens.RulesScreen
 import com.paraelcarro.ui.screens.TurnScreen
+import androidx.compose.ui.zIndex
+import com.paraelcarro.ui.components.SettingsBar
+import com.paraelcarro.ui.components.SettingsDialog
 import com.paraelcarro.ui.theme.ParaElCarroTheme
+import com.paraelcarro.ui.theme.ThemeState
 import com.paraelcarro.ui.theme.Rustic
 
 class MainActivity : ComponentActivity() {
@@ -71,16 +75,23 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Iconos claros en las barras del sistema: el fondo de la app siempre es de noche
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
-        )
+        applySystemBars(light = false)
         ads = AdsManager(applicationContext).also { it.init(this) }
         feedback = Feedback(this)
         if (savedInstanceState == null) handleInvite(intent)
         setContent { ParaElCarroTheme { App() } }
+        if (savedInstanceState == null && CrashGuard.consumeRestarted(this)) {
+            Toast.makeText(this, "Ups, algo ha fallado y hemos vuelto a abrir el juego.", Toast.LENGTH_LONG).show()
+        }
     }
+
+    /** Iconos de las barras del sistema que se vean sobre el fondo (oscuros en el tema claro). */
+    private fun applySystemBars(light: Boolean) {
+        val transparent = android.graphics.Color.TRANSPARENT
+        val style = if (light) SystemBarStyle.light(transparent, transparent) else SystemBarStyle.dark(transparent)
+        enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
+    }
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -117,6 +128,9 @@ class MainActivity : ComponentActivity() {
         var confirmExit by remember { mutableStateOf(false) }
         var confirmLeaveRoom by remember { mutableStateOf(false) }
         val phase = state.phase
+        var showSettings by remember { mutableStateOf(false) }
+        val light = ThemeState.light
+        LaunchedEffect(light) { applySystemBars(light) }
 
         LaunchedEffect(Unit) {
             vm.events.collect {
@@ -124,6 +138,8 @@ class MainActivity : ComponentActivity() {
                     GameEvent.TICK -> feedback.tick()
                     GameEvent.BID -> feedback.bid()
                     GameEvent.RAISE -> feedback.raise()
+                    GameEvent.STAY -> feedback.stay()
+                    GameEvent.GET_OFF -> feedback.getOff()
                 }
             }
         }
@@ -133,6 +149,8 @@ class MainActivity : ComponentActivity() {
                     OnlineEvent.Tick -> feedback.tick()
                     OnlineEvent.Bid -> feedback.bid()
                     OnlineEvent.Raise -> feedback.raise()
+                    OnlineEvent.Stay -> feedback.stay()
+                    OnlineEvent.GetOff -> feedback.getOff()
                     OnlineEvent.YourTurn -> feedback.creak()
                     OnlineEvent.ShowAd -> ads.showInterstitial(this@MainActivity) {}
                     is OnlineEvent.Closed -> Toast.makeText(this@MainActivity, it.message, Toast.LENGTH_LONG).show()
@@ -164,9 +182,10 @@ class MainActivity : ComponentActivity() {
         Column(
             Modifier
                 .fillMaxSize()
-                .background(Brush.radialGradient(listOf(Color(0xFF2B3342), Rustic.Noche), radius = 1600f)),
+                .background(Brush.radialGradient(listOf(Rustic.Cielo, Rustic.Noche), radius = 1600f)),
         ) {
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                SettingsBar(onOpen = { showSettings = true }, modifier = Modifier.align(Alignment.TopEnd).zIndex(5f))
                 if (!inOnline && phase is GamePhase.Bridge) {
                     BridgeCrossingScreen(state, phase.result, feedback, vm::onBridgeFinished)
                 } else {
@@ -177,7 +196,7 @@ class MainActivity : ComponentActivity() {
                             .verticalScroll(rememberScrollState())
                             .statusBarsPadding()
                             .imePadding()
-                            .padding(16.dp),
+                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 60.dp),
                     ) {
                         if (inOnline) OnlineContent(ou) { confirmLeaveRoom = true } else OfflineContent(phase, state)
                     }
@@ -186,6 +205,7 @@ class MainActivity : ComponentActivity() {
             if (showBanner) AdBanner()
         }
 
+        if (showSettings) SettingsDialog(onTest = feedback::click, onDismiss = { showSettings = false })
         if (confirmExit) {
             AlertDialog(
                 onDismissRequest = { confirmExit = false },

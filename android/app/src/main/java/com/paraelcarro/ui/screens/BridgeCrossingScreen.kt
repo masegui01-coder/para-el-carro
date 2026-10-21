@@ -87,7 +87,7 @@ fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedba
     var skip by remember { mutableStateOf(false) }
 
     Column(
-        Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
+        Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 60.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         RoundHeader(state.roundNumber, state.config.rounds, q)

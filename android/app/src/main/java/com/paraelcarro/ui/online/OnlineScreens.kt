@@ -1,5 +1,8 @@
 package com.paraelcarro.ui.online
 
+import com.paraelcarro.ui.components.statusIcon
+import com.paraelcarro.ui.components.Ico
+import com.paraelcarro.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -163,7 +166,7 @@ fun OnlineLobbyScreen(ui: OnlineUi, vm: OnlineViewModel, onShare: () -> Unit, on
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Número de rondas", Modifier.weight(1f))
                 if (host) WoodButton("−", { vm.setRounds(meta.rounds - 1) }, small = true)
-                Text("${meta.rounds}", Modifier.size(48.dp, 32.dp), color = Rustic.Ambar, fontSize = 24.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                Text("${meta.rounds}", Modifier.size(48.dp, 32.dp), color = Rustic.AmbarClaro, fontSize = 24.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 if (host) WoodButton("+", { vm.setRounds(meta.rounds + 1) }, small = true)
             }
             if (host) {
@@ -253,7 +256,7 @@ private fun OpenView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
                     }
                 }
                 WoodButton(
-                    if (ui.sent) "Enviado…" else "🐴 ¡Me subo a la burra!", vm::submitOpening, Modifier.fillMaxWidth(),
+                    if (ui.sent) "Enviado…" else "¡Me subo a la burra!", vm::submitOpening, Modifier.fillMaxWidth(), icon = R.drawable.ic_burra,
                     tone = Tone.AMBAR, enabled = value != null && !ui.sent,
                 )
             }
@@ -279,7 +282,7 @@ private fun TurnView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
             "×10" to { if (bid > 0) bid * 10 else bid + 1 },
         )
     }
-    val where = when (r.status[ui.me]) { "conductor" -> "🐴 Vas montado en la burra."; "bajado" -> "🚶 Te has bajado del carro."; else -> "🛒 Vas en el carro." }
+    val where = when (r.status[ui.me]) { "conductor" -> "Vas montado en la burra."; "bajado" -> "Te has bajado del carro."; else -> "Vas en el carro." }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Header(ui, st)
         QuestionCard(q)
@@ -296,18 +299,18 @@ private fun TurnView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
         if (mine) {
             Text("¡Te toca! ¿Qué haces?", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             if (!ui.draft.raiseOpen) {
-                WoodButton("⬆️ Subir la cifra", { vm.openRaise(steps.first().second()) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent)
+                WoodButton("Subir la cifra", { vm.openRaise(steps.first().second()) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent, icon = R.drawable.ic_subir)
             } else {
                 Panel {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
                         steps.forEach { (label, f) -> WoodButton(label, { vm.setDraftValue(f()) }, small = true) }
                     }
                     CifraField(q, ui.draft, "Nueva cifra (mayor)", vm::onDraftText, vm::onDraftBeforeChrist)
-                    WoodButton("🐴 Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent && value != null && value > bid)
+                    WoodButton("Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent && value != null && value > bid, icon = R.drawable.ic_burra)
                 }
             }
-            WoodButton("🛒 Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO, enabled = !ui.sent)
-            WoodButton("🚶 Me bajo del carro", vm::getOff, Modifier.fillMaxWidth(), tone = Tone.SANGRE, enabled = !ui.sent)
+            WoodButton("Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO, enabled = !ui.sent, icon = R.drawable.ic_carreta)
+            WoodButton("Me bajo del carro", vm::getOff, Modifier.fillMaxWidth(), tone = Tone.SANGRE, enabled = !ui.sent, icon = R.drawable.ic_bajar)
         } else {
             Text("⏳ Le toca a ${ui.player(turnId).tag()}\n$where", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         }
@@ -323,18 +326,18 @@ private fun CartPanel(ui: OnlineUi, st: OnlineState, turnId: String?) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             st.players.forEach { p ->
                 val s = r.status[p.id]
-                val icon = when (s) { "conductor" -> "🐴"; "bajado" -> "🚶"; else -> "🛒" }
+                val icon = statusIcon(s)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
                         .alpha(if (s == "bajado") .55f else 1f)
                         .clip(RoundedCornerShape(50))
-                        .background(if (s == "conductor") Rustic.Ambar.copy(alpha = .25f) else Color.Black.copy(alpha = .35f))
+                        .background(if (s == "conductor") Rustic.Ambar.copy(alpha = .25f) else Rustic.Chip)
                         .then(if (p.id == turnId) Modifier.border(2.dp, Rustic.AmbarClaro, RoundedCornerShape(50)) else Modifier)
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                 ) {
-                    Text(icon, fontSize = 14.sp)
+                    Ico(icon, 20.dp)
                     Avatar(p.avatar, 20.dp)
                     Text(p.name + if (!ui.isOnline(p.id)) " 📴" else "", fontSize = 14.sp, textDecoration = if (s == "bajado") TextDecoration.LineThrough else null)
                 }
@@ -428,10 +431,10 @@ private fun ScoreView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
             }
             st.players.sortedByDescending { st.scores[it.id] ?: 0 }.forEach { p ->
                 val d = res.delta[p.id] ?: 0
-                val icon = when (r.status[p.id]) { "conductor" -> "🐴"; "bajado" -> "🚶"; else -> "🛒" }
+                val icon = statusIcon(r.status[p.id])
                 HorizontalDivider(color = Rustic.MaderaClara.copy(alpha = .25f))
                 Row {
-                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) { Text("$icon "); PlayerTag(p.avatar, p.name + if (p.id == ui.me) " (tú)" else "") }
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) { Ico(icon, 22.dp); Text(" "); PlayerTag(p.avatar, p.name + if (p.id == ui.me) " (tú)" else "") }
                     Text(if (d > 0) "+$d" else "$d", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold,
                         color = when { d > 0 -> Rustic.Verde; d < 0 -> Rustic.Rojo; else -> Rustic.Texto })
                     Text("${st.scores[p.id] ?: 0}", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold)

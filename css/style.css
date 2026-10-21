@@ -13,6 +13,12 @@
   --texto: #efe6d6;
   --texto-suave: #b9ad99;
   --radio: 14px;
+  --verde: var(--verde);
+  --rojo: var(--rojo);
+  --cielo: #2b3342;
+  --campo: rgba(10, 12, 16, .6);
+  --borde-suave: rgba(239, 230, 214, .25);
+  --chip: rgba(0, 0, 0, .35);
 }
 
 * { box-sizing: border-box; }
@@ -21,7 +27,7 @@
 html, body { margin: 0; height: 100%; }
 
 body {
-  background: radial-gradient(ellipse at 70% -10%, #2b3342 0%, var(--noche) 60%) fixed, var(--noche);
+  background: radial-gradient(ellipse at 70% -10%, var(--cielo) 0%, var(--noche) 60%) fixed, var(--noche);
   color: var(--texto);
   font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   display: flex;
@@ -68,7 +74,7 @@ p { line-height: 1.45; }
 .btn.ambar { background: linear-gradient(180deg, var(--ambar-claro), var(--ambar)); color: #2a1a08; box-shadow: 0 3px 0 #9a6516; }
 .btn.musgo { background: linear-gradient(180deg, var(--musgo-claro), var(--musgo)); box-shadow: 0 3px 0 #1a2b1c; }
 .btn.sangre { background: linear-gradient(180deg, #d9715c, var(--sangre)); box-shadow: 0 3px 0 #6e2a1d; }
-.btn.fantasma { background: transparent; border-color: rgba(239, 230, 214, .25); box-shadow: none; color: var(--texto); }
+.btn.fantasma { background: transparent; border-color: var(--borde-suave); box-shadow: none; color: var(--texto); }
 .btn.bloque { width: 100%; }
 .btn.peq { min-height: 38px; padding: 6px 12px; font-size: .9rem; }
 
@@ -79,7 +85,7 @@ p { line-height: 1.45; }
 input[type="text"], select {
   width: 100%; min-height: 46px; padding: 8px 12px;
   border-radius: 10px; border: 1px solid rgba(160, 112, 60, .6);
-  background: rgba(10, 12, 16, .6); color: var(--texto); font-size: 1rem;
+  background: var(--campo); color: var(--texto); font-size: 1rem;
 }
 input:focus, select:focus { outline: 2px solid var(--ambar); outline-offset: 1px; }
 
@@ -156,14 +162,14 @@ input:focus, select:focus { outline: 2px solid var(--ambar); outline-offset: 1px
   font-weight: 800; font-size: 1.1rem; text-shadow: 0 2px 6px #000;
 }
 .resultado-titulo { font-size: 1.6rem; text-align: center; margin: 10px 0 4px; font-family: Georgia, serif; }
-.resultado-titulo.ok { color: #8fd18f; }
-.resultado-titulo.ko { color: #ff8a73; }
+.resultado-titulo.ok { color: var(--verde); }
+.resultado-titulo.ko { color: var(--rojo); }
 
 table.puntos { width: 100%; border-collapse: collapse; }
 table.puntos td { padding: 8px 4px; border-bottom: 1px solid rgba(160, 112, 60, .25); }
 table.puntos td.num { text-align: right; font-weight: 800; }
-.mas { color: #8fd18f; }
-.menos { color: #ff8a73; }
+.mas { color: var(--verde); }
+.menos { color: var(--rojo); }
 
 .podio { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 20px 0; }
 .podio > div { text-align: center; width: 30%; }
@@ -196,7 +202,7 @@ table.puntos td.num { text-align: right; font-weight: 800; }
 }
 .codigo-input { text-transform: uppercase; letter-spacing: .3em; font-family: "Courier New", monospace; font-size: 1.4rem !important; text-align: center; margin-top: 6px; }
 .enlace { font-size: .8rem; margin-top: 10px; word-break: break-all; user-select: all; }
-.error { color: #ff8a73; min-height: 1.2em; font-weight: 700; }
+.error { color: var(--rojo); min-height: 1.2em; font-weight: 700; }
 .aviso { background: rgba(192, 80, 58, .25); border: 1px solid var(--sangre); border-radius: 10px; padding: 8px 12px; margin: 8px 0; font-size: .9rem; }
 .ambar { color: var(--ambar); }
 .chip.turno { outline: 2px solid var(--ambar-claro); animation: latido .6s infinite alternate; }
@@ -223,6 +229,52 @@ label { display: block; }
 .rig-salto.bota { animation: bota .3s ease-in-out 3; }
 @keyframes salto { 0% { transform: translateY(0); } 45% { transform: translateY(-70%) rotate(-12deg); } 100% { transform: translateY(0); } }
 @keyframes bota { 50% { transform: translateY(-30%); } }
+
+/* Iconos ilustrados de las opciones */
+.ico { width: 1.7em; height: 1.7em; vertical-align: middle; flex: none; }
+.btn .ico { width: 2em; height: 2em; margin: -6px 0; }
+.chip .ico { width: 1.3em; height: 1.3em; }
+
+/* Barra de ajustes: silencio y ⚙️ */
+#app { padding-top: 56px; }
+.barra-ajustes { position: fixed; top: 8px; right: max(8px, calc(50% - 272px)); z-index: 30; display: flex; gap: 6px; }
+.btn-redondo {
+  width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer;
+  border: 1px solid var(--borde-suave); background: var(--noche-2); color: var(--texto);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+}
+.modal .panel { background: var(--noche-2); }
+.modal input[type="checkbox"] { width: 24px; height: 24px; accent-color: var(--ambar); }
+
+/* Aviso de fallo (no se cierra el juego) */
+.aviso-fallo {
+  position: fixed; left: 50%; bottom: 76px; transform: translateX(-50%); z-index: 60; width: min(520px, calc(100% - 32px));
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: #3a1d17; color: #ffe3d9; border: 1px solid var(--sangre); border-radius: 12px; padding: 10px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+}
+
+/* Tema claro ("de día"): pergamino y madera */
+:root[data-theme="light"] {
+  --noche: #f3e9d6;
+  --noche-2: #e8dcc4;
+  --texto: #2b1d12;
+  --texto-suave: #6b5a45;
+  --ambar-claro: #a8650c;
+  --verde: #2f7a3a;
+  --rojo: #b23a26;
+  --cielo: #fff6e4;
+  --campo: rgba(255, 255, 255, .75);
+  --borde-suave: rgba(43, 29, 18, .25);
+  --chip: rgba(107, 68, 35, .12);
+}
+:root[data-theme="light"] .panel { background: linear-gradient(180deg, rgba(160, 112, 60, .16), rgba(107, 68, 35, .1)); }
+:root[data-theme="light"] .chip { background: var(--chip); }
+:root[data-theme="light"] .cifra-grande { text-shadow: none; }
+:root[data-theme="light"] h1 { text-shadow: none; color: #b8731a; }
+:root[data-theme="light"] .temporizador { background: rgba(107, 68, 35, .18); }
+:root[data-theme="light"] .avatar-btn, :root[data-theme="light"] .rejilla-avatares button { background: rgba(107, 68, 35, .12); }
+:root[data-theme="light"] .ad-banner { background: #e2d4b8; border-top-color: #cdbb98; color: #8a7a62; }
 
 /* Valorar la pregunta */
 .valorar {

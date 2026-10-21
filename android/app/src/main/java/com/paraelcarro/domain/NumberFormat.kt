@@ -25,8 +25,9 @@ fun Question.format(value: Double): String =
 
 /** "7.400.000" -> 7400000.0 ; "13,7" -> 13.7 (formato español). Null si no es una cifra válida. */
 fun parseCifra(text: String, type: QuestionType, beforeChrist: Boolean): Double? {
+    // Nunca lanza: texto raro, varias comas, más de 18 cifras o números infinitos devuelven null
     val s = text.trim().replace(" ", "").replace(".", "").replace(',', '.')
-    if (!Regex("""^\d+(\.\d+)?$""").matches(s)) return null
-    val v = s.toDoubleOrNull() ?: return null
+    if (s.length > 25 || !Regex("""^\d{1,18}(\.\d{1,6})?$""").matches(s)) return null
+    val v = s.toDoubleOrNull()?.takeIf { it.isFinite() } ?: return null
     return if (type == QuestionType.FECHA) Math.round(v).toDouble().let { if (beforeChrist) -it else it } else v
 }

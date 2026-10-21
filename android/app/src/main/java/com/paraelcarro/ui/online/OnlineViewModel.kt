@@ -49,6 +49,8 @@ sealed interface OnlineEvent {
     data object Tick : OnlineEvent
     data object Bid : OnlineEvent
     data object Raise : OnlineEvent
+    data object Stay : OnlineEvent
+    data object GetOff : OnlineEvent
     data object YourTurn : OnlineEvent
     data object ShowAd : OnlineEvent
     data class Closed(val message: String) : OnlineEvent
@@ -330,7 +332,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
 
     // ------------------------------------------------------------ Jugadas del jugador
 
-    fun onDraftText(t: String) = _ui.update { it.copy(draft = it.draft.copy(text = t)) }
+    fun onDraftText(t: String) = _ui.update { it.copy(draft = it.draft.copy(text = t.take(24))) }
     fun onDraftBeforeChrist(b: Boolean) = _ui.update { it.copy(draft = it.draft.copy(beforeChrist = b)) }
     fun openRaise(v: Double) {
         _ui.update { it.copy(draft = it.draft.copy(raiseOpen = true)) }
@@ -357,8 +359,8 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
         val v = draftValue() ?: return
         if (v > (_ui.value.state?.r?.bid ?: return)) { _events.tryEmit(OnlineEvent.Raise); playThenSend("subir", v) }
     }
-    fun stay() = playThenSend("quedar", null)
-    fun getOff() = playThenSend("bajar", null)
+    fun stay() { _events.tryEmit(OnlineEvent.Stay); playThenSend("quedar", null) }
+    fun getOff() { _events.tryEmit(OnlineEvent.GetOff); playThenSend("bajar", null) }
 
     /** Primero el muñeco se sube a la burra, se baja o bota en el carro; después se envía la jugada. */
     private fun playThenSend(a: String, v: Double?) {

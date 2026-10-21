@@ -1,5 +1,6 @@
 package com.paraelcarro.ui.screens
 
+import com.paraelcarro.ui.components.Ico
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +9,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.paraelcarro.BuildConfig
 import com.paraelcarro.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,7 +56,14 @@ fun HomeScreen(onCreateRoom: () -> Unit, onJoinRoom: () -> Unit, onPlay: () -> U
                 .clip(RoundedCornerShape(14.dp))
                 .border(2.dp, Rustic.MaderaClara, RoundedCornerShape(14.dp)),
         )
-        Text("Para el Carro", color = Rustic.Ambar, fontSize = 38.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold)
+        // Solo en la versión de pruebas: 7 toques en el título fuerzan un error para comprobar CrashGuard
+        var taps by remember { mutableIntStateOf(0) }
+        Text(
+            "Para el Carro", color = Rustic.Ambar, fontSize = 38.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold,
+            modifier = if (BuildConfig.DEBUG) Modifier.clickable(indication = null, interactionSource = null) {
+                if (++taps >= 7) { taps = 0; error("Fallo de prueba forzado") }
+            } else Modifier,
+        )
         Text(
             "Sube la cifra, carga el carro… y reza para que el puente aguante.",
             color = Rustic.TextoSuave, textAlign = TextAlign.Center,
@@ -69,16 +83,19 @@ fun RulesScreen(onBack: () -> Unit) {
         Panel {
             Text("1. Sale una pregunta cuya respuesta es un año o un número.")
             Text("2. El primer jugador tiene $OPEN_SECONDS s para decir una cifra. Se monta en la burra: es el conductor.")
-            Text("3. Por turnos, cada jugador tiene $TURN_SECONDS s para:\n  ⬆️ Subir la cifra (pasa a conductor y el anterior se sube al carro)\n  🛒 Quedarse en el carro\n  🚶 Bajarse (ya no puede volver ni pujar en la ronda)")
+            Text("3. Por turnos, cada jugador tiene $TURN_SECONDS s para:")
+            RuleOption(R.drawable.ic_subir, "Subir la cifra (pasa a conductor y el anterior se sube al carro)")
+            RuleOption(R.drawable.ic_carreta, "Quedarse en el carro")
+            RuleOption(R.drawable.ic_bajar, "Bajarse (ya no puede volver ni pujar en la ronda)")
             Text("4. Se dan vueltas hasta que nadie sube la cifra.")
             Text("5. El carro cruza si la respuesta real es IGUAL O MAYOR que la cifra del conductor. Si no… ¡al río!")
         }
         Title("Puntos")
         Panel {
             RuleRow("", "Cruza", "Al río")
-            RuleRow("🐴 Conductor", "+3 +1/pasajero", "−3 −1/bajado")
-            RuleRow("🛒 En el carro", "+3", "−2")
-            RuleRow("🚶 Bajados", "0", "+3")
+            RuleRow("Conductor", "+3 +1/pasajero", "−3 −1/bajado", R.drawable.ic_burra)
+            RuleRow("En el carro", "+3", "−2", R.drawable.ic_carreta)
+            RuleRow("Bajados", "0", "+3", R.drawable.ic_bajar)
             Text("🎯 ¡Clavada! +2 al conductor si cruza y su cifra está a menos del 10 % (o a 5 años) de la respuesta.", color = Rustic.TextoSuave)
         }
         WoodButton("Volver", onBack, Modifier.fillMaxWidth())
@@ -86,10 +103,18 @@ fun RulesScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun RuleRow(who: String, ok: String, ko: String) {
-    Row(Modifier.fillMaxWidth()) {
-        Text(who, Modifier.weight(1.2f))
+private fun RuleRow(who: String, ok: String, ko: String, icon: Int? = null) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.weight(1.2f), verticalAlignment = Alignment.CenterVertically) { if (icon != null) { Ico(icon, 24.dp); Text(" ") }; Text(who) }
         Text(ok, Modifier.weight(1f), color = Rustic.Verde, textAlign = TextAlign.End)
         Text(ko, Modifier.weight(1f), color = Rustic.Rojo, textAlign = TextAlign.End)
+    }
+}
+
+@Composable
+private fun RuleOption(icon: Int, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 12.dp)) {
+        Ico(icon, 28.dp)
+        Text("  $text")
     }
 }

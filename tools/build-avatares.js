@@ -55,6 +55,16 @@ for (const id of ids) {
   fs.writeFileSync(path.join(drawable, `av_${id}.xml`), toVector(svg, id));
 }
 
+// Iconos de las opciones (shared/iconos/*.svg): img/iconos/<id>.svg y res/drawable/ic_<id>.xml
+const iconos = fs.readdirSync(path.join(root, 'shared', 'iconos')).filter((f) => f.endsWith('.svg')).map((f) => f.slice(0, -4));
+const webIconos = path.join(root, 'img', 'iconos');
+fs.mkdirSync(webIconos, { recursive: true });
+for (const id of iconos) {
+  const svg = fs.readFileSync(path.join(root, 'shared', 'iconos', `${id}.svg`), 'utf8');
+  fs.writeFileSync(path.join(webIconos, `${id}.svg`), svg);
+  fs.writeFileSync(path.join(drawable, `ic_${id}.xml`), toVector(svg, id).replace(`shared/avatares/${id}.svg`, `shared/iconos/${id}.svg`));
+}
+
 fs.writeFileSync(path.join(root, 'js', 'avatares.js'),
   '// Generado por tools/build-avatares.js — no editar a mano.\n' +
   `window.AVATARES = ${JSON.stringify(ids.map((id) => ({ id: 'av:' + id, nombre: NOMBRES[id] })), null, 1)};\n`);
@@ -76,4 +86,4 @@ ${ids.map((id) => `        "av:${id}" to "${NOMBRES[id]}",`).join('\n')}
     )
 }
 `);
-console.log(`${ids.length} avatares publicados`);
+console.log(`${ids.length} avatares y ${iconos.length} iconos publicados`);

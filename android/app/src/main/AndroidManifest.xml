@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
+        android:name=".ParaElCarroApp"
         android:allowBackup="false"
         android:label="Para el Carro"
         android:supportsRtl="true"

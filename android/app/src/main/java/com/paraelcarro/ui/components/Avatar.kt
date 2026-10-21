@@ -41,6 +41,20 @@ fun Avatar(avatar: String, size: Dp, modifier: Modifier = Modifier, highlight: B
     }
 }
 
+/** Icono ilustrado de las opciones (R.drawable.ic_burra, ic_carreta, ic_bajar, ic_subir). */
+@Composable
+fun Ico(@androidx.annotation.DrawableRes res: Int, size: Dp = 20.dp) {
+    Image(painterResource(res), contentDescription = null, modifier = Modifier.size(size))
+}
+
+/** Icono según dónde va el jugador: burra (conductor), carreta (en el carro) o saltando (bajado). */
+@androidx.annotation.DrawableRes
+fun statusIcon(status: String?): Int = when (status) {
+    "conductor" -> com.paraelcarro.R.drawable.ic_burra
+    "bajado" -> com.paraelcarro.R.drawable.ic_bajar
+    else -> com.paraelcarro.R.drawable.ic_carreta
+}
+
 /** Avatar pequeño + nombre, para frases y listas ("🐸 Lucía"). */
 @Composable
 fun PlayerTag(avatar: String, name: String, modifier: Modifier = Modifier, size: Dp = 22.dp, style: TextStyle = TextStyle.Default, color: Color = Color.Unspecified) {

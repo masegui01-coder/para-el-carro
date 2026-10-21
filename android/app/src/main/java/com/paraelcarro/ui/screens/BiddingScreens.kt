@@ -1,5 +1,8 @@
 package com.paraelcarro.ui.screens
 
+import com.paraelcarro.ui.components.statusIcon
+import com.paraelcarro.ui.components.Ico
+import com.paraelcarro.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -78,7 +81,7 @@ fun OpeningBidScreen(state: GameState, phase: GamePhase.OpeningBid, vm: GameView
                     WoodButton("×1 millón", { value?.let { vm.setDraftValue(it * 1_000_000) } }, small = true)
                 }
             }
-            WoodButton("🐴 ¡Me subo a la burra!", vm::submitOpening, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = value != null)
+            WoodButton("¡Me subo a la burra!", vm::submitOpening, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = value != null, icon = R.drawable.ic_burra)
         }
     }
 }
@@ -118,18 +121,18 @@ fun TurnScreen(state: GameState, phase: GamePhase.Turn, vm: GameViewModel) {
         )
         val free = !state.animating
         if (!state.draft.raiseOpen) {
-            WoodButton("⬆️ Subir la cifra", { vm.openRaise(steps.first().second()) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free)
+            WoodButton("Subir la cifra", { vm.openRaise(steps.first().second()) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free, icon = R.drawable.ic_subir)
         } else {
             Panel {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
                     steps.forEach { (label, f) -> WoodButton(label, { vm.setDraftValue(f()) }, small = true) }
                 }
                 CifraField(q, state.draft, "Nueva cifra (mayor)", vm::onDraftText, vm::onDraftBeforeChrist)
-                WoodButton("🐴 Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free && value != null && value > bid)
+                WoodButton("Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free && value != null && value > bid, icon = R.drawable.ic_burra)
             }
         }
-        WoodButton("🛒 Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO, enabled = free)
-        WoodButton("🚶 Me bajo del carro", vm::getOff, Modifier.fillMaxWidth(), tone = Tone.SANGRE, enabled = free)
+        WoodButton("Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO, enabled = free, icon = R.drawable.ic_carreta)
+        WoodButton("Me bajo del carro", vm::getOff, Modifier.fillMaxWidth(), tone = Tone.SANGRE, enabled = free, icon = R.drawable.ic_bajar)
         CartPanel(state)
     }
 }
@@ -143,17 +146,17 @@ private fun CartPanel(state: GameState) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             state.players.forEach { p ->
                 val st = round.status[p.id]
-                val icon = when (st) { PlayerStatus.CONDUCTOR -> "🐴"; PlayerStatus.BAJADO -> "🚶"; else -> "🛒" }
+                val icon = statusIcon(when (st) { PlayerStatus.CONDUCTOR -> "conductor"; PlayerStatus.BAJADO -> "bajado"; else -> "carro" })
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
                         .alpha(if (st == PlayerStatus.BAJADO) .55f else 1f)
                         .clip(RoundedCornerShape(50))
-                        .background(if (st == PlayerStatus.CONDUCTOR) Rustic.Ambar.copy(alpha = .25f) else Color.Black.copy(alpha = .35f))
+                        .background(if (st == PlayerStatus.CONDUCTOR) Rustic.Ambar.copy(alpha = .25f) else Rustic.Chip)
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                 ) {
-                    Text(icon, fontSize = 14.sp)
+                    Ico(icon, 20.dp)
                     Avatar(p.avatar, 20.dp)
                     Text(p.name, fontSize = 14.sp, textDecoration = if (st == PlayerStatus.BAJADO) TextDecoration.LineThrough else null)
                 }

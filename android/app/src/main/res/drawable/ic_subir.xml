@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generado por tools/build-avatares.js desde shared/iconos/subir.svg -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:pathData="M30 44 Q14 58 18 78 Q22 94 44 94 Q66 94 70 78 Q74 58 58 44 Z"
+        android:fillColor="#c9954a"
+        android:strokeColor="#2b1d12"
+        android:strokeWidth="4"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M30 44 Q44 50 58 44 L54 36 Q44 40 34 36 Z"
+        android:fillColor="#a8743a"
+        android:strokeColor="#2b1d12"
+        android:strokeWidth="3.5"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M34 36 Q30 28 36 26 Q44 32 52 26 Q58 28 54 36"
+        android:fillColor="#c9954a"
+        android:strokeColor="#2b1d12"
+        android:strokeWidth="3.5"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M54 62 Q50 57 45 57 Q36 57 36 70 Q36 83 45 83 Q50 83 54 78 M30 66 L46 66 M30 74 L46 74"
+        android:strokeColor="#2b1d12"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M70 62 L70 34 L60 34 L78 10 L96 34 L86 34 L86 62 Z"
+        android:fillColor="#f2a93b"
+        android:strokeColor="#2b1d12"
+        android:strokeWidth="4"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M74 34 L74 56"
+        android:strokeColor="#ffd27a"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+</vector>

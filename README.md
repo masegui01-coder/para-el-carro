@@ -76,6 +76,16 @@ Para añadir uno, crea su SVG (solo `circle`, `ellipse` y `path`), añade su nom
 node tools/build-avatares.js
 ```
 
+## Ajustes, sonidos y control de fallos
+
+- Botones 🔊/🔇 (silencio rápido) y ⚙️ arriba a la derecha: sonido, vibración y tema (oscuro, claro o el del sistema).
+- Cada opción suena y vibra distinto: rebuzno al subir la cifra, crujido de madera al quedarse, salto y golpe al
+  bajarse. Los sonidos se sintetizan (web: Web Audio; Android: `ui/SoundSynth.kt`), sin ficheros de audio.
+- Iconos ilustrados de las opciones en `shared/iconos/*.svg` (se publican con `node tools/build-avatares.js`).
+- Control de fallos: lo que escribe el jugador y los datos de las salas se validan (tests en `RobustezTest`).
+  En la web, si algo falla aparece un aviso y se puede seguir o volver al inicio. En Android, en vez del aviso de
+  "la app se ha detenido", el juego se vuelve a abrir solo en el inicio (`CrashGuard.kt`).
+
 ## Añadir o cambiar preguntas
 
 Edita `shared/fechas.json` o `shared/numeros.json` (`q` pregunta, `a` respuesta, `u` unidad, `n` curiosidad;
