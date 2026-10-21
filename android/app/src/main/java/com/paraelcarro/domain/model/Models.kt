@@ -63,6 +63,14 @@ data class RoundState(
     val log: List<LogEntry> = emptyList(),
 )
 
+/** Un disparate de la ronda: quién, qué cifra dijo y si se pasó ([high]) o se quedó muy corto. */
+data class Barbaridad(val playerId: Int, val value: Double, val high: Boolean) {
+    companion object {
+        const val ALTO = "alto"
+        const val BAJO = "bajo"
+    }
+}
+
 data class RoundResult(
     val question: Question,
     val bid: Double,
@@ -72,11 +80,14 @@ data class RoundResult(
     val passengers: List<Int>,
     val gotOff: List<Int>,
     val delta: Map<Int, Int>,
+    val barbaridades: List<Barbaridad> = emptyList(),
 )
 
 data class GameConfig(
     val rounds: Int = 6,
     val mode: QuestionMode = QuestionMode.MEZCLA,
+    /** Modo barbaridades: −1 a quien diga un disparate. */
+    val barbaridades: Boolean = true,
 )
 
 /** Máquina de estados: Lobby -> Puja (apertura + turnos) -> Animación/Resolución -> Puntuaciones -> … -> Final. */

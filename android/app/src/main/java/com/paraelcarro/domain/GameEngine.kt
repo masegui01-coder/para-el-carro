@@ -1,6 +1,10 @@
 package com.paraelcarro.domain
 
+import com.paraelcarro.domain.model.Barbaridad
 import com.paraelcarro.domain.model.LogEntry
+import java.util.Calendar
+import kotlin.math.abs
+import kotlin.math.ln
 import com.paraelcarro.domain.model.LogKind
 import com.paraelcarro.domain.model.Player
 import com.paraelcarro.domain.model.PlayerStatus
@@ -81,8 +85,9 @@ object GameEngine {
      * - Conductor: cruza +3 +1 por pasajero (+2 si es ¡Clavada!); cae −3 y paga 1 a cada uno que se bajó.
      * - En el carro: cruza +3; cae −2.
      * - Bajados: cruza 0; cae +2 (+1 que paga el conductor).
+     * - Con [barbaridades]: −1 a cada jugador que haya dicho algún disparate en la ronda (una vez).
      */
-    fun score(players: List<Player>, round: RoundState): RoundResult {
+    fun score(players: List<Player>, round: RoundState, barbaridades: Boolean = false): RoundResult {
         val bid = requireNotNull(round.bid)
         val driver = requireNotNull(round.driverId)
         val success = round.question.answer >= bid
@@ -98,6 +103,40 @@ object GameEngine {
             passengers.forEach { delta[it] = -2 }
             off.forEach { delta[it] = 2 + 1 }
         }
-        return RoundResult(round.question, bid, driver, success, bullseye, passengers, off, delta)
+        val barb = if (!barbaridades) emptyList() else players.mapNotNull { p ->
+            val worst = round.log
+                .filter { it.playerId == p.id && (it.kind == LogKind.ABRE || it.kind == LogKind.SUBE) }
+                .mapNotNull { it.value }
+                .filter { barbaridad(round.question, it) != null }
+                .maxByOrNull { distancia(round.question, it) } ?: return@mapNotNull null
+            delta[p.id] = (delta[p.id] ?: 0) - 1
+            Barbaridad(p.id, worst, barbaridad(round.question, worst) == Barbaridad.ALTO)
+        }
+        return RoundResult(round.question, bid, driver, success, bullseye, passengers, off, delta, barb)
     }
+
+    /**
+     * ¿Es una barbaridad? (igual que Logic.barbaridad en js/game.js)
+     * - Números: 10 veces o más por encima o por debajo, con al menos 10 de diferencia.
+     * - Fechas: más de 100 años de error, o más de 1/4 del tiempo transcurrido si es muy antigua.
+     * Devuelve [Barbaridad.ALTO] (se ha pasado), [Barbaridad.BAJO] (se ha quedado muy corto) o null.
+     */
+    fun barbaridad(question: Question, value: Double, currentYear: Int = Calendar.getInstance().get(Calendar.YEAR)): String? {
+        val a = question.answer
+        if (!value.isFinite()) return null
+        if (question.type == QuestionType.FECHA) {
+            val margin = maxOf(100.0, 0.25 * (currentYear - a))
+            if (abs(value - a) <= margin) return null
+            return if (value > a) Barbaridad.ALTO else Barbaridad.BAJO
+        }
+        if (abs(value - a) < 10) return null
+        if (value >= a * 10) return Barbaridad.ALTO
+        if (value * 10 <= a) return Barbaridad.BAJO
+        return null
+    }
+
+    /** Lo lejos que está una cifra de la respuesta (para quedarse con la peor de cada jugador). */
+    private fun distancia(question: Question, value: Double): Double =
+        if (question.type == QuestionType.FECHA) abs(value - question.answer)
+        else abs(ln(maxOf(value, 1e-9) / maxOf(question.answer, 1e-9)))
 }

@@ -91,6 +91,7 @@ const val WEB_URL = "https://masegui01-coder.github.io/para-el-carro/"
 private const val HOST_GRACE_MS = 1500L   // margen para jugadas enviadas justo al final del plazo
 private const val OFFLINE_SKIP_MS = 3000L // si le toca a un desconectado, se le pasa el turno enseguida
 private const val BRIDGE_MS = 10500L      // lo que dura la animación del puente
+private const val BARBARIDAD_MS = 4800L   // y la abuela, si alguien ha dicho una barbaridad
 private const val AD_EVERY_ROUNDS = 2
 
 /**
@@ -172,7 +173,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
                 repeat(6) {
                     if (code == null) {
                         val c = (1..5).map { CODE_CHARS.random() }.joinToString("")
-                        if (repo.createMeta(c, pid, rounds, mode)) code = c
+                        if (repo.createMeta(c, pid, rounds, mode, prefs.getBoolean("barbaridades", true))) code = c
                     }
                 }
                 val c = code ?: return@launch fail("No se pudo crear la sala.")
@@ -277,6 +278,11 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
     fun setMode(mode: String) {
         prefs.edit().putString("modo", mode).apply()
         repo.room(_ui.value.code).child("meta/mode").setValue(mode)
+    }
+
+    fun setBarbaridades(on: Boolean) {
+        prefs.edit().putBoolean("barbaridades", on).apply()
+        repo.room(_ui.value.code).child("meta/barbaridades").setValue(on)
     }
 
     fun changeAvatar(a: String) = repo.room(_ui.value.code).child("players/${_ui.value.me}/avatar").setValue(a)
@@ -579,7 +585,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             val rs = game.rs ?: return
             timer?.cancel()
             if (!GameEngine.isFinished(rs)) return setTurn()
-            val res = GameEngine.score(game.engine, rs)
+            val res = GameEngine.score(game.engine, rs, _ui.value.meta?.barbaridades == true)
             res.delta.forEach { (i, d) -> game.scores[game.pids[i]] = (game.scores[game.pids[i]] ?: 0) + d }
             game.result = res.toOnline(game.pids, game.question!!)
             game.phase = "bridge"
@@ -592,7 +598,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             bridgeTimer?.cancel()
             val game = g ?: return
             bridgeTimer = viewModelScope.launch {
-                delay(BRIDGE_MS)
+                delay(BRIDGE_MS + if (game.result?.barbaridades.isNullOrEmpty()) 0 else BARBARIDAD_MS)
                 if (g === game && game.phase == "bridge") { game.phase = "score"; publish() }
             }
         }

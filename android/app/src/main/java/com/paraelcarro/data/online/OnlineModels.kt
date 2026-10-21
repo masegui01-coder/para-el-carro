@@ -23,7 +23,7 @@ import com.paraelcarro.domain.model.RoundState
 const val CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 val CODE_REGEX = Regex("^[A-HJ-NP-Z2-9]{5}$")
 
-data class RoomMeta(val host: String, val status: String, val rounds: Int, val mode: String)
+data class RoomMeta(val host: String, val status: String, val rounds: Int, val mode: String, val barbaridades: Boolean = false)
 
 data class RoomPlayer(val id: String, val name: String, val avatar: String, val order: Long = 0, val online: Boolean = true)
 
@@ -45,7 +45,11 @@ data class OnlineResult(
     val off: List<String>,
     val answer: Double,
     val note: String,
+    val barbaridades: List<OnlineBarbaridad> = emptyList(),
 )
+
+/** Un disparate: quién, qué cifra dijo y si se pasó (tipo "alto") o se quedó muy corto ("bajo"). */
+data class OnlineBarbaridad(val id: String, val value: Double, val high: Boolean)
 
 data class OnlineState(
     val phase: String,
@@ -79,7 +83,7 @@ private fun Any?.str(): String? = this as? String
 fun parseMeta(v: Any?): RoomMeta? {
     val m = v.asMap()
     val host = m["host"].str() ?: return null
-    return RoomMeta(host, m["status"].str() ?: "lobby", m["rounds"].num()?.toInt() ?: 6, m["mode"].str() ?: "mezcla")
+    return RoomMeta(host, m["status"].str() ?: "lobby", m["rounds"].num()?.toInt() ?: 6, m["mode"].str() ?: "mezcla", m["barbaridades"] as? Boolean ?: false)
 }
 
 fun parsePlayers(v: Any?): List<RoomPlayer> = v.asMap().mapNotNull { (id, raw) ->
@@ -120,6 +124,10 @@ fun parseState(v: Any?): OnlineState? {
             off = rm["off"].asList().mapNotNull { it.str() },
             answer = rm["a"].num() ?: 0.0,
             note = rm["n"].str() ?: "",
+            barbaridades = rm["barbaridades"].asList().mapNotNull { b ->
+                val bm = b.asMap()
+                OnlineBarbaridad(bm["id"].str() ?: return@mapNotNull null, bm["v"].num() ?: return@mapNotNull null, bm["tipo"] == "alto")
+            },
         )
     }
     return OnlineState(
@@ -177,6 +185,7 @@ fun RoundResult.toOnline(pids: List<String>, question: Question) = OnlineResult(
     off = gotOff.map { pids[it] },
     answer = question.answer,
     note = question.note,
+    barbaridades = barbaridades.map { OnlineBarbaridad(pids[it.playerId], it.value, it.high) },
 )
 
 // ------------------------------------------------------------------ Escritura
@@ -209,6 +218,7 @@ fun OnlineState.toMap(): Map<String, Any?> = buildMap {
         put("result", mapOf(
             "success" to res.success, "bullseye" to res.bullseye, "delta" to res.delta,
             "passengers" to res.passengers, "off" to res.off, "a" to res.answer, "n" to res.note,
+            "barbaridades" to res.barbaridades.map { mapOf("id" to it.id, "v" to it.value, "tipo" to if (it.high) "alto" else "bajo") },
         ))
     }
 }

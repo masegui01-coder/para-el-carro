@@ -25,6 +25,7 @@ class LobbyStore(context: Context) {
     fun loadConfig(): GameConfig = GameConfig(
         rounds = prefs.getInt("rondas", 6),
         mode = runCatching { QuestionMode.valueOf(prefs.getString("modo", null)!!) }.getOrDefault(QuestionMode.MEZCLA),
+        barbaridades = prefs.getBoolean("barbaridades", true),
     )
 
     fun save(players: List<Player>, config: GameConfig) {
@@ -34,6 +35,7 @@ class LobbyStore(context: Context) {
             .putString("jugadores", arr.toString())
             .putInt("rondas", config.rounds)
             .putString("modo", config.mode.name)
+            .putBoolean("barbaridades", config.barbaridades)
             .apply()
     }
 }

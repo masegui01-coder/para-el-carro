@@ -68,12 +68,12 @@ class RoomRepository(context: Context) {
     suspend fun read(ref: DatabaseReference): DataSnapshot = ref.get().await()
 
     /** Crea rooms/CODIGO/meta solo si el código está libre. Devuelve si lo ha conseguido. */
-    suspend fun createMeta(code: String, host: String, rounds: Int, mode: String): Boolean =
+    suspend fun createMeta(code: String, host: String, rounds: Int, mode: String, barbaridades: Boolean): Boolean =
         suspendCancellableCoroutine { cont ->
             room(code).child("meta").runTransaction(object : Transaction.Handler {
                 override fun doTransaction(d: MutableData): Transaction.Result {
                     if (d.value != null) return Transaction.abort()
-                    d.value = mapOf("host" to host, "created" to ServerValue.TIMESTAMP, "status" to "lobby", "rounds" to rounds, "mode" to mode)
+                    d.value = mapOf("host" to host, "created" to ServerValue.TIMESTAMP, "status" to "lobby", "rounds" to rounds, "mode" to mode, "barbaridades" to barbaridades)
                     return Transaction.success(d)
                 }
 

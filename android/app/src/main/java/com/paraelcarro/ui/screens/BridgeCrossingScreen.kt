@@ -12,7 +12,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.zIndex
+import com.paraelcarro.ui.components.AbuelaOverlay
 import com.paraelcarro.ui.components.Avatar
+import com.paraelcarro.ui.components.Culpable
 import com.paraelcarro.ui.components.AvatarAssets
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -85,6 +87,7 @@ fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedba
     val driver = state.player(result.driverId)!!
     var animState by remember { mutableStateOf(BridgeAnimState.Walking) }
     var skip by remember { mutableStateOf(false) }
+    var abuela by remember { mutableStateOf(false) }
 
     Column(
         Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 60.dp),
@@ -112,7 +115,11 @@ fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedba
                         BridgeAnimState.Walking -> Unit
                     }
                 },
-                onDone = onFinished,
+                onDone = {
+                    // ¡Qué barbaridad!: la abuela sale antes de los puntos
+                    if (result.barbaridades.isEmpty()) onFinished()
+                    else { abuela = true; feedback.abuela(result.barbaridades.any { it.high }) }
+                },
             )
             val label = if (animState == BridgeAnimState.Walking) "${driver.name} apuesta por ${q.format(result.bid)}"
             else "Respuesta real: ${q.format(q.answer)}"
@@ -127,6 +134,14 @@ fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedba
             )
         }
         WoodButton("Saltar ⏩", { skip = true }, Modifier.fillMaxWidth(), tone = Tone.FANTASMA, small = true)
+    }
+    if (abuela) {
+        AbuelaOverlay(
+            culpables = result.barbaridades.map { b -> state.player(b.playerId).let { Culpable(it?.avatar ?: "🙂", it?.name ?: "¿?", q.format(b.value)) } },
+            high = result.barbaridades.any { it.high },
+            answer = q.format(q.answer),
+            onDone = onFinished,
+        )
     }
 }
 

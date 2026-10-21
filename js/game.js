@@ -59,8 +59,36 @@
       return q.tipo === 'fecha' ? q.a - bid <= 5 : bid >= q.a * 0.9;
     },
 
-    /** Puntos de la ronda. La burra aguanta si la respuesta real es IGUAL O MAYOR que la cifra. */
-    score(players, R) {
+    /**
+     * ¿Es una barbaridad? Devuelve 'alto' (se ha pasado), 'bajo' (se ha quedado muy corto) o null.
+     * - Números: 10 veces o más por encima o por debajo, con al menos 10 de diferencia.
+     * - Fechas: más de 100 años de error, o más de 1/4 del tiempo transcurrido si es muy antigua.
+     */
+    barbaridad(q, v, anioActual = new Date().getFullYear()) {
+      const a = q.a;
+      if (typeof v !== 'number' || !isFinite(v)) return null;
+      if (q.tipo === 'fecha') {
+        const margen = Math.max(100, 0.25 * (anioActual - a));
+        if (Math.abs(v - a) <= margen) return null;
+        return v > a ? 'alto' : 'bajo';
+      }
+      if (Math.abs(v - a) < 10) return null;
+      if (v >= a * 10) return 'alto';
+      if (v * 10 <= a) return 'bajo';
+      return null;
+    },
+
+    /** Lo lejos que está una cifra de la respuesta (para quedarse con la peor de cada jugador). */
+    distancia(q, v) {
+      if (q.tipo === 'fecha') return Math.abs(v - q.a);
+      return Math.abs(Math.log(Math.max(v, 1e-9) / Math.max(q.a, 1e-9)));
+    },
+
+    /**
+     * Puntos de la ronda. La burra aguanta si la respuesta real es IGUAL O MAYOR que la cifra.
+     * Con `barbaridades`, cada jugador que haya dicho algún disparate en la ronda pierde 1 punto (una vez).
+     */
+    score(players, R, barbaridades = false) {
       const success = R.q.a >= R.bid;
       const passengers = players.filter((p) => R.status[p.id] === 'carro').map((p) => p.id);
       const off = players.filter((p) => R.status[p.id] === 'bajado').map((p) => p.id);
@@ -75,7 +103,18 @@
         passengers.forEach((id) => { delta[id] = -2; });
         off.forEach((id) => { delta[id] = 2 + 1; });
       }
-      return { success, bullseye, delta, passengers, off };
+      const barb = [];
+      if (barbaridades) {
+        players.forEach((p) => {
+          const cifras = (R.log || []).filter((l) => l.id === p.id && (l.action === 'abre' || l.action === 'subir')).map((l) => l.value);
+          const peor = cifras.filter((v) => Logic.barbaridad(R.q, v))
+            .sort((x, y) => Logic.distancia(R.q, y) - Logic.distancia(R.q, x))[0];
+          if (peor === undefined) return;
+          delta[p.id] -= 1;
+          barb.push({ id: p.id, v: peor, tipo: Logic.barbaridad(R.q, peor) });
+        });
+      }
+      return { success, bullseye, delta, passengers, off, barbaridades: barb };
     },
   };
 
@@ -292,6 +331,7 @@
     ],
     rounds: store.get('rounds', 6),
     mode: store.get('mode', 'mezcla'), // 'fecha' | 'numero' | 'mezcla'
+    barbaridades: store.get('barbaridades', true), // −1 a quien diga un disparate
     round: 0,
     R: null,
     openAttempts: 0,
@@ -442,10 +482,13 @@
         <div class="segmentado">
           ${[['fecha', '📅 Fechas'], ['numero', '🔢 Números'], ['mezcla', '🎲 Mezcla']].map(([k, l]) => `<button data-mode="${k}" class="${G.mode === k ? 'sel' : ''}">${l}</button>`).join('')}
         </div>
+        <label class="fila"><span class="crece">😱 Modo barbaridades<br><span class="suave">−1 a quien diga un disparate (10 veces más o menos, o más de 100 años)</span></span>
+          <input type="checkbox" id="barbaridades" ${G.barbaridades ? 'checked' : ''}></label>
       </div>
       <button class="btn ambar bloque" id="empezar">¡Arre, burra! Empezar</button>`, true);
 
-    const save = () => { store.set('players', G.players); store.set('rounds', G.rounds); store.set('mode', G.mode); };
+    const save = () => { store.set('players', G.players); store.set('rounds', G.rounds); store.set('mode', G.mode); store.set('barbaridades', G.barbaridades); };
+    on('#barbaridades', 'change', (e) => { G.barbaridades = e.target.checked; save(); });
     on('#atras', 'click', screenHome);
     $app.querySelectorAll('[data-name]').forEach((el) => el.addEventListener('input', () => {
       playerById(+el.dataset.name).name = el.value; save();
@@ -677,7 +720,7 @@
 
   function screenBridge() {
     const R = G.R, q = R.q;
-    const result = Logic.score(G.players, R);
+    const result = Logic.score(G.players, R, G.barbaridades);
     const driver = playerById(R.driver);
     const passengers = result.passengers.map((id) => playerById(id).avatar);
     render(`
@@ -705,7 +748,7 @@
     on('#saltar', 'click', () => scene.skip());
     scene.done.then(() => {
       G.players.forEach((p) => { p.score += result.delta[p.id]; });
-      screenRoundScore(result);
+      showBarbaridades(result.barbaridades, G.players, R.q).then(() => screenRoundScore(result));
     });
   }
 
@@ -723,6 +766,7 @@
       ${header()}
       <div class="resultado-titulo ${result.success ? 'ok' : 'ko'}">${result.success ? '¡El carro cruzó el puente!' : '¡Al río con la burra!'}</div>
       ${result.bullseye ? '<p class="centro" style="color:var(--ambar-claro);font-weight:800">🎯 ¡Clavada! +2 para el conductor</p>' : ''}
+      ${barbaridadesHTML(result.barbaridades, G.players, q)}
       <div class="panel">
         <div class="pregunta" style="font-size:1rem">${esc(q.q)}</div>
         <p>Respuesta: <b style="color:var(--ambar-claro)">${esc(fmtQ(q.a, q))}</b> · ${tag(driver)} dijo <b>${esc(fmtQ(R.bid, q))}</b></p>
@@ -738,6 +782,77 @@
       if (last || G.round % AD_EVERY_ROUNDS === 0) showInterstitial(next); else next();
     });
     Ratings.bind();
+  }
+
+  // ---------------------------------------------------------------- ¡Qué barbaridad! (abuela)
+
+  const VOCES_ABUELA = {
+    alto: { src: ['audio/abuela-te-pasas.ogg', 'audio/abuela-te-pasas.wav'], texto: '¿No te habrás quedado corto, no?' },
+    bajo: { src: ['audio/abuela-espiritu-santo.ogg', 'audio/abuela-espiritu-santo.wav'], texto: '¡Esto no lo arregla ni el Espíritu Santo!' },
+  };
+
+  function vozAbuela(voz) {
+    if (!Ajustes.sonido) return;
+    const decir = () => {
+      // Si el navegador no puede reproducir la grabación, una voz sintética dice la frase
+      try {
+        const u = new SpeechSynthesisUtterance(voz.texto);
+        u.lang = 'es-ES'; u.rate = .85; u.pitch = .8;
+        speechSynthesis.speak(u);
+      } catch (e) { /* sin voz */ }
+    };
+    // Primero la grabación en Ogg (ligera); si el navegador no la reproduce (algunos iPhone), el WAV; si no, voz sintética
+    const probar = (i) => {
+      if (i >= voz.src.length) return decir();
+      try { new Audio(voz.src[i]).play().catch(() => probar(i + 1)); } catch (e) { probar(i + 1); }
+    };
+    probar(0);
+  }
+
+  /**
+   * Tras el puente: la abuela señala a quien ha dicho un disparate y le cae −1.
+   * "¿No te habrás quedado corto, no?" si alguien se pasó; si no, "¡Esto no lo arregla ni el Espíritu Santo!".
+   */
+  function showBarbaridades(lista, players, q) {
+    if (!lista || !lista.length) return Promise.resolve();
+    const voz = lista.some((b) => b.tipo === 'alto') ? VOCES_ABUELA.alto : VOCES_ABUELA.bajo;
+    const quien = (id) => players.find((p) => p.id === id) || { name: '¿?', avatar: '🙂' };
+    const el = document.createElement('div');
+    el.className = 'abuela-escena';
+    el.setAttribute('role', 'alert');
+    el.innerHTML = `
+      <div class="abuela-fila">
+        <div class="abuela-bocadillo">${esc(voz.texto)}</div>
+        <div class="abuela-cuerpo"><img src="img/avatares/abuela.svg" alt="La abuela"><span class="dedo" aria-hidden="true">👉</span></div>
+      </div>
+      <div class="culpables">${lista.map((b) => {
+        const p = quien(b.id);
+        return `<div class="culpable">
+          <div class="culpable-av">${avatarHTML(p.avatar, 'grande')}</div>
+          <b>${esc(p.name)}</b>
+          <span>dijo ${esc(fmtQ(b.v, q))}</span>
+          <span class="menos-uno">−1</span>
+        </div>`;
+      }).join('')}</div>
+      <p class="suave centro">La respuesta era ${esc(fmtQ(q.a, q))}</p>
+      <button class="btn fantasma peq" id="abuela-seguir">Seguir ⏩</button>`;
+    document.body.appendChild(el);
+    vozAbuela(voz);
+    vibrate([60, 40, 60, 40, 120]);
+    return new Promise((resolve) => {
+      const fin = () => { if (el.isConnected) { el.remove(); resolve(); } };
+      el.querySelector('#abuela-seguir').onclick = fin;
+      setTimeout(fin, 4500);
+    });
+  }
+
+  /** Línea de la tabla de puntos con los disparates de la ronda. */
+  function barbaridadesHTML(lista, players, q) {
+    if (!lista || !lista.length) return '';
+    return `<div class="panel barbaridades">😱 <b>¡Qué barbaridad!</b> (−1)<br>${lista.map((b) => {
+      const p = players.find((x) => x.id === b.id) || { name: '¿?', avatar: '🙂' };
+      return `${avatarHTML(p.avatar)} ${esc(p.name)} dijo <b>${esc(fmtQ(b.v, q))}</b> ${b.tipo === 'alto' ? '(¡se pasó!)' : '(¡se quedó cortísimo!)'}`;
+    }).join('<br>')}</div>`;
   }
 
   /** Simulación del anuncio intersticial (en Android lo sirve AdMob). */
@@ -781,6 +896,7 @@
     Logic, AVATARS, OPEN_SECONDS, TURN_SECONDS, MIN_PLAYERS, MAX_PLAYERS, AD_EVERY_ROUNDS,
     esc, fmtQ, parseCifra, avatarHTML, ico, feedback, store, sfx, vibrate, render, on, startTimer, stopTimer,
     pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome, Ratings,
+    showBarbaridades, barbaridadesHTML,
   };
   Ratings.refresh();
 

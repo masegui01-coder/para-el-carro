@@ -41,6 +41,7 @@ import com.paraelcarro.domain.model.QuestionMode
 import com.paraelcarro.ui.GameViewModel
 import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.AvatarPickerDialog
+import com.paraelcarro.ui.components.BarbaridadesSwitch
 import com.paraelcarro.ui.components.Panel
 import com.paraelcarro.ui.components.Title
 import com.paraelcarro.ui.components.Tone
@@ -101,6 +102,7 @@ fun LobbyScreen(state: GameState, vm: GameViewModel) {
                     )
                 }
             }
+            BarbaridadesSwitch(state.config.barbaridades, vm::setBarbaridades)
         }
         WoodButton("¡Arre, burra! Empezar", vm::startGame, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
     }

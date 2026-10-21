@@ -276,6 +276,36 @@ label { display: block; }
 :root[data-theme="light"] .avatar-btn, :root[data-theme="light"] .rejilla-avatares button { background: rgba(107, 68, 35, .12); }
 :root[data-theme="light"] .ad-banner { background: #e2d4b8; border-top-color: #cdbb98; color: #8a7a62; }
 
+/* ¡Qué barbaridad! La abuela señala al que ha dicho un disparate */
+.abuela-escena {
+  position: fixed; inset: 0; z-index: 55; background: rgba(5, 6, 9, .94);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px;
+  animation: aparece .25s ease-out;
+}
+.abuela-fila { display: flex; align-items: flex-end; gap: 6px; }
+.abuela-cuerpo { position: relative; width: 140px; animation: entraAbuela .5s cubic-bezier(.3, 1.6, .5, 1); }
+.abuela-cuerpo img { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--ambar); background: #2a2f3a; }
+.abuela-cuerpo .dedo { position: absolute; left: -26px; bottom: -22px; font-size: 44px; transform: rotate(125deg); animation: senala .35s ease-in-out infinite alternate; }
+.abuela-bocadillo {
+  position: relative; max-width: 200px; background: #fffaf0; color: #2b1d12; border: 3px solid #2b1d12; border-radius: 18px;
+  padding: 10px 14px; font-family: Georgia, serif; font-weight: 800; font-size: 1.15rem; line-height: 1.25; margin-bottom: 70px;
+  animation: entraBocadillo .4s .2s both cubic-bezier(.3, 1.6, .5, 1);
+}
+.abuela-bocadillo::after { content: ''; position: absolute; right: -16px; bottom: 14px; border: 10px solid transparent; border-left: 16px solid #2b1d12; }
+.culpables { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+.culpable { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #fff3e0; animation: tiembla .12s linear infinite; }
+.culpable-av { width: 74px; height: 74px; border-radius: 50%; overflow: hidden; border: 3px solid var(--sangre); background: #2a2f3a; font-size: 48px; display: flex; align-items: center; justify-content: center; filter: saturate(1.4) hue-rotate(-10deg); }
+.culpable span { font-size: .9rem; opacity: .85; }
+.menos-uno { color: #ff8a73 !important; font-size: 1.6rem !important; font-weight: 900; opacity: 1 !important; animation: sube 1s .3s both; }
+.abuela-escena .suave { color: #cdbfa8; }
+.panel.barbaridades { border-color: var(--sangre); }
+@keyframes aparece { from { opacity: 0; } }
+@keyframes entraAbuela { from { transform: translateX(-120%) rotate(-20deg); } }
+@keyframes entraBocadillo { from { transform: scale(0); } }
+@keyframes senala { from { transform: rotate(118deg) translateX(0); } to { transform: rotate(128deg) translateX(8px); } }
+@keyframes tiembla { 0% { transform: translateX(-1.5px); } 50% { transform: translateX(1.5px); } 100% { transform: translateX(-1.5px); } }
+@keyframes sube { from { transform: translateY(14px); opacity: 0; } }
+
 /* Valorar la pregunta */
 .valorar {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;

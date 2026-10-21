@@ -14,6 +14,7 @@
   const HOST_GRACE_MS = 1500;  // margen para que llegue una jugada enviada justo al final del plazo
   const OFFLINE_SKIP_MS = 3000; // si le toca a alguien desconectado, se le pasa el turno enseguida
   const BRIDGE_MS = 10500;     // lo que dura la animación del puente antes de ver los puntos
+  const BARBARIDAD_MS = 4800;  // y la abuela, si alguien ha dicho una barbaridad
 
   let db = null;
   let offset = 0;
@@ -112,7 +113,7 @@
           const c = randomCode();
           const res = await db.ref(`rooms/${c}/meta`).transaction((cur) => cur ? undefined : {
             host: pid, created: firebase.database.ServerValue.TIMESTAMP, status: 'lobby',
-            rounds: P().store.get('rounds', 6), mode: P().store.get('mode', 'mezcla'),
+            rounds: P().store.get('rounds', 6), mode: P().store.get('mode', 'mezcla'), barbaridades: P().store.get('barbaridades', true),
           });
           if (res.committed) code = c;
         }
@@ -211,6 +212,7 @@
       st.result.passengers = st.result.passengers || [];
       st.result.off = st.result.off || [];
       st.result.delta = st.result.delta || {};
+      st.result.barbaridades = st.result.barbaridades || [];
     }
   }
 
@@ -260,6 +262,8 @@
         </div>
         ${host ? `<div class="segmentado">${Object.entries(modeName).map(([k, l]) => `<button data-mode="${k}" class="${S.meta.mode === k ? 'sel' : ''}">${l}</button>`).join('')}</div>`
           : `<div class="fila"><span class="crece">Preguntas</span><b class="ambar">${modeName[S.meta.mode]}</b></div>`}
+        ${host ? `<label class="fila"><span class="crece">😱 Modo barbaridades<br><span class="suave">−1 a quien diga un disparate</span></span><input type="checkbox" id="barbaridades" ${S.meta.barbaridades ? 'checked' : ''}></label>`
+          : `<div class="fila"><span class="crece">😱 Modo barbaridades</span><b class="ambar">${S.meta.barbaridades ? 'Sí' : 'No'}</b></div>`}
       </div>
       ${host
         ? `<button class="btn ambar bloque" id="empezar" ${onlineCount < P().MIN_PLAYERS ? 'disabled' : ''}>¡Arre, burra! Empezar</button>
@@ -280,6 +284,7 @@
     }));
     P().on('#menos', 'click', () => { const r = Math.max(1, S.meta.rounds - 1); roomRef('meta/rounds').set(r); P().store.set('rounds', r); });
     P().on('#mas', 'click', () => { const r = Math.min(30, S.meta.rounds + 1); roomRef('meta/rounds').set(r); P().store.set('rounds', r); });
+    P().on('#barbaridades', 'change', (e) => { roomRef('meta/barbaridades').set(e.target.checked); P().store.set('barbaridades', e.target.checked); });
     P().on('#empezar', 'click', () => H.startGame());
   }
 
@@ -507,6 +512,7 @@
       },
     });
     P().on('#saltar', 'click', () => scene.skip());
+    scene.done.then(() => P().showBarbaridades(res.barbaridades, st.players, q));
   }
 
   function viewScore(st, players) {
@@ -529,6 +535,7 @@
         ${res.n ? `<p class="suave" style="margin:0">💡 ${P().esc(res.n)}</p>` : ''}
         ${P().Ratings.widget(q.id)}
       </div>
+      ${P().barbaridadesHTML(res.barbaridades, players, q)}
       <div class="panel"><table class="puntos">
         <tr class="suave"><td>Jugador</td><td class="num">Ronda</td><td class="num">Total</td></tr>${rows}
       </table></div>
@@ -707,7 +714,7 @@
       const g = this.g;
       clearTimeout(this.timer);
       if (g.R.queue.length > 0) return this.setTurn();
-      g.result = P().Logic.score(g.players, g.R);
+      g.result = P().Logic.score(g.players, g.R, !!(S.meta && S.meta.barbaridades));
       g.players.forEach((p) => { g.scores[p.id] = (g.scores[p.id] || 0) + g.result.delta[p.id]; });
       g.phase = 'bridge';
       g.deadline = 0;
@@ -721,7 +728,7 @@
         if (!this.g || this.g.phase !== 'bridge') return;
         this.g.phase = 'score';
         this.publish();
-      }, BRIDGE_MS);
+      }, BRIDGE_MS + (this.g && this.g.result && this.g.result.barbaridades && this.g.result.barbaridades.length ? BARBARIDAD_MS : 0));
     },
 
     next() {

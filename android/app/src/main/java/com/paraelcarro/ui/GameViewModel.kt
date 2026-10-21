@@ -98,6 +98,7 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setRounds(rounds: Int) = editLobby { it.copy(config = it.config.copy(rounds = rounds.coerceIn(1, 30))) }
     fun setMode(mode: QuestionMode) = editLobby { it.copy(config = it.config.copy(mode = mode)) }
+    fun setBarbaridades(on: Boolean) = editLobby { it.copy(config = it.config.copy(barbaridades = on)) }
 
     fun startGame() {
         editLobby { s ->
@@ -210,7 +211,7 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
         stopTimer()
         val s = _state.value
         if (GameEngine.isFinished(round)) {
-            _state.update { it.copy(round = round, phase = GamePhase.Bridge(GameEngine.score(s.players, round))) }
+            _state.update { it.copy(round = round, phase = GamePhase.Bridge(GameEngine.score(s.players, round, s.config.barbaridades))) }
         } else {
             _state.update { it.copy(round = round, draft = Draft(), phase = GamePhase.Handoff(round.queue.first(), opening = false, message = "Pasa el móvil a")) }
         }

@@ -50,7 +50,13 @@ import com.paraelcarro.domain.model.MAX_PLAYERS
 import com.paraelcarro.domain.model.MIN_PLAYERS
 import com.paraelcarro.domain.model.QuestionType
 import com.paraelcarro.ui.Feedback
+import com.paraelcarro.ui.components.AbuelaOverlay
 import com.paraelcarro.ui.components.Avatar
+import com.paraelcarro.ui.components.BarbaridadesPanel
+import com.paraelcarro.ui.components.BarbaridadesSwitch
+import com.paraelcarro.ui.components.Culpable
+import com.paraelcarro.data.online.OnlineBarbaridad
+import com.paraelcarro.domain.model.Question
 import com.paraelcarro.ui.components.AvatarPickerDialog
 import com.paraelcarro.ui.components.PlayerTag
 import com.paraelcarro.ui.components.CifraField
@@ -178,6 +184,7 @@ fun OnlineLobbyScreen(ui: OnlineUi, vm: OnlineViewModel, onShare: () -> Unit, on
             } else {
                 Row { Text("Preguntas", Modifier.weight(1f)); Text(modes.firstOrNull { it.first == meta.mode }?.second ?: "", color = Rustic.Ambar, fontWeight = FontWeight.Bold) }
             }
+            BarbaridadesSwitch(meta.barbaridades, if (host) vm::setBarbaridades else null)
         }
         if (host) {
             WoodButton("¡Arre, burra! Empezar", vm::startGame, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = online >= MIN_PLAYERS)
@@ -365,6 +372,7 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
     val driver = ui.player(r.driver)
     var anim by remember(st.seq) { mutableStateOf(BridgeAnimState.Walking) }
     var skip by remember(st.seq) { mutableStateOf(false) }
+    var abuela by remember(st.seq) { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Header(ui, st)
         QuestionCard(q, small = true)
@@ -389,7 +397,9 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
                             BridgeAnimState.Walking -> Unit
                         }
                     },
-                    onDone = {},
+                    onDone = {
+                        if (res.barbaridades.isNotEmpty()) { abuela = true; feedback.abuela(res.barbaridades.any { it.high }) }
+                    },
                 )
             }
             Text(
@@ -400,6 +410,14 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
             )
         }
         WoodButton("Saltar ⏩", { skip = true }, Modifier.fillMaxWidth(), tone = Tone.FANTASMA, small = true)
+    }
+    if (abuela) {
+        AbuelaOverlay(
+            culpables = res.barbaridades.map { b -> culpable(ui, b, q) },
+            high = res.barbaridades.any { it.high },
+            answer = q.format(res.answer),
+            onDone = { abuela = false },
+        )
     }
 }
 
@@ -423,6 +441,7 @@ private fun ScoreView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
             if (res.note.isNotEmpty()) Text("💡 ${res.note}", color = Rustic.TextoSuave)
             RatingRow(q.id, vm.isRated(q.id)) { vm.rate(q.id, it) }
         }
+        BarbaridadesPanel(res.barbaridades.map { b -> culpable(ui, b, q) }, res.barbaridades.map { it.high })
         Panel {
             Row {
                 Text("Jugador", Modifier.weight(1f), color = Rustic.TextoSuave)
@@ -487,3 +506,6 @@ private fun Podium(p: RoomPlayer?, st: OnlineState, height: Int, pos: String, mo
         ) { Text("$pos\n${st.scores[p.id] ?: 0}", color = Color.White, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp)) }
     }
 }
+
+private fun culpable(ui: OnlineUi, b: OnlineBarbaridad, q: Question) =
+    ui.player(b.id).let { Culpable(it?.avatar ?: "🙂", it?.name ?: "¿?", q.format(b.value)) }

@@ -13,7 +13,7 @@ import com.paraelcarro.ui.SoundSynth.Wave
  * Sonido y vibración de cada momento del juego (los mismos sonidos que la web).
  * Respeta los ajustes de silencio y vibración.
  */
-class Feedback(context: Context) {
+class Feedback(private val context: Context) {
     private val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)?.defaultVibrator
     } else {
@@ -79,6 +79,21 @@ class Feedback(context: Context) {
     fun fell() {
         sound("cae") { listOf(Note(400.0, .9, Wave.SAWTOOTH, .2, 0.0, 60.0), Note(140.0, .5, Wave.SINE, .45, .85)) }
         vibrate(300, 80, 500)
+    }
+
+    /**
+     * La abuela: "¿No te habrás quedado corto, no?" si alguien se pasó ([high]);
+     * si no, "¡Esto no lo arregla ni el Espíritu Santo!". Grabaciones en res/raw.
+     */
+    fun abuela(high: Boolean) {
+        vibrate(60, 40, 60, 40, 120)
+        if (!Settings.sound) return
+        runCatching {
+            val player = android.media.MediaPlayer.create(context, if (high) com.paraelcarro.R.raw.abuela_te_pasas else com.paraelcarro.R.raw.abuela_espiritu_santo)
+                ?: return
+            player.setOnCompletionListener { it.release() }
+            player.start()
+        }
     }
 
     fun release() = Unit

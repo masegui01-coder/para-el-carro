@@ -26,6 +26,7 @@
           "status": { ".validate": "newData.val() === 'lobby' || newData.val() === 'playing' || newData.val() === 'final'" },
           "rounds": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 30" },
           "mode": { ".validate": "newData.val() === 'fecha' || newData.val() === 'numero' || newData.val() === 'mezcla'" },
+          "barbaridades": { ".validate": "newData.isBoolean()" },
           "$other": { ".validate": false }
         },
         "players": {
