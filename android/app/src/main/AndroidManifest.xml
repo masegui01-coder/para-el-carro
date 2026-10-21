@@ -7,7 +7,9 @@
     <application
         android:name=".ParaElCarroApp"
         android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
         android:label="Para el Carro"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ParaElCarro">
 
