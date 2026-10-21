@@ -1,9 +1,12 @@
 package com.paraelcarro.domain.model
 
-/** Avatares disponibles en la sala (emoji compatibles con Android 8+). */
+/**
+ * Avatares ilustrados (los SVG de shared/avatares, convertidos con tools/build-avatares.js).
+ * Los jugadores guardados con un emoji de versiones anteriores lo siguen viendo como texto.
+ */
 val AVATARS = listOf(
-    "🧔", "👩‍🦰", "🧙‍♂️", "🧝‍♀️", "🤠", "🏴‍☠️", "👸", "🤴", "🧛", "🧟", "🧑‍🌾", "👵",
-    "👴", "🥷", "🧜‍♀️", "🦸", "🐸", "🐷", "🦊", "🐻", "🐵", "🐔", "👻", "🤡",
+    "av:campesino", "av:campesina", "av:abuela", "av:abuelo", "av:raton", "av:gato", "av:loro", "av:perro",
+    "av:cerdo", "av:gallina", "av:oveja", "av:zorro", "av:rana", "av:pirata", "av:bruja", "av:bandolero",
 )
 
 const val MIN_PLAYERS = 3
@@ -107,6 +110,10 @@ data class GameState(
     val timerFraction: Float = 1f,
     val draft: Draft = Draft(),
     val openAttempts: Int = 0,
+    /** true mientras el muñeco salta en la mini escena tras pulsar un botón (no se aceptan más jugadas). */
+    val animating: Boolean = false,
+    /** Jugador que bota de alegría en el carro ("me quedo"). */
+    val cheerId: Int? = null,
 ) {
     fun player(id: Int?): Player? = players.firstOrNull { it.id == id }
     val isLastRound: Boolean get() = roundNumber >= config.rounds

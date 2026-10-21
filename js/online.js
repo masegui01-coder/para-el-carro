@@ -59,6 +59,7 @@
     S.code = S.me = S.meta = S.state = null;
     S.players = {};
     S.lastSeq = -1;
+    S.prevState = null;
     P().store.set('online', null);
     history.replaceState(null, '', location.pathname);
   }
@@ -74,7 +75,7 @@
       <div class="panel col">
         ${codeValue !== null ? `<label>Código de la sala<input type="text" id="codigo" maxlength="5" autocomplete="off" value="${P().esc(codeValue)}" class="codigo-input" placeholder="ABCDE"></label>` : ''}
         <div class="jugador">
-          <button class="avatar-btn" id="avatar" aria-label="Elegir avatar">${prof.avatar}</button>
+          <button class="avatar-btn" id="avatar" aria-label="Elegir avatar">${P().avatarHTML(prof.avatar, 'grande')}</button>
           <input type="text" id="nombre" maxlength="14" placeholder="Tu nombre" value="${P().esc(prof.name)}">
         </div>
         <div id="error" class="error"></div>
@@ -82,7 +83,7 @@
       </div>`, true);
     P().on('#atras', 'click', () => { history.replaceState(null, '', location.pathname); P().screenHome(); });
     P().on('#avatar', 'click', () => P().avatarPicker(prof.avatar, [], (a) => {
-      if (a) { prof.avatar = a; document.querySelector('#avatar').textContent = a; }
+      if (a) { prof.avatar = a; document.querySelector('#avatar').innerHTML = P().avatarHTML(a, 'grande'); }
     }));
     const codeInput = document.querySelector('#codigo');
     if (codeInput) codeInput.addEventListener('input', () => { codeInput.value = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
@@ -245,7 +246,7 @@
       <div class="panel col">
         ${players.map((p) => `
           <div class="fila">
-            <button class="avatar-btn" ${p.id === S.me ? 'id="mi-avatar"' : 'disabled'}>${p.avatar}</button>
+            <button class="avatar-btn" ${p.id === S.me ? 'id="mi-avatar"' : 'disabled'}>${P().avatarHTML(p.avatar, 'grande')}</button>
             <span class="crece">${P().esc(p.name)}${p.id === S.me ? ' <span class="suave">(tú)</span>' : ''}</span>
             ${p.id === S.meta.host ? '<span class="corona">👑 Jefe</span>' : ''}
             ${p.online === false ? '<span class="suave">📴</span>' : ''}
@@ -327,7 +328,7 @@
   }
 
   const question = (st) => `<div class="panel"><div class="pregunta">${P().esc(st.q.q)}</div></div>`;
-  const tag = (p) => p ? `${p.avatar} ${P().esc(p.name)}` : '¿?';
+  const tag = (p) => p ? `${P().avatarHTML(p.avatar)} ${P().esc(p.name)}` : '¿?';
 
   function hostOfflineBanner() {
     const h = S.players[S.meta.host];
@@ -345,8 +346,10 @@
     S.sent = false;
     const players = st.players.map(live);
     const ph = st.phase;
+    const prev = S.prevState; // para animar en la mini escena la última jugada
+    S.prevState = st;
     if (ph === 'open') return viewOpen(st);
-    if (ph === 'turn') return viewTurn(st, players);
+    if (ph === 'turn') return viewTurn(st, players, prev);
     if (ph === 'bridge') return viewBridge(st, players);
     if (ph === 'score') return viewScore(st, players);
     if (ph === 'final') return viewFinal(st, players);
@@ -387,7 +390,7 @@
     }, st.deadline, now);
   }
 
-  function viewTurn(st, players) {
+  function viewTurn(st, players, prev) {
     const R = st.R, q = st.q;
     const turnId = R.queue[0];
     const mine = turnId === S.me;
@@ -409,6 +412,7 @@
       <div class="cifra-grande">${P().esc(P().fmtQ(R.bid, q))}</div>
       <div class="segundos" style="margin-top:8px">${P().TURN_SECONDS}</div>
       <div class="temporizador"><div style="width:100%"></div></div>
+      <div id="rig"></div>
       ${mine ? `<p class="centro"><b>¡Te toca!</b> ¿Qué haces?</p>
         <div class="col" id="acciones">
           <button class="btn ambar bloque" id="subir">⬆️ Subir la cifra</button>
@@ -422,6 +426,19 @@
         </div>`
         : `<p class="centro">⏳ Le toca a ${tag(pl(turnId))}<br><span class="suave">${where}</span></p>`}
       ${P().cartPanel(players, R, turnId)}`);
+    // Mini escena: los demás ven saltar al que acaba de jugar (el propio jugador ya lo vio al pulsar)
+    const rigEl = document.querySelector('#rig');
+    const scene = window.BridgeScene;
+    const last = R.log[R.log.length - 1];
+    const sameRound = prev && prev.round === st.round && prev.R && (prev.phase === 'turn' || prev.phase === 'open');
+    if (sameRound && last && last.id !== S.me) {
+      if (last.action === 'quedar' || last.action === 'tiempo') { scene.rig(rigEl, players, R); scene.cheer(rigEl, last.id); }
+      else scene.rig(rigEl, players, prev.R, R);
+    } else {
+      scene.rig(rigEl, players, R);
+    }
+    const mark = () => { const me = rigEl.querySelector(`.rig-av[data-id="${S.me}"]`); if (me) me.classList.add('yo'); };
+    mark();
     let field = null;
     let raising = false;
     if (mine) {
@@ -430,9 +447,17 @@
       field = P().bindCifra(q, (v) => { okBtn.disabled = v === null || !(v > R.bid); });
       const act = (a, v) => {
         if (S.sent) return;
+        S.sent = true; // evita que el temporizador envíe otra jugada mientras salta el muñeco
         document.querySelectorAll('#acciones button').forEach((b) => { b.disabled = true; });
         if (a === 'subir') P().vibrate([20, 40, 20]);
-        send(a, v);
+        // Primero el muñeco se sube, se baja o se alegra; después se envía la jugada
+        const after = JSON.parse(JSON.stringify(R));
+        let anim;
+        try {
+          P().Logic.act(players, after, S.me, a, v);
+          anim = a === 'quedar' ? scene.cheer(rigEl, S.me) : scene.rig(rigEl, players, R, after);
+        } catch (e) { anim = Promise.resolve(); }
+        anim.then(() => send(a, v));
       };
       document.querySelectorAll('[data-step]').forEach((el) => el.addEventListener('click', () => {
         const s = el.dataset.step; field.set(raise(/^\d+$/.test(s) ? Number(s) : s));
@@ -464,7 +489,7 @@
       <div class="panel"><div class="pregunta" style="font-size:1.05rem">${P().esc(q.q)}</div></div>
       <div class="escena">
         <canvas id="puente" width="400" height="260"></canvas>
-        <div class="revelacion" id="rev">${driver.avatar} apuesta por <span style="color:var(--ambar-claro)">${P().esc(P().fmtQ(R.bid, q))}</span></div>
+        <div class="revelacion" id="rev">${P().avatarHTML(driver.avatar)} apuesta por <span style="color:var(--ambar-claro)">${P().esc(P().fmtQ(R.bid, q))}</span></div>
       </div>
       <button class="btn fantasma bloque peq" id="saltar" style="margin-top:10px">Saltar ⏩</button>`);
     const scene = window.BridgeScene.play(document.querySelector('#puente'), {
@@ -521,7 +546,7 @@
     const ranking = players.slice().sort((a, b) => (st.scores[b.id] || 0) - (st.scores[a.id] || 0));
     const [p1, p2, p3] = ranking;
     const sc = (p) => st.scores[p.id] || 0;
-    const peana = (p, h, pos) => p ? `<div><div class="av">${p.avatar}</div><div>${P().esc(p.name)}</div><div class="peana" style="height:${h}px">${pos}<br>${sc(p)}</div></div>` : '<div></div>';
+    const peana = (p, h, pos) => p ? `<div><div class="podio-av">${P().avatarHTML(p.avatar, 'grande')}</div><div>${P().esc(p.name)}</div><div class="peana" style="height:${h}px">${pos}<br>${sc(p)}</div></div>` : '<div></div>';
     P().render(`
       <h1 class="centro">🏆 ${P().esc(p1.name)} gana</h1>
       <div class="podio">${peana(p2, 70, '2º')}${peana(p1, 100, '1º')}${peana(p3, 50, '3º')}</div>

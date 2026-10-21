@@ -7,8 +7,8 @@
   const TURN_SECONDS = 15;   // cada jugador tiene 15 s para subir, quedarse o bajarse
   const MIN_PLAYERS = 3, MAX_PLAYERS = 8;
   const AD_EVERY_ROUNDS = 2; // intersticial cada 2 rondas y antes del podio
-  const AVATARS = ['🧔', '👩‍🦰', '🧙‍♂️', '🧝‍♀️', '🤠', '🏴‍☠️', '👸', '🤴', '🧛', '🧟', '🧑‍🌾', '👵',
-    '👴', '🥷', '🧜‍♀️', '🦸', '🐸', '🐷', '🦊', '🐻', '🐵', '🐔', '👻', '🤡'];
+  // Avatares ilustrados (js/avatares.js, generado desde shared/avatares/*.svg)
+  const AVATARS = (window.AVATARES || []).map((a) => a.id);
 
   // ---------------------------------------------------------------- Lógica pura
 
@@ -169,7 +169,15 @@
 
   const on = (sel, ev, fn) => { const el = $app.querySelector(sel); if (el) el.addEventListener(ev, fn); return el; };
   const playerById = (id) => G.players.find((p) => p.id === id);
-  const tag = (p) => `${p.avatar} ${esc(p.name)}`;
+  /** Avatar ilustrado ("av:gato") como imagen; los antiguos con emoji se muestran tal cual. */
+  function avatarHTML(a, cls = '') {
+    if (typeof a === 'string' && a.startsWith('av:')) {
+      const info = (window.AVATARES || []).find((x) => x.id === a);
+      return `<img class="av ${cls}" src="img/avatares/${esc(a.slice(3))}.svg" alt="${esc(info ? info.nombre : '')}">`;
+    }
+    return `<span class="av-emoji ${cls}">${esc(a || '🙂')}</span>`;
+  }
+  const tag = (p) => `${avatarHTML(p.avatar)} ${esc(p.name)}`;
 
   // ---------------------------------------------------------------- Estado de la partida
 
@@ -269,7 +277,7 @@
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `<div class="panel"><h2>Elige avatar</h2><div class="rejilla-avatares">
-      ${AVATARS.map((a) => `<button data-a="${a}" class="${a === current ? 'sel' : ''}" ${used.includes(a) ? 'disabled' : ''}>${a}</button>`).join('')}
+      ${AVATARS.map((a) => `<button data-a="${a}" class="${a === current ? 'sel' : ''}" ${used.includes(a) ? 'disabled' : ''} title="${esc(((window.AVATARES || []).find((x) => x.id === a) || {}).nombre || '')}">${avatarHTML(a, 'grande')}</button>`).join('')}
       </div></div>`;
     modal.addEventListener('click', (e) => {
       const a = e.target.closest('[data-a]');
@@ -311,7 +319,7 @@
     const taken = (exceptId) => G.players.filter((p) => p.id !== exceptId).map((p) => p.avatar);
     const rows = G.players.map((p, i) => `
       <div class="jugador">
-        <button class="avatar-btn" data-avatar="${p.id}" aria-label="Cambiar avatar">${p.avatar}</button>
+        <button class="avatar-btn" data-avatar="${p.id}" aria-label="Cambiar avatar">${avatarHTML(p.avatar, 'grande')}</button>
         <input type="text" maxlength="14" value="${esc(p.name)}" data-name="${p.id}" aria-label="Nombre">
         ${i === 0 ? '<span class="corona">👑 Jefe</span>' : `<button class="btn fantasma peq" data-del="${p.id}" ${G.players.length <= MIN_PLAYERS ? 'disabled' : ''}>✕</button>`}
       </div>`).join('');
@@ -389,7 +397,7 @@
     render(`
       ${G.R ? header() : ''}
       <div class="pasa-movil">
-        <div class="gigante">${player.avatar}</div>
+        <div class="gigante">${avatarHTML(player.avatar, 'gigante')}</div>
         <p class="suave">${esc(subtitle || 'Pasa el móvil a')}</p>
         <h1>${esc(player.name)}</h1>
         <button class="btn ambar bloque" id="listo" style="margin-top:20px">¡Soy yo, empezar!</button>
@@ -469,13 +477,13 @@
       const cls = st === 'conductor' ? 'conductor' : st === 'bajado' ? 'bajado' : '';
       const ico = st === 'conductor' ? '🐴' : st === 'bajado' ? '🚶' : '🛒';
       const off = p.online === false ? ' 📴' : '';
-      return `<span class="chip ${cls}${p.id === turnId ? ' turno' : ''}">${ico} ${p.avatar} ${esc(p.name)}${off}</span>`;
+      return `<span class="chip ${cls}${p.id === turnId ? ' turno' : ''}">${ico} ${avatarHTML(p.avatar)} ${esc(p.name)}${off}</span>`;
     }).join('');
     const log = (R.log || []).slice(-6).reverse().map((l) => {
       const p = players.find((x) => x.id === l.id);
       if (!p) return '';
       const txt = { abre: `abre con ${fmtQ(l.value, R.q)}`, subir: `sube a ${fmtQ(l.value, R.q)}`, quedar: 'se queda en el carro', bajar: 'se baja del carro', tiempo: 'se queda (tiempo)' }[l.action];
-      return `<li>${p.avatar} ${esc(p.name)} ${txt}</li>`;
+      return `<li>${avatarHTML(p.avatar)} ${esc(p.name)} ${txt}</li>`;
     }).join('');
     return `<div class="panel"><div class="pasajeros">${chips}</div>${log ? `<ul class="registro" style="margin-top:8px">${log}</ul>` : ''}</div>`;
   }
@@ -500,6 +508,7 @@
       <div class="segundos" style="margin-top:8px">${TURN_SECONDS}</div>
       <div class="temporizador"><div style="width:100%"></div></div>
       <p class="centro">${tag(player)}, ¿qué haces?</p>
+      <div id="rig"></div>
       <div class="col">
         <button class="btn ambar bloque" id="subir">⬆️ Subir la cifra</button>
         <div class="panel col" id="panel-subir" hidden>
@@ -526,14 +535,24 @@
       const s = el.dataset.step;
       field.set(raise(/^\d+$/.test(s) ? Number(s) : s));
     }));
+    const rigEl = $app.querySelector('#rig');
+    window.BridgeScene.rig(rigEl, G.players, R);
+    rigEl.querySelector(`.rig-av[data-id="${player.id}"]`).classList.add('yo');
     let done = false;
     const act = (action, value, timedOut = false) => {
       if (done) return;
       done = true;
+      stopTimer();
+      $app.querySelectorAll('.col button').forEach((b) => { b.disabled = true; });
+      const before = JSON.parse(JSON.stringify({ status: G.R.status }));
       Logic.act(G.players, G.R, player.id, action, value);
       if (timedOut) G.R.log[G.R.log.length - 1].action = 'tiempo';
       if (action === 'subir') vibrate([20, 40, 20]);
-      afterAction();
+      // El muñeco se sube a la burra, se baja o se alegra en el carro; luego sigue el juego
+      const anim = action === 'quedar'
+        ? window.BridgeScene.cheer(rigEl, player.id)
+        : window.BridgeScene.rig(rigEl, G.players, before, G.R);
+      anim.then(afterAction);
     };
     on('#subir', 'click', () => {
       $app.querySelector('#panel-subir').hidden = false;
@@ -563,7 +582,7 @@
       <div class="panel"><div class="pregunta" style="font-size:1.05rem">${esc(q.q)}</div></div>
       <div class="escena">
         <canvas id="puente" width="400" height="260"></canvas>
-        <div class="revelacion" id="rev">${driver.avatar} apuesta por <span style="color:var(--ambar-claro)">${esc(fmtQ(R.bid, q))}</span></div>
+        <div class="revelacion" id="rev">${avatarHTML(driver.avatar)} apuesta por <span style="color:var(--ambar-claro)">${esc(fmtQ(R.bid, q))}</span></div>
       </div>
       <div id="fin"></div>
       <button class="btn fantasma bloque peq" id="saltar" style="margin-top:10px">Saltar ⏩</button>`);
@@ -638,7 +657,7 @@
   function screenFinal() {
     const ranking = G.players.slice().sort((a, b) => b.score - a.score);
     const [p1, p2, p3] = ranking;
-    const peana = (p, h, pos) => p ? `<div><div class="av">${p.avatar}</div><div>${esc(p.name)}</div><div class="peana" style="height:${h}px">${pos}<br>${p.score}</div></div>` : '<div></div>';
+    const peana = (p, h, pos) => p ? `<div><div class="podio-av">${avatarHTML(p.avatar, 'grande')}</div><div>${esc(p.name)}</div><div class="peana" style="height:${h}px">${pos}<br>${p.score}</div></div>` : '<div></div>';
     render(`
       <h1 class="centro">🏆 ${esc(p1.name)} gana</h1>
       <div class="podio">${peana(p2, 70, '2º')}${peana(p1, 100, '1º')}${peana(p3, 50, '3º')}</div>
@@ -657,7 +676,7 @@
   // Piezas compartidas con el modo online (js/online.js)
   window.ParaElCarro = {
     Logic, AVATARS, OPEN_SECONDS, TURN_SECONDS, MIN_PLAYERS, MAX_PLAYERS, AD_EVERY_ROUNDS,
-    esc, fmtQ, parseCifra, store, sfx, vibrate, render, on, startTimer, stopTimer,
+    esc, fmtQ, parseCifra, avatarHTML, store, sfx, vibrate, render, on, startTimer, stopTimer,
     pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome, Ratings,
   };
   Ratings.refresh();

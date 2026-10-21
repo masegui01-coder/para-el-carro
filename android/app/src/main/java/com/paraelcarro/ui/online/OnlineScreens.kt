@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -46,7 +47,9 @@ import com.paraelcarro.domain.model.MAX_PLAYERS
 import com.paraelcarro.domain.model.MIN_PLAYERS
 import com.paraelcarro.domain.model.QuestionType
 import com.paraelcarro.ui.Feedback
+import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.AvatarPickerDialog
+import com.paraelcarro.ui.components.PlayerTag
 import com.paraelcarro.ui.components.CifraField
 import com.paraelcarro.ui.components.Panel
 import com.paraelcarro.ui.components.RatingRow
@@ -58,6 +61,8 @@ import com.paraelcarro.ui.components.Tone
 import com.paraelcarro.ui.components.WoodButton
 import com.paraelcarro.ui.screens.BridgeAnimState
 import com.paraelcarro.ui.screens.BridgeScene
+import com.paraelcarro.ui.screens.RigPlayer
+import com.paraelcarro.ui.screens.TurnRig
 import com.paraelcarro.ui.theme.Rustic
 import kotlin.math.ceil
 
@@ -115,7 +120,7 @@ private fun AvatarCircle(avatar: String, enabled: Boolean = true, onClick: () ->
             .background(Color.Black.copy(alpha = .35f))
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
-    ) { Text(avatar, fontSize = 30.sp) }
+    ) { Avatar(avatar, 52.dp, background = false) }
 }
 
 // ------------------------------------------------------------------ Sala de espera
@@ -190,7 +195,7 @@ private fun Hint(text: String) = Text(text, color = Rustic.TextoSuave, textAlign
 
 // ------------------------------------------------------------------ Partida
 
-private fun RoomPlayer?.tag() = if (this == null) "¿?" else "$avatar $name"
+private fun RoomPlayer?.tag() = this?.name ?: "¿?"
 
 @Composable
 private fun HostOfflineBanner(ui: OnlineUi) {
@@ -281,6 +286,13 @@ private fun TurnView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
         Text("${ui.player(r.driver).tag()} va en la burra con", color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Text(q.format(bid), color = Rustic.AmbarClaro, fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         TimerBar(ui.secondsLeft, ui.timerFraction)
+        TurnRig(
+            players = st.players.map { RigPlayer(it.id, it.avatar) },
+            status = ui.rigOverride ?: r.status,
+            highlightId = ui.me,
+            cheerId = ui.cheerId,
+            cheerKey = ui.cheerId?.let { ui.cheerKey },
+        )
         if (mine) {
             Text("¡Te toca! ¿Qué haces?", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             if (!ui.draft.raiseOpen) {
@@ -312,17 +324,20 @@ private fun CartPanel(ui: OnlineUi, st: OnlineState, turnId: String?) {
             st.players.forEach { p ->
                 val s = r.status[p.id]
                 val icon = when (s) { "conductor" -> "🐴"; "bajado" -> "🚶"; else -> "🛒" }
-                Text(
-                    "$icon ${p.avatar} ${p.name}" + if (!ui.isOnline(p.id)) " 📴" else "",
-                    fontSize = 14.sp,
-                    textDecoration = if (s == "bajado") TextDecoration.LineThrough else null,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
                         .alpha(if (s == "bajado") .55f else 1f)
                         .clip(RoundedCornerShape(50))
                         .background(if (s == "conductor") Rustic.Ambar.copy(alpha = .25f) else Color.Black.copy(alpha = .35f))
                         .then(if (p.id == turnId) Modifier.border(2.dp, Rustic.AmbarClaro, RoundedCornerShape(50)) else Modifier)
                         .padding(horizontal = 10.dp, vertical = 4.dp),
-                )
+                ) {
+                    Text(icon, fontSize = 14.sp)
+                    Avatar(p.avatar, 20.dp)
+                    Text(p.name + if (!ui.isOnline(p.id)) " 📴" else "", fontSize = 14.sp, textDecoration = if (s == "bajado") TextDecoration.LineThrough else null)
+                }
             }
         }
         r.log.takeLast(6).reversed().forEach { e ->
@@ -333,7 +348,7 @@ private fun CartPanel(ui: OnlineUi, st: OnlineState, turnId: String?) {
                 "bajar" -> "se baja del carro"
                 else -> "se queda (tiempo)"
             }
-            Text("• ${ui.player(e.id).tag()} $what", color = Rustic.TextoSuave, fontSize = 13.sp)
+            PlayerTag(ui.player(e.id)?.avatar ?: "🙂", "${ui.player(e.id).tag()} $what", size = 18.dp, style = TextStyle(fontSize = 13.sp), color = Rustic.TextoSuave)
         }
     }
 }
@@ -375,7 +390,7 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
                 )
             }
             Text(
-                if (anim == BridgeAnimState.Walking) "${driver?.avatar ?: ""} apuesta por ${q.format(r.bid)}" else "Respuesta real: ${q.format(res.answer)}",
+                if (anim == BridgeAnimState.Walking) "${driver.tag()} apuesta por ${q.format(r.bid)}" else "Respuesta real: ${q.format(res.answer)}",
                 color = if (anim == BridgeAnimState.Walking) Rustic.AmbarClaro else if (res.success) Rustic.Verde else Rustic.Rojo,
                 fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().background(Color.Black.copy(alpha = .35f)).padding(6.dp),
@@ -416,7 +431,7 @@ private fun ScoreView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
                 val icon = when (r.status[p.id]) { "conductor" -> "🐴"; "bajado" -> "🚶"; else -> "🛒" }
                 HorizontalDivider(color = Rustic.MaderaClara.copy(alpha = .25f))
                 Row {
-                    Text("$icon ${p.tag()}" + if (p.id == ui.me) " (tú)" else "", Modifier.weight(1f))
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) { Text("$icon "); PlayerTag(p.avatar, p.name + if (p.id == ui.me) " (tú)" else "") }
                     Text(if (d > 0) "+$d" else "$d", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold,
                         color = when { d > 0 -> Rustic.Verde; d < 0 -> Rustic.Rojo; else -> Rustic.Texto })
                     Text("${st.scores[p.id] ?: 0}", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold)
@@ -440,7 +455,7 @@ private fun FinalView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel, onExit
         }
         Panel {
             ranking.forEachIndexed { i, p ->
-                Row { Text("${i + 1}. ${p.tag()}" + if (p.id == ui.me) " (tú)" else "", Modifier.weight(1f)); Text("${st.scores[p.id] ?: 0}", fontWeight = FontWeight.ExtraBold) }
+                Row(verticalAlignment = Alignment.CenterVertically) { Text("${i + 1}. "); PlayerTag(p.avatar, p.name + if (p.id == ui.me) " (tú)" else "", Modifier.weight(1f)); Text("${st.scores[p.id] ?: 0}", fontWeight = FontWeight.ExtraBold) }
             }
         }
         if (ui.isHost) {
@@ -457,7 +472,7 @@ private fun FinalView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel, onExit
 private fun Podium(p: RoomPlayer?, st: OnlineState, height: Int, pos: String, modifier: Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         if (p == null) return@Column
-        Text(p.avatar, fontSize = 40.sp)
+        Avatar(p.avatar, 56.dp, highlight = true)
         Text(p.name, fontSize = 13.sp, textAlign = TextAlign.Center)
         Box(
             Modifier

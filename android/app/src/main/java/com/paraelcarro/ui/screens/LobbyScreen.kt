@@ -39,6 +39,7 @@ import com.paraelcarro.domain.model.MAX_PLAYERS
 import com.paraelcarro.domain.model.MIN_PLAYERS
 import com.paraelcarro.domain.model.QuestionMode
 import com.paraelcarro.ui.GameViewModel
+import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.AvatarPickerDialog
 import com.paraelcarro.ui.components.Panel
 import com.paraelcarro.ui.components.Title
@@ -65,7 +66,7 @@ fun LobbyScreen(state: GameState, vm: GameViewModel) {
                             .background(Color.Black.copy(alpha = .35f))
                             .clickable { pickingFor = p.id },
                         contentAlignment = Alignment.Center,
-                    ) { Text(p.avatar, fontSize = 30.sp) }
+                    ) { Avatar(p.avatar, 52.dp, background = false) }
                     OutlinedTextField(
                         value = p.name,
                         onValueChange = { vm.rename(p.id, it) },

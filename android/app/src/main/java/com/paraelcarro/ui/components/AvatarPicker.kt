@@ -42,7 +42,7 @@ fun AvatarPickerDialog(current: String, taken: Set<String>, onPick: (String) -> 
                             .alpha(if (free) 1f else .25f)
                             .clickable(enabled = free) { onPick(a) },
                         contentAlignment = Alignment.Center,
-                    ) { Text(a, fontSize = 24.sp) }
+                    ) { Avatar(a, 44.dp, background = false) }
                 }
             }
         },

@@ -187,9 +187,17 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
     private fun act(action: TurnAction, timedOut: Boolean = false) {
         val s = _state.value
         val phase = s.phase as? GamePhase.Turn ?: return
+        if (s.animating) return
+        stopTimer()
         val round = GameEngine.act(s.players, s.round!!, phase.playerId, action, timedOut)
         if (action is TurnAction.Raise) _events.tryEmit(GameEvent.RAISE)
-        advance(round)
+        // El muñeco salta en la mini escena (se sube a la burra, se baja o bota en el carro) y luego sigue el juego
+        _state.update { it.copy(round = round, animating = true, cheerId = if (action == TurnAction.Stay) phase.playerId else null) }
+        viewModelScope.launch {
+            delay(900)
+            _state.update { it.copy(animating = false, cheerId = null) }
+            advance(round)
+        }
     }
 
     private fun advance(round: RoundState) {

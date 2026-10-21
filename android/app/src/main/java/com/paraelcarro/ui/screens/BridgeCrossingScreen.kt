@@ -2,6 +2,18 @@ package com.paraelcarro.ui.screens
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.key
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.zIndex
+import com.paraelcarro.ui.components.Avatar
+import com.paraelcarro.ui.components.AvatarAssets
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -102,7 +114,7 @@ fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedba
                 },
                 onDone = onFinished,
             )
-            val label = if (animState == BridgeAnimState.Walking) "${driver.avatar} apuesta por ${q.format(result.bid)}"
+            val label = if (animState == BridgeAnimState.Walking) "${driver.name} apuesta por ${q.format(result.bid)}"
             else "Respuesta real: ${q.format(q.answer)}"
             Text(
                 label,
@@ -131,6 +143,13 @@ private const val HALF = 120f
 private const val SAG = 18f
 private const val RIVER_Y = 226f
 private const val GS = 1.35f // escala del grupo burra + carro
+
+// Mini escena del turno (igual que BridgeScene.rig en js/bridge.js)
+private const val RIG_W = 400f
+private const val RIG_H = 140f
+private const val RIG_S = 2f
+private const val RIG_GX = 250f
+private const val RIG_GY = 118f
 
 private const val T_WALK = 2800f
 private const val T_SUSPENSE = 2200f
@@ -285,7 +304,18 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
         textAlign = Paint.Align.CENTER; typeface = Typeface.create(Typeface.SERIF, Typeface.BOLD); textSize = 26f
     }
 
+    /** Dibujos de los avatares ilustrados ("av:gato" -> Painter); los emoji se dibujan como texto. */
+    var painters: Map<String, Painter> = emptyMap()
+
     private fun DrawScope.emoji(ch: String, x: Float, y: Float, size: Float, angle: Float = 0f) {
+        val painter = painters[ch]
+        if (painter != null) {
+            val s = size * 1.25f
+            withTransform({ translate(x, y); rotate(deg(angle), Offset.Zero); translate(-s / 2, -s / 2) }) {
+                with(painter) { draw(Size(s, s)) }
+            }
+            return
+        }
         withTransform({ translate(x, y); rotate(deg(angle), Offset.Zero) }) {
             drawIntoCanvas { c ->
                 emojiPaint.textSize = size
@@ -361,6 +391,20 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
                         c.nativeCanvas.drawText("¡PLAF!", 0f, 0f, plafPaint)
                     }
                 }
+            }
+        }
+    }
+
+    /** Mini escena del turno: suelo, carro y burra parados, sin jinetes (van encima como avatares animados). */
+    fun DrawScope.drawRig() {
+        val k = size.width / RIG_W
+        withTransform({ scale(k, k, Offset.Zero) }) {
+            drawRect(Brush.verticalGradient(listOf(Color(0xFF1D2430), Color(0xFF141820)), 0f, RIG_H), size = Size(RIG_W, RIG_H))
+            drawRect(Color(0xFF3A3129), Offset(0f, RIG_GY), Size(RIG_W, RIG_H - RIG_GY))
+            drawRect(Rustic.Musgo, Offset(0f, RIG_GY - 2), Size(RIG_W, 5f))
+            withTransform({ translate(RIG_GX, RIG_GY); scale(RIG_S, RIG_S, Offset.Zero) }) {
+                cart(0f, 1f)
+                donkey(0f, false)
             }
         }
     }
@@ -533,6 +577,7 @@ fun BridgeScene(
     modifier: Modifier = Modifier,
 ) {
     val sim = remember(driver, passengers, success) { BridgeSimulation(driver, passengers.take(7), success) }
+    sim.painters = (passengers + driver).distinct().mapNotNull { a -> AvatarAssets.drawables[a]?.let { a to painterResource(it) } }.toMap()
     var frame by remember { mutableIntStateOf(0) }
     val speed by rememberUpdatedState(if (fastForward) 5f else 1f)
     val stateCb by rememberUpdatedState(onStateChange)
@@ -554,5 +599,88 @@ fun BridgeScene(
     Canvas(modifier.fillMaxWidth().aspectRatio(W / H).background(Color(0xFF0C0E13))) {
         frame // leer el estado fuerza el redibujado en cada frame
         with(sim) { draw() }
+    }
+}
+
+// --------------------------------------------------------------------------- Mini escena del turno
+
+/** Un jugador en la mini escena: id (como texto) y avatar. */
+data class RigPlayer(val id: String, val avatar: String)
+
+private data class RigSpot(val x: Float, val y: Float, val z: Float, val gone: Boolean)
+
+/** Dónde va cada jugador según su estado ("conductor", "carro" o "bajado"). */
+private fun rigLayout(players: List<RigPlayer>, status: Map<String, String>): Map<String, RigSpot> {
+    val inCart = players.filter { status[it.id] == "carro" }
+    return players.associate { p ->
+        p.id to when (status[p.id]) {
+            "conductor" -> RigSpot(RIG_GX + 26 * RIG_S, RIG_GY - 38 * RIG_S, 3f, false)
+            "carro" -> {
+                val s = seatOf(inCart.indexOf(p), inCart.size)
+                RigSpot(RIG_GX + s.x * RIG_S, RIG_GY + s.y * RIG_S, 2f, false)
+            }
+            else -> RigSpot(40f, RIG_GY - 12, 1f, true)
+        }
+    }
+}
+
+/**
+ * La burra y el carro con los jugadores: el conductor montado y el resto en el carro.
+ * Cuando cambia [status], cada avatar que cambia de sitio salta hasta el nuevo (se sube a la burra,
+ * baja del carro…). [cheerId] + [cheerKey] hacen botar a un jugador ("me quedo en el carro").
+ */
+@Composable
+fun TurnRig(
+    players: List<RigPlayer>,
+    status: Map<String, String>,
+    highlightId: String?,
+    cheerId: String? = null,
+    cheerKey: Any? = null,
+    modifier: Modifier = Modifier,
+) {
+    val sim = remember { BridgeSimulation("", emptyList(), true) }
+    val layout = rigLayout(players, status)
+    BoxWithConstraints(
+        modifier
+            .fillMaxWidth()
+            .aspectRatio(RIG_W / RIG_H)
+            .clip(RoundedCornerShape(14.dp))
+            .border(1.dp, Rustic.MaderaClara.copy(alpha = .45f), RoundedCornerShape(14.dp)),
+    ) {
+        val w = maxWidth
+        val h = maxHeight
+        val avatarSize = w * 0.1f
+        Canvas(Modifier.fillMaxSize()) { with(sim) { drawRig() } }
+        players.forEach { p ->
+            key(p.id) {
+                val spot = layout.getValue(p.id)
+                val x by animateFloatAsState(spot.x, tween(700), label = "x")
+                val y by animateFloatAsState(spot.y, tween(700), label = "y")
+                val alpha by animateFloatAsState(if (spot.gone) 0f else 1f, tween(400, delayMillis = if (spot.gone) 450 else 0), label = "alpha")
+                val hop = remember { Animatable(1f) }
+                var first by remember { mutableStateOf(true) }
+                LaunchedEffect(spot.x, spot.y) {
+                    if (first) { first = false; return@LaunchedEffect }
+                    hop.snapTo(0f)
+                    hop.animateTo(1f, tween(700))
+                }
+                val bounce = remember { Animatable(0f) }
+                LaunchedEffect(cheerKey) {
+                    if (cheerKey != null && cheerId == p.id) repeat(3) {
+                        bounce.animateTo(1f, tween(150))
+                        bounce.animateTo(0f, tween(150))
+                    }
+                }
+                val lift = avatarSize * (0.9f * sin(hop.value * PI.toFloat()) + 0.3f * bounce.value)
+                Box(
+                    Modifier
+                        .zIndex(spot.z)
+                        .offset(x = w * (x / RIG_W) - avatarSize / 2, y = h * (y / RIG_H) - avatarSize / 2 - lift)
+                        .alpha(alpha),
+                ) {
+                    Avatar(p.avatar, avatarSize, highlight = p.id == highlightId, background = false)
+                }
+            }
+        }
     }
 }

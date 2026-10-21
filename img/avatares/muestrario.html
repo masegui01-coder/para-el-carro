@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avatares de Para el Carro</title>
+<style>
+  body { background: #14161c; color: #efe6d6; font-family: system-ui, sans-serif; margin: 16px; }
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 14px; }
+  figure { margin: 0; text-align: center; }
+  img { width: 100%; aspect-ratio: 1; border-radius: 50%; border: 3px solid #f2a93b; background: #2a2f3a; }
+  .peq img { width: 28px; border-width: 1px; }
+</style>
+</head>
+<body>
+  <h1>Avatares</h1>
+  <div class="rejilla" id="g"></div>
+  <h2>Tamaño pequeño (como en el carro)</h2>
+  <div class="peq" id="p"></div>
+  <script src="../../js/avatares.js"></script>
+  <script>
+    for (const a of window.AVATARES) {
+      const id = a.id.slice(3);
+      document.getElementById('g').insertAdjacentHTML('beforeend', `<figure><img src="${id}.svg" alt=""><figcaption>${a.nombre}</figcaption></figure>`);
+      document.getElementById('p').insertAdjacentHTML('beforeend', `<img src="${id}.svg" alt="${a.nombre}"> `);
+    }
+  </script>
+</body>
+</html>

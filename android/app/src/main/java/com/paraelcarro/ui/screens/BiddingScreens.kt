@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -30,7 +31,9 @@ import com.paraelcarro.domain.model.LogKind
 import com.paraelcarro.domain.model.PlayerStatus
 import com.paraelcarro.domain.model.QuestionType
 import com.paraelcarro.ui.GameViewModel
+import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.CifraField
+import com.paraelcarro.ui.components.PlayerTag
 import com.paraelcarro.ui.components.Panel
 import com.paraelcarro.ui.components.QuestionCard
 import com.paraelcarro.ui.components.RoundHeader
@@ -47,7 +50,7 @@ fun HandoffScreen(state: GameState, phase: GamePhase.Handoff, vm: GameViewModel)
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         state.round?.let { RoundHeader(state.roundNumber, state.config.rounds, it.question) }
         Column(Modifier.fillMaxWidth().padding(top = 40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(p.avatar, fontSize = 84.sp)
+            Avatar(p.avatar, 120.dp, highlight = true)
             Text(phase.message, color = Rustic.TextoSuave, textAlign = TextAlign.Center)
             Text(p.name, color = Rustic.Ambar, fontSize = 36.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(24.dp))
@@ -64,10 +67,8 @@ fun OpeningBidScreen(state: GameState, phase: GamePhase.OpeningBid, vm: GameView
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         RoundHeader(state.roundNumber, state.config.rounds, q)
         QuestionCard(q)
-        Text(
-            "${p.avatar} ${p.name}, di una cifra para arrancar.\nTe montarás en la burra como conductor.",
-            textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
-        )
+        CenteredTag(p.avatar, "${p.name}, di una cifra para arrancar.")
+        Text("Te montarás en la burra como conductor.", color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         TimerBar(state.secondsLeft, state.timerFraction)
         Panel {
             CifraField(q, state.draft, if (q.type == QuestionType.FECHA) "Año, p. ej. 1890" else "Tu cifra", vm::onDraftText, vm::onDraftBeforeChrist)
@@ -104,23 +105,31 @@ fun TurnScreen(state: GameState, phase: GamePhase.Turn, vm: GameViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         RoundHeader(state.roundNumber, state.config.rounds, q)
         QuestionCard(q)
-        Text("${driver.avatar} ${driver.name} va en la burra con", color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        CenteredTag(driver.avatar, "${driver.name} va en la burra con", Rustic.TextoSuave)
         Text(q.format(bid), color = Rustic.AmbarClaro, fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         TimerBar(state.secondsLeft, state.timerFraction)
-        Text("${p.avatar} ${p.name}, ¿qué haces?", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        CenteredTag(p.avatar, "${p.name}, ¿qué haces?")
+        TurnRig(
+            players = state.players.map { RigPlayer(it.id.toString(), it.avatar) },
+            status = round.status.entries.associate { (id, s) -> id.toString() to when (s) { PlayerStatus.CONDUCTOR -> "conductor"; PlayerStatus.BAJADO -> "bajado"; else -> "carro" } },
+            highlightId = p.id.toString(),
+            cheerId = state.cheerId?.toString(),
+            cheerKey = state.cheerId?.let { round.log.size },
+        )
+        val free = !state.animating
         if (!state.draft.raiseOpen) {
-            WoodButton("⬆️ Subir la cifra", { vm.openRaise(steps.first().second()) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
+            WoodButton("⬆️ Subir la cifra", { vm.openRaise(steps.first().second()) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free)
         } else {
             Panel {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
                     steps.forEach { (label, f) -> WoodButton(label, { vm.setDraftValue(f()) }, small = true) }
                 }
                 CifraField(q, state.draft, "Nueva cifra (mayor)", vm::onDraftText, vm::onDraftBeforeChrist)
-                WoodButton("🐴 Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = value != null && value > bid)
+                WoodButton("🐴 Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free && value != null && value > bid)
             }
         }
-        WoodButton("🛒 Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO)
-        WoodButton("🚶 Me bajo del carro", vm::getOff, Modifier.fillMaxWidth(), tone = Tone.SANGRE)
+        WoodButton("🛒 Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO, enabled = free)
+        WoodButton("🚶 Me bajo del carro", vm::getOff, Modifier.fillMaxWidth(), tone = Tone.SANGRE, enabled = free)
         CartPanel(state)
     }
 }
@@ -135,16 +144,19 @@ private fun CartPanel(state: GameState) {
             state.players.forEach { p ->
                 val st = round.status[p.id]
                 val icon = when (st) { PlayerStatus.CONDUCTOR -> "🐴"; PlayerStatus.BAJADO -> "🚶"; else -> "🛒" }
-                Text(
-                    "$icon ${p.avatar} ${p.name}",
-                    fontSize = 14.sp,
-                    textDecoration = if (st == PlayerStatus.BAJADO) TextDecoration.LineThrough else null,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
                         .alpha(if (st == PlayerStatus.BAJADO) .55f else 1f)
                         .clip(RoundedCornerShape(50))
                         .background(if (st == PlayerStatus.CONDUCTOR) Rustic.Ambar.copy(alpha = .25f) else Color.Black.copy(alpha = .35f))
                         .padding(horizontal = 10.dp, vertical = 4.dp),
-                )
+                ) {
+                    Text(icon, fontSize = 14.sp)
+                    Avatar(p.avatar, 20.dp)
+                    Text(p.name, fontSize = 14.sp, textDecoration = if (st == PlayerStatus.BAJADO) TextDecoration.LineThrough else null)
+                }
             }
         }
         round.log.takeLast(6).reversed().forEach { e ->
@@ -156,7 +168,16 @@ private fun CartPanel(state: GameState) {
                 LogKind.BAJA -> "se baja del carro"
                 LogKind.TIEMPO -> "se queda (tiempo)"
             }
-            Text("• ${who.avatar} ${who.name} $what", color = Rustic.TextoSuave, fontSize = 13.sp)
+            PlayerTag(who.avatar, "${who.name} $what", size = 18.dp, style = TextStyle(fontSize = 13.sp), color = Rustic.TextoSuave)
         }
+    }
+}
+
+/** Avatar + frase, centrados ("🐸 Lucía, ¿qué haces?"). */
+@Composable
+private fun CenteredTag(avatar: String, text: String, color: Color = Color.Unspecified) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Avatar(avatar, 26.dp)
+        Text("  $text", color = color, textAlign = TextAlign.Center)
     }
 }

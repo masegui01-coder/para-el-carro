@@ -91,10 +91,26 @@
     return c;
   }
 
+  // Avatares ilustrados precargados (js/avatares.js): "av:gato" -> Image
+  const AV_IMG = {};
+  (window.AVATARES || []).forEach((a) => {
+    const img = new Image();
+    img.src = `img/avatares/${a.id.slice(3)}.svg`;
+    AV_IMG[a.id] = img;
+  });
+
+  /** Dibuja un avatar (ilustrado o emoji) centrado en (x, y). */
   function drawEmoji(ctx, ch, x, y, size, angle) {
     ctx.save();
     ctx.translate(x, y);
     if (angle) ctx.rotate(angle);
+    const img = AV_IMG[ch];
+    if (img) {
+      const s = size * 1.25;
+      if (img.complete && img.naturalWidth) ctx.drawImage(img, -s / 2, -s / 2, s, s);
+      ctx.restore();
+      return;
+    }
     ctx.font = `${size}px ${EMOJI_FONT}`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(ch, 0, 0);
@@ -442,5 +458,86 @@
     return { done, skip() { skipped = true; } };
   }
 
-  window.BridgeScene = { play };
+  // ------------------------------------------------------------------ Mini escena del turno
+  // La burra y el carro parados; los avatares van encima como imágenes HTML para poder animar
+  // cuando alguien se sube a la burra, se queda en el carro o se baja.
+
+  const RW = 400, RH = 140, RS = 2, RGX = 250, RGY = 118;
+  const pct = (x, y) => ({ left: (x / RW) * 100, top: (y / RH) * 100 });
+
+  /** Posición de cada jugador según su estado: burra, asiento del carro o suelo (bajado). */
+  function rigLayout(players, R) {
+    const inCart = players.filter((p) => R.status[p.id] === 'carro');
+    const pos = {};
+    players.forEach((p) => {
+      const st = R.status[p.id];
+      if (st === 'conductor') pos[p.id] = { ...pct(RGX + 26 * RS, RGY - 38 * RS), z: 3 };
+      else if (st === 'carro') {
+        const s = seatOf(inCart.indexOf(p), inCart.length);
+        pos[p.id] = { ...pct(RGX + s.x * RS, RGY + s.y * RS), z: 2 };
+      } else pos[p.id] = { ...pct(40, RGY - 12), z: 1, gone: true };
+    });
+    return pos;
+  }
+
+  function paintRig(canvas) {
+    const cssW = canvas.clientWidth || 340;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const k = (cssW * dpr) / RW;
+    canvas.width = Math.round(RW * k); canvas.height = Math.round(RH * k);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    const sky = ctx.createLinearGradient(0, 0, 0, RH);
+    sky.addColorStop(0, '#1d2430'); sky.addColorStop(1, '#141820');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, RW, RH);
+    ctx.fillStyle = '#3a3129'; ctx.fillRect(0, RGY, RW, RH - RGY);
+    ctx.fillStyle = '#2f4a32'; ctx.fillRect(0, RGY - 2, RW, 5);
+    ctx.save(); ctx.translate(RGX, RGY); ctx.scale(RS, RS);
+    drawCart(ctx, 0, 0, 1);
+    drawDonkey(ctx, 0, false);
+    ctx.restore();
+  }
+
+  /**
+   * Pinta la escena con los jugadores colocados según R1. Si se pasa R2, anima el cambio:
+   * cada avatar que cambia de sitio da un salto hasta su nueva posición. Devuelve una promesa
+   * que se cumple al acabar la animación.
+   */
+  function rig(container, players, R1, R2) {
+    container.classList.add('rig');
+    container.innerHTML = '<canvas></canvas>' + players.map((p) => {
+      const a = p.avatar || '🙂';
+      const inner = AV_IMG[a] ? `<img src="${AV_IMG[a].src}" alt="">` : `<span>${a}</span>`;
+      return `<div class="rig-av" data-id="${p.id}"><div class="rig-salto">${inner}</div></div>`;
+    }).join('');
+    paintRig(container.querySelector('canvas'));
+    const place = (pos, animate) => players.forEach((p) => {
+      const el = container.querySelector(`.rig-av[data-id="${p.id}"]`);
+      const q = pos[p.id];
+      el.style.transition = animate ? 'left .7s ease-in-out, top .7s ease-in-out, opacity .5s .5s' : 'none';
+      el.style.left = q.left + '%'; el.style.top = q.top + '%'; el.style.zIndex = q.z;
+      el.style.opacity = q.gone ? '0' : '1';
+    });
+    const p1 = rigLayout(players, R1);
+    place(p1, false);
+    if (!R2) return Promise.resolve();
+    const p2 = rigLayout(players, R2);
+    void container.offsetWidth; // fuerza a pintar la posición inicial antes de animar
+    players.forEach((p) => {
+      const moved = p1[p.id].left !== p2[p.id].left || p1[p.id].top !== p2[p.id].top || !!p1[p.id].gone !== !!p2[p.id].gone;
+      const el = container.querySelector(`.rig-av[data-id="${p.id}"] .rig-salto`);
+      if (moved) el.classList.add('salta');
+    });
+    place(p2, true);
+    return new Promise((r) => setTimeout(r, 900));
+  }
+
+  /** Un avatar se alegra en su sitio ("me quedo en el carro"). */
+  function cheer(container, id) {
+    const el = container.querySelector(`.rig-av[data-id="${id}"] .rig-salto`);
+    if (el) el.classList.add('bota');
+    return new Promise((r) => setTimeout(r, 900));
+  }
+
+  window.BridgeScene = { play, rig, cheer };
 })();

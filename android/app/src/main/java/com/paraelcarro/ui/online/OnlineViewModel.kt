@@ -72,6 +72,11 @@ data class OnlineUi(
     val sent: Boolean = false,
     val secondsLeft: Int = 0,
     val timerFraction: Float = 1f,
+    /** Mini escena: posiciones tras mi jugada mientras salta el muñeco (antes de enviarla). */
+    val rigOverride: Map<String, String>? = null,
+    /** Jugador que bota de alegría en el carro (se ha quedado) y clave para repetir la animación. */
+    val cheerId: String? = null,
+    val cheerKey: Long = 0,
 ) {
     val isHost: Boolean get() = meta?.host == me
     val inGame: Boolean get() = meta != null && meta.status != "lobby" && state != null
@@ -281,7 +286,9 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
         if (st.seq == lastSeq) return
         lastSeq = st.seq
         val me = _ui.value.me
-        _ui.update { it.copy(draft = Draft(), sent = false) }
+        val last = st.r?.log?.lastOrNull()
+        val cheer = last?.takeIf { st.phase == "turn" && it.id != me && (it.action == "quedar" || it.action == "tiempo") }?.id
+        _ui.update { it.copy(draft = Draft(), sent = false, rigOverride = null, cheerId = cheer, cheerKey = st.seq) }
         ticker?.cancel()
         when (st.phase) {
             "open", "turn" -> {
@@ -348,10 +355,29 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
     fun submitOpening() { draftValue()?.let { _events.tryEmit(OnlineEvent.Bid); send("abre", it) } }
     fun submitRaise() {
         val v = draftValue() ?: return
-        if (v > (_ui.value.state?.r?.bid ?: return)) { _events.tryEmit(OnlineEvent.Raise); send("subir", v) }
+        if (v > (_ui.value.state?.r?.bid ?: return)) { _events.tryEmit(OnlineEvent.Raise); playThenSend("subir", v) }
     }
-    fun stay() = send("quedar", null)
-    fun getOff() = send("bajar", null)
+    fun stay() = playThenSend("quedar", null)
+    fun getOff() = playThenSend("bajar", null)
+
+    /** Primero el muñeco se sube a la burra, se baja o bota en el carro; después se envía la jugada. */
+    private fun playThenSend(a: String, v: Double?) {
+        val s = _ui.value
+        val st = s.state ?: return
+        val r = st.r ?: return
+        if (s.sent) return
+        if (a == "quedar") {
+            _ui.update { it.copy(sent = true, cheerId = s.me, cheerKey = System.nanoTime()) }
+        } else {
+            val after = r.status.toMutableMap()
+            if (a == "subir") { after[r.driver] = "carro"; after[s.me] = "conductor" } else after[s.me] = "bajado"
+            _ui.update { it.copy(sent = true, rigOverride = after) }
+        }
+        viewModelScope.launch {
+            delay(900)
+            repo.sendAction(s.code, s.me, a, v, st.seq)
+        }
+    }
 
     private fun send(a: String, v: Double?) {
         val s = _ui.value

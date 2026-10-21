@@ -26,7 +26,9 @@ import com.paraelcarro.domain.format
 import com.paraelcarro.domain.model.GameState
 import com.paraelcarro.domain.model.Player
 import com.paraelcarro.domain.model.RoundResult
+import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.Panel
+import com.paraelcarro.ui.components.PlayerTag
 import com.paraelcarro.ui.components.RatingRow
 import com.paraelcarro.ui.components.RoundHeader
 import com.paraelcarro.ui.components.Tone
@@ -50,7 +52,7 @@ fun RoundScoreScreen(state: GameState, result: RoundResult, alreadyRated: Boolea
         }
         Panel {
             Text(q.text, fontFamily = FontFamily.Serif)
-            Text("Respuesta: ${q.format(q.answer)} · ${driver.avatar} ${driver.name} dijo ${q.format(result.bid)}", fontWeight = FontWeight.Bold, color = Rustic.AmbarClaro)
+            Text("Respuesta: ${q.format(q.answer)} · ${driver.name} dijo ${q.format(result.bid)}", fontWeight = FontWeight.Bold, color = Rustic.AmbarClaro)
             if (q.note.isNotEmpty()) Text("💡 ${q.note}", color = Rustic.TextoSuave)
             RatingRow(q.id, alreadyRated, onRate)
         }
@@ -61,7 +63,7 @@ fun RoundScoreScreen(state: GameState, result: RoundResult, alreadyRated: Boolea
                 val icon = when (p.id) { result.driverId -> "🐴"; in result.gotOff -> "🚶"; else -> "🛒" }
                 HorizontalDivider(color = Rustic.MaderaClara.copy(alpha = .25f))
                 Row {
-                    Text("$icon ${p.avatar} ${p.name}", Modifier.weight(1f))
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) { Text("$icon "); PlayerTag(p.avatar, p.name) }
                     Text(if (d > 0) "+$d" else "$d", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold,
                         color = when { d > 0 -> Rustic.Verde; d < 0 -> Rustic.Rojo; else -> Rustic.Texto })
                     Text("${p.score}", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold)
@@ -84,7 +86,7 @@ fun FinalScreen(state: GameState, onRematch: () -> Unit, onLobby: () -> Unit) {
         }
         Panel {
             ranking.forEachIndexed { i, p ->
-                Row { Text("${i + 1}. ${p.avatar} ${p.name}", Modifier.weight(1f)); Text("${p.score}", fontWeight = FontWeight.ExtraBold) }
+                Row(verticalAlignment = Alignment.CenterVertically) { Text("${i + 1}. "); PlayerTag(p.avatar, p.name, Modifier.weight(1f)); Text("${p.score}", fontWeight = FontWeight.ExtraBold) }
             }
         }
         WoodButton("Revancha (mismos jugadores)", onRematch, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
@@ -96,7 +98,7 @@ fun FinalScreen(state: GameState, onRematch: () -> Unit, onLobby: () -> Unit) {
 private fun Podium(p: Player?, height: Int, pos: String, modifier: Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         if (p == null) return@Column
-        Text(p.avatar, fontSize = 40.sp)
+        Avatar(p.avatar, 56.dp, highlight = true)
         Text(p.name, fontSize = 13.sp, textAlign = TextAlign.Center)
         Box(
             Modifier

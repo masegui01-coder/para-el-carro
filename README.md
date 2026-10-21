@@ -7,7 +7,9 @@ del conductor, cruza; si no… ¡al río!
 
 - **Versión web** (para probar ya): `index.html`, `css/`, `js/` → se publica en GitHub Pages.
 - **App Android** (Kotlin + Jetpack Compose + AdMob): carpeta `android/`.
-- **Preguntas**: `shared/fechas.json` (158) y `shared/numeros.json` (155).
+- **Preguntas** (885): `shared/fechas.json` y `fechas2.json` (316 fechas), `shared/numeros.json` y `numeros2.json`
+  (415 números) y `shared/estimaciones.json` (154 estimaciones calculadas por `tools/estimaciones.js`: divisas,
+  costes de construcción de los colegios de arquitectos, cálculos curiosos).
 
 ## Salas privadas online
 
@@ -54,14 +56,37 @@ Abre `index.html` con doble clic, o con un servidor:
 python -m http.server 8765
 ```
 
+## Valoraciones de preguntas
+
+Al final de cada ronda cada jugador puede valorar la pregunta (👍 😐 👎, opcional, un voto por dispositivo).
+Se guarda solo un contador por pregunta en Firebase (`ratings/<id>`; las reglas solo permiten sumar de 1 en 1).
+El juego deja de sacar las preguntas con al menos 5 votos, nota negativa y en el 20 % peor.
+Para ver la clasificación:
+
+```bash
+node tools/valoraciones.js
+```
+
+## Avatares
+
+16 personajes ilustrados en `shared/avatares/*.svg` (muestrario en `img/avatares/muestrario.html`).
+Para añadir uno, crea su SVG (solo `circle`, `ellipse` y `path`), añade su nombre en `tools/build-avatares.js` y ejecuta:
+
+```bash
+node tools/build-avatares.js
+```
+
 ## Añadir o cambiar preguntas
 
 Edita `shared/fechas.json` o `shared/numeros.json` (`q` pregunta, `a` respuesta, `u` unidad, `n` curiosidad;
 años antes de Cristo en negativo) y regenera los ficheros de la web y de Android:
 
 ```bash
-node tools/build-preguntas.js
+node tools/estimaciones.js && node tools/build-preguntas.js
 ```
+
+Los ficheros nuevos se añaden al final de su lista en `tools/build-preguntas.js` para que no cambien los
+identificadores de las preguntas existentes.
 
 ## App Android
 
