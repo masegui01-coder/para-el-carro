@@ -48,8 +48,15 @@ data class OnlineResult(
     val barbaridades: List<OnlineBarbaridad> = emptyList(),
 )
 
-/** Un disparate: quién, qué cifra dijo y si se pasó (tipo "alto") o se quedó muy corto ("bajo"). */
-data class OnlineBarbaridad(val id: String, val value: Double, val high: Boolean)
+/** La grabación de la abuela para esta ronda (la misma en todos los móviles). */
+fun OnlineResult.vozAbuela(): com.paraelcarro.domain.model.VozAbuela =
+    com.paraelcarro.domain.model.VozAbuela.para(barbaridades.map { it.value }, barbaridades.any { it.high })
+
+/**
+ * Un disparate: quién, qué cifra y si se pasó (tipo "alto") o se quedó muy corto ("bajo").
+ * [from] ("de") es el conductor de la cifra si el jugador solo se quedó en el carro con ella.
+ */
+data class OnlineBarbaridad(val id: String, val value: Double, val high: Boolean, val from: String? = null)
 
 data class OnlineState(
     val phase: String,
@@ -126,7 +133,7 @@ fun parseState(v: Any?): OnlineState? {
             note = rm["n"].str() ?: "",
             barbaridades = rm["barbaridades"].asList().mapNotNull { b ->
                 val bm = b.asMap()
-                OnlineBarbaridad(bm["id"].str() ?: return@mapNotNull null, bm["v"].num() ?: return@mapNotNull null, bm["tipo"] == "alto")
+                OnlineBarbaridad(bm["id"].str() ?: return@mapNotNull null, bm["v"].num() ?: return@mapNotNull null, bm["tipo"] == "alto", bm["de"].str())
             },
         )
     }
@@ -185,7 +192,7 @@ fun RoundResult.toOnline(pids: List<String>, question: Question) = OnlineResult(
     off = gotOff.map { pids[it] },
     answer = question.answer,
     note = question.note,
-    barbaridades = barbaridades.map { OnlineBarbaridad(pids[it.playerId], it.value, it.high) },
+    barbaridades = barbaridades.map { OnlineBarbaridad(pids[it.playerId], it.value, it.high, it.from?.let { f -> pids[f] }) },
 )
 
 // ------------------------------------------------------------------ Escritura
@@ -218,7 +225,9 @@ fun OnlineState.toMap(): Map<String, Any?> = buildMap {
         put("result", mapOf(
             "success" to res.success, "bullseye" to res.bullseye, "delta" to res.delta,
             "passengers" to res.passengers, "off" to res.off, "a" to res.answer, "n" to res.note,
-            "barbaridades" to res.barbaridades.map { mapOf("id" to it.id, "v" to it.value, "tipo" to if (it.high) "alto" else "bajo") },
+            "barbaridades" to res.barbaridades.map { b ->
+                buildMap { put("id", b.id); put("v", b.value); put("tipo", if (b.high) "alto" else "bajo"); b.from?.let { put("de", it) } }
+            },
         ))
     }
 }

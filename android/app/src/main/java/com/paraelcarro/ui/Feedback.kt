@@ -81,15 +81,19 @@ class Feedback(private val context: Context) {
         vibrate(300, 80, 500)
     }
 
-    /**
-     * La abuela: "¿No te habrás quedado corto, no?" si alguien se pasó ([high]);
-     * si no, "¡Esto no lo arregla ni el Espíritu Santo!". Grabaciones en res/raw.
-     */
-    fun abuela(high: Boolean) {
+    /** La abuela suelta la grabación que toca ([VozAbuela]). Grabaciones en res/raw. */
+    fun abuela(voz: com.paraelcarro.domain.model.VozAbuela) {
         vibrate(60, 40, 60, 40, 120)
         if (!Settings.sound) return
         runCatching {
-            val player = android.media.MediaPlayer.create(context, if (high) com.paraelcarro.R.raw.abuela_te_pasas else com.paraelcarro.R.raw.abuela_espiritu_santo)
+            val player = android.media.MediaPlayer.create(
+                context,
+                when (voz) {
+                    com.paraelcarro.domain.model.VozAbuela.CORTO -> com.paraelcarro.R.raw.abuela_te_pasas
+                    com.paraelcarro.domain.model.VozAbuela.SANTO -> com.paraelcarro.R.raw.abuela_espiritu_santo
+                    com.paraelcarro.domain.model.VozAbuela.TRILLONES -> com.paraelcarro.R.raw.abuela_trillones
+                },
+            )
                 ?: return
             player.setOnCompletionListener { it.release() }
             player.start()

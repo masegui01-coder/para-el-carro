@@ -291,6 +291,9 @@ label { display: block; }
   padding: 10px 14px; font-family: Georgia, serif; font-weight: 800; font-size: 1.15rem; line-height: 1.25; margin-bottom: 70px;
   animation: entraBocadillo .4s .2s both cubic-bezier(.3, 1.6, .5, 1);
 }
+.abuela-bocadillo .palabra { opacity: .22; display: inline-block; transition: opacity .15s, transform .15s; }
+.abuela-bocadillo .palabra.dicha { opacity: 1; animation: palabraDicha .3s cubic-bezier(.3, 1.8, .5, 1); }
+@keyframes palabraDicha { from { transform: scale(1.35); color: #b3261e; } }
 .abuela-bocadillo::after { content: ''; position: absolute; right: -16px; bottom: 14px; border: 10px solid transparent; border-left: 16px solid #2b1d12; }
 .culpables { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
 .culpable { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #fff3e0; animation: tiembla .12s linear infinite; }

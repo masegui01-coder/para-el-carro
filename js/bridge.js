@@ -200,8 +200,22 @@
     ctx.beginPath(); ctx.ellipse(0, -6, 1.8, 6, 0, 0, 7); ctx.fill(); ctx.restore();
   }
 
+  /**
+   * Estilos de caída (opts.caida). 'clasica' es la de siempre; las demás son propuestas (ver demo-caida.html):
+   * - 'lenta': cámara lenta con zoom sobre el carro, ¡CRAAAC! y temblor al caer al agua.
+   * - 'dibujos': como en los dibujos animados: se quedan colgando en el aire, la burra mira a cámara y... ¡CATAPLOF!
+   * - 'derrumbe': los tablones se sueltan uno a uno desde el centro, polvo, y los restos flotan en el río.
+   */
+  const CAIDAS = {
+    clasica: { tFall: T_FALL, hang: 0, delay: 0, g: 520, vr: .9, texto: '¡PLAF!', temblor: 0 },
+    lenta: { tFall: T_FALL, hang: 0, delay: 0, g: 520, vr: .9, texto: '¡PLAF!', temblor: 5, lenta: .3 },
+    dibujos: { tFall: 4800, hang: 1100, delay: 0, g: 760, vr: 0, texto: '¡CATAPLOF!', temblor: 3 },
+    derrumbe: { tFall: 4600, hang: 0, delay: 350, g: 520, vr: 1.7, texto: '¡CRASH!', temblor: 7 },
+  };
+
   function play(canvas, opts) {
     const driver = opts.driver || '🙂';
+    const caida = CAIDAS[opts.caida] || CAIDAS.clasica;
     const passengers = (opts.passengers || []).slice(0, 7);
     const success = !!opts.success;
 
@@ -217,12 +231,16 @@
       if (plankRand() < .07) continue; // tablones que faltan
       planks.push({ x, w: 4.5 + plankRand(), tilt: (plankRand() - .5) * .15, shade: 80 + plankRand() * 40 });
     }
+    // Derrumbe: cada tablón se suelta un poco después que el de al lado, del centro hacia fuera
+    if (caida === CAIDAS.derrumbe) planks.forEach((p) => { p.suelta = (Math.abs(p.x - MID) / HALF) * 900 + plankRand() * 120; });
 
     let start = null, last = null, finished = false, skipped = false, resolveDone;
     let suspenseFired = false, impactFired = false;
     const done = new Promise((r) => { resolveDone = r; });
     const particles = [];
     let splashText = 0;
+    // Cámara (zoom y temblor) y velocidad del reloj (cámara lenta)
+    let camZ = 1, camX = W / 2, camY = H / 2, speed = 1, shakeT = -1e9, shakeAmp = 0, crac = 0;
 
     // Estado de caída (se inicializa al romperse el puente)
     let fall = null;
@@ -257,6 +275,45 @@
           }),
         ],
       };
+    }
+
+    function addPolvo(x, y) {
+      for (let i = 0; i < 3; i++) {
+        particles.push({ kind: 'polvo', x: x + (Math.random() - .5) * 6, y, vx: (Math.random() - .5) * 14, vy: -6 - Math.random() * 10, r: 2, life: 1 });
+      }
+    }
+
+    function drawWheel(x, y, rot) {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(GS, GS);
+      ctx.strokeStyle = '#2b1a0c'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.stroke();
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < 6; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(9, 0); ctx.stroke(); }
+      ctx.restore();
+    }
+
+    /** Dibujos: ojos de "¡ay, madre!" mirando a cámara y el cartelito. */
+    function drawUps(x, y, t, hangT) {
+      const hx = x + 49 * GS, hy = y - 35 * GS;
+      const pop = clamp01(hangT / 200);
+      ctx.save(); ctx.translate(hx, hy); ctx.scale(pop, pop);
+      [-3.5, 3.5].forEach((dx) => {
+        ctx.fillStyle = '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = .8;
+        ctx.beginPath(); ctx.ellipse(dx, -2, 3.6, 4.6, 0, 0, 7); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(dx, -.5 + Math.sin(t / 90) * .4, 1.5, 0, 7); ctx.fill();
+      });
+      ctx.restore();
+      if (hangT > 350) {
+        const s = clamp01((hangT - 350) / 180);
+        ctx.save(); ctx.translate(x - 30 * GS, y - 72 * GS); ctx.scale(s * 1.3, s * 1.3); ctx.rotate(Math.sin(t / 160) * .06);
+        ctx.strokeStyle = '#3e2714'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, 10); ctx.lineTo(0, 30); ctx.stroke();
+        ctx.fillStyle = '#c99a5b'; ctx.fillRect(-26, -10, 52, 22);
+        ctx.strokeRect(-26, -10, 52, 22);
+        ctx.fillStyle = '#2b1d12'; ctx.font = 'bold 13px Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('¡Ups!', 0, 1);
+        ctx.restore();
+      }
     }
 
     function drawRiver(t) {
@@ -319,6 +376,14 @@
       // Tablones
       planks.forEach((p) => {
         const q = tf(p.x, bridgeY(p.x));
+        if (p.suelta !== undefined && fall && t - fall.t0 >= p.suelta) {
+          if (!p.cayo) {
+            p.cayo = true;
+            particles.push({ kind: 'tablon', x: q.x, y: q.y, vx: (Math.random() - .5) * 30, vy: -10 - Math.random() * 30, rot: p.tilt, vr: (Math.random() - .5) * 8, w: p.w, shade: p.shade, life: 99 });
+            if (Math.random() < .5) addPolvo(q.x, q.y);
+          }
+          return;
+        }
         ctx.save(); ctx.translate(q.x, q.y);
         ctx.rotate(Math.atan(bridgeSlope(p.x)) + p.tilt + (q.a || 0));
         ctx.fillStyle = `rgb(${p.shade + 30},${p.shade},${p.shade * .6})`;
@@ -343,18 +408,39 @@
       ctx.restore();
     }
 
+    /** Dónde mira la cámara en cada estilo de caída (z = zoom). */
+    function camara(t) {
+      const full = { z: 1, x: W / 2, y: H / 2 };
+      if (!fall || success) return full;
+      const aun = !fall.sunk || t - fall.sinkT < 500;
+      if (caida === CAIDAS.lenta && aun) return { z: 1.5, x: fall.x, y: Math.min(fall.y, RIVER_Y) - 25 };
+      if (caida === CAIDAS.dibujos && t - fall.t0 < 400 + caida.hang) return { z: 1.6, x: fall.x + 15, y: fall.y - 45 };
+      if (caida === CAIDAS.derrumbe && aun) return { z: 1.2, x: MID, y: 170 };
+      return full;
+    }
+
     function frame(now) {
       if (finished) return;
       if (start === null) { start = 0; last = now; }
       // Reloj virtual: "Saltar" acelera la escena x5 en vez de cortarla.
       const realDt = Math.min(50, now - last); last = now;
-      start += realDt * (skipped ? 5 : 1);
+      const rate = (skipped ? 5 : 1) * speed;
+      start += realDt * rate;
       const t = start;
-      const dt = (realDt * (skipped ? 5 : 1)) / 1000;
+      const dt = (realDt * rate) / 1000;
 
+      // Cámara: se acerca y vuelve suave; el temblor se apaga solo
+      const cam = camara(t);
+      const ease = Math.min(1, realDt / 160);
+      camZ += (cam.z - camZ) * ease; camX += (cam.x - camX) * ease; camY += (cam.y - camY) * ease;
+      const vw = W / (2 * camZ), vh = H / (2 * camZ);
+      camX = Math.max(vw, Math.min(W - vw, camX)); camY = Math.max(vh, Math.min(H - vh, camY));
+      const sh = shakeAmp * Math.exp(-(t - shakeT) / 350);
+      const sx = Math.sin(t / 23) * sh, sy = Math.cos(t / 31) * sh;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.drawImage(bg, 0, 0);
-      ctx.setTransform(k, 0, 0, k, 0, 0);
+      ctx.fillStyle = '#07090c'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(k * camZ, 0, 0, k * camZ, k * (W / 2 - camX * camZ + sx), k * (H / 2 - camY * camZ + sy));
+      ctx.drawImage(bg, 0, 0, W, H);
       drawRiver(t);
 
       const tSusp = T_WALK, tAfter = T_WALK + T_SUSPENSE;
@@ -362,12 +448,13 @@
       if (t < tSusp) phase = 'walking';
       else if (t < tAfter) phase = 'suspense';
       else if (success) phase = t < tAfter + T_CROSS ? 'crossing' : 'crossed';
-      else phase = t < tAfter + 400 ? 'breaking' : (t < tAfter + T_FALL ? 'falling' : 'fell');
+      else phase = t < tAfter + 400 ? 'breaking' : (t < tAfter + caida.tFall ? 'falling' : 'fell');
 
       if (phase !== 'walking' && !suspenseFired) { suspenseFired = true; opts.onSuspense && opts.onSuspense(); }
 
       const wobble = phase === 'suspense' ? Math.sin(t / 30) * 1.2 * clamp01((t - tSusp) / 600) : (phase === 'walking' ? 1.5 * clamp01((t - 1800) / 1000) : 0);
-      const breakT = success ? 0 : clamp01((t - tAfter) / 400);
+      // En el derrumbe las cuerdas aguantan un poco más mientras se sueltan los tablones
+      const breakT = success ? 0 : caida === CAIDAS.derrumbe ? clamp01((t - tAfter - 500) / 900) : clamp01((t - tAfter) / 400);
       drawBridge(t, breakT, wobble);
 
       if (phase === 'walking' || phase === 'suspense' || phase === 'crossing' || phase === 'crossed') {
@@ -382,19 +469,29 @@
         });
         if (phase === 'crossed' && !impactFired) { impactFired = true; addConfetti(); opts.onImpact && opts.onImpact(true); }
       } else {
-        if (!fall) { startFall(MID, bridgeY(MID)); fall.t0 = t; }
-        if (phase !== 'breaking') {
+        if (!fall) {
+          startFall(MID, bridgeY(MID)); fall.t0 = t; fall.vr = caida.vr;
+          if (caida.hang) { fall.vy = 0; fall.riders.forEach((r) => { r.vx *= .35; r.vy = 0; r.vr = 0; }); }
+          if (caida === CAIDAS.lenta) crac = t;
+        }
+        const hangT = t - fall.t0 - 400;
+        const colgando = caida.hang && hangT < caida.hang;
+        if (phase !== 'breaking' && !colgando && hangT >= caida.delay) {
           // Gravedad: grupo y jinetes
           if (!fall.sunk) {
-            fall.vy += 520 * dt; fall.y += fall.vy * dt; fall.rot += fall.vr * dt;
+            fall.vy += caida.g * dt; fall.y += fall.vy * dt; fall.rot += fall.vr * dt;
             if (fall.y >= RIVER_Y + 6) {
               fall.sunk = true; fall.sinkT = t; addSplash(fall.x, true); splashText = t;
+              if (caida.temblor) { shakeT = t; shakeAmp = caida.temblor; }
+              if (caida === CAIDAS.dibujos) {
+                particles.push({ kind: 'rueda', x: fall.x - 28 * GS, y: RIVER_Y - 4, vx: 70, vy: -260, rot: 0, vr: 9, life: 3 });
+              }
               if (!impactFired) { impactFired = true; opts.onImpact && opts.onImpact(false); }
             }
           }
           fall.riders.forEach((r) => {
             if (r.sunk) return;
-            r.vy += 520 * dt; r.x += r.vx * dt; r.y += r.vy * dt; r.rot += r.vr * dt;
+            r.vy += caida.g * dt; r.x += r.vx * dt; r.y += r.vy * dt; r.rot += r.vr * dt;
             r.x = Math.max(LEFT + 8, Math.min(RIGHT - 8, r.x));
             if (r.y >= RIVER_Y + 2) { r.sunk = true; r.sinkT = t; r.y = RIVER_Y + 2; addSplash(r.x, false); }
           });
@@ -410,10 +507,31 @@
         if (fall.sunk) { ctx.beginPath(); ctx.rect(0, 0, W, RIVER_Y + 4); ctx.clip(); }
         drawGroup(t, fall.x, gy, rot, { step: t / 60, riders: false, lantern: fall.sunk ? .3 : 1, sad: true });
         ctx.restore();
+        if (caida === CAIDAS.dibujos && !fall.sunk) {
+          if (colgando || hangT < caida.hang + 120) drawUps(fall.x, gy, t, Math.max(0, hangT));
+          else if (fall.vy > 120) {
+            // Líneas de velocidad
+            ctx.strokeStyle = 'rgba(230,235,255,.35)'; ctx.lineWidth = 1;
+            for (let i = 0; i < 4; i++) {
+              const lx = fall.x - 40 + i * 22;
+              ctx.beginPath(); ctx.moveTo(lx, gy - 95); ctx.lineTo(lx, gy - 60 - (i % 2) * 10); ctx.stroke();
+            }
+          }
+        }
+        if (fall.sunk && caida !== CAIDAS.clasica && t - fall.sinkT < 2200 && Math.random() < .25) {
+          particles.push({ kind: 'burbuja', x: fall.x + (Math.random() - .5) * 40, y: RIVER_Y + 18, vy: -14 - Math.random() * 10, r: 1 + Math.random() * 1.5, life: 2 });
+        }
         fall.riders.forEach((r, i) => {
           const y = r.sunk ? RIVER_Y + 1 + Math.sin(t / 250 + i) * 1.5 : r.y;
           drawEmoji(ctx, r.ch, r.x, y, r.size, r.sunk ? Math.sin(t / 300 + i) * .3 : r.rot);
           if (r.sunk && t - r.sinkT > 700) drawEmoji(ctx, '💦', r.x + 9, y - 10, 9);
+          if (caida === CAIDAS.dibujos && r.sunk && t - r.sinkT < 2200) {
+            ctx.fillStyle = '#ffd27a'; ctx.font = '8px sans-serif'; ctx.textAlign = 'center';
+            for (let j = 0; j < 3; j++) {
+              const a = t / 220 + j * 2.1 + i;
+              ctx.fillText('✦', r.x + Math.cos(a) * 9, y - 13 + Math.sin(a) * 3);
+            }
+          }
         });
       }
 
@@ -422,6 +540,39 @@
         const p = particles[i];
         p.life -= dt;
         if (p.life <= 0) { particles.splice(i, 1); continue; }
+        if (p.kind === 'tablon') {
+          if (p.y < RIVER_Y) {
+            p.vy += 420 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+            if (p.y >= RIVER_Y) { p.y = RIVER_Y; p.vx = 6 + Math.random() * 6; if (Math.random() < .5) addSplash(p.x, false); }
+          } else {
+            // Flota río abajo
+            p.x += p.vx * dt; p.rot = Math.sin(t / 300 + p.x) * .15;
+          }
+          const py = p.y >= RIVER_Y ? RIVER_Y + 1 + Math.sin(t / 250 + p.x) : p.y;
+          ctx.save(); ctx.translate(p.x, py); ctx.rotate(p.rot);
+          ctx.fillStyle = `rgb(${p.shade + 30},${p.shade},${p.shade * .6})`;
+          ctx.fillRect(-p.w / 2, -1, p.w, 3.2); ctx.restore();
+          continue;
+        }
+        if (p.kind === 'polvo') {
+          p.x += p.vx * dt; p.y += p.vy * dt; p.r += 10 * dt;
+          ctx.fillStyle = `rgba(150,135,115,${.35 * p.life})`;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill();
+          continue;
+        }
+        if (p.kind === 'burbuja') {
+          p.y += p.vy * dt;
+          if (p.y <= RIVER_Y + 1) { particles.splice(i, 1); continue; }
+          ctx.strokeStyle = 'rgba(190,230,240,.7)'; ctx.lineWidth = .6;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.stroke();
+          continue;
+        }
+        if (p.kind === 'rueda') {
+          p.vy += 520 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+          if (p.vy > 0 && p.y >= RIVER_Y) { addSplash(p.x, false); particles.splice(i, 1); continue; }
+          drawWheel(p.x, p.y, p.rot);
+          continue;
+        }
         if (p.kind === 'gota') {
           p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
           ctx.fillStyle = `rgba(170,215,230,${Math.min(1, p.life)})`;
@@ -439,12 +590,29 @@
         const s = clamp01((t - splashText) / 250);
         ctx.save(); ctx.translate(MID, 196); ctx.scale(s, s);
         ctx.font = 'bold 26px Georgia, serif'; ctx.textAlign = 'center';
-        ctx.lineWidth = 4; ctx.strokeStyle = '#061015'; ctx.strokeText('¡PLAF!', 0, 0);
-        ctx.fillStyle = '#bfe6f0'; ctx.fillText('¡PLAF!', 0, 0);
+        ctx.lineWidth = 4; ctx.strokeStyle = '#061015'; ctx.strokeText(caida.texto, 0, 0);
+        ctx.fillStyle = '#bfe6f0'; ctx.fillText(caida.texto, 0, 0);
         ctx.restore();
       }
 
-      const end = success ? tAfter + T_CROSS + T_PARTY : tAfter + T_FALL;
+      // Cámara lenta: viñeta oscura y ¡CRAAAC! mientras dura
+      if (caida === CAIDAS.lenta && fall && !fall.sunk) {
+        ctx.setTransform(k, 0, 0, k, 0, 0);
+        const v = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, W * .7);
+        v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(40,0,0,.65)');
+        ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+        const s = clamp01((t - crac) / 120);
+        ctx.save(); ctx.translate(W / 2, 46); ctx.scale(.6 + s * .4, .6 + s * .4); ctx.rotate(-.06);
+        ctx.font = 'bold 34px Georgia, serif'; ctx.textAlign = 'center';
+        ctx.lineWidth = 5; ctx.strokeStyle = '#1a0606'; ctx.strokeText('¡CRAAAC!', 0, 0);
+        ctx.fillStyle = '#ffb199'; ctx.fillText('¡CRAAAC!', 0, 0);
+        ctx.restore();
+      }
+
+      // Cámara lenta mientras caen
+      speed = caida.lenta && fall && !fall.sunk && t > tAfter + 150 ? caida.lenta : 1;
+
+      const end = success ? tAfter + T_CROSS + T_PARTY : tAfter + caida.tFall;
       if (t >= end) {
         finished = true;
         if (!impactFired) { impactFired = true; opts.onImpact && opts.onImpact(success); }

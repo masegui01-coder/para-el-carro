@@ -30,6 +30,7 @@ import com.paraelcarro.domain.model.QuestionMode
 import com.paraelcarro.domain.model.QuestionType
 import com.paraelcarro.domain.model.RoundState
 import com.paraelcarro.domain.model.TURN_SECONDS
+import com.paraelcarro.domain.model.VozAbuela
 import com.paraelcarro.domain.model.TurnAction
 import com.paraelcarro.domain.parseCifra
 import kotlinx.coroutines.Job
@@ -91,7 +92,7 @@ const val WEB_URL = "https://masegui01-coder.github.io/para-el-carro/"
 private const val HOST_GRACE_MS = 1500L   // margen para jugadas enviadas justo al final del plazo
 private const val OFFLINE_SKIP_MS = 3000L // si le toca a un desconectado, se le pasa el turno enseguida
 private const val BRIDGE_MS = 10500L      // lo que dura la animación del puente
-private const val BARBARIDAD_MS = 4800L   // y la abuela, si alguien ha dicho una barbaridad
+private const val BARBARIDAD_MARGEN_MS = 300L   // la abuela dura lo que su grabación (VozAbuela.escenaMs) y un respiro
 private const val AD_EVERY_ROUNDS = 2
 
 /**
@@ -598,7 +599,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             bridgeTimer?.cancel()
             val game = g ?: return
             bridgeTimer = viewModelScope.launch {
-                delay(BRIDGE_MS + if (game.result?.barbaridades.isNullOrEmpty()) 0 else BARBARIDAD_MS)
+                delay(BRIDGE_MS + game.result?.barbaridades.orEmpty().let { b -> if (b.isEmpty()) 0L else VozAbuela.para(b.map { it.value }, b.any { it.high }).escenaMs + BARBARIDAD_MARGEN_MS })
                 if (g === game && game.phase == "bridge") { game.phase = "score"; publish() }
             }
         }

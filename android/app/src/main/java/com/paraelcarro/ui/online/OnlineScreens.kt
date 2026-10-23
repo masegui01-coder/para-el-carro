@@ -54,7 +54,8 @@ import com.paraelcarro.ui.components.AbuelaOverlay
 import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.BarbaridadesPanel
 import com.paraelcarro.ui.components.BarbaridadesSwitch
-import com.paraelcarro.ui.components.Culpable
+import com.paraelcarro.ui.components.culpable as culpableDe
+import com.paraelcarro.data.online.vozAbuela
 import com.paraelcarro.data.online.OnlineBarbaridad
 import com.paraelcarro.domain.model.Question
 import com.paraelcarro.ui.components.AvatarPickerDialog
@@ -398,7 +399,7 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
                         }
                     },
                     onDone = {
-                        if (res.barbaridades.isNotEmpty()) { abuela = true; feedback.abuela(res.barbaridades.any { it.high }) }
+                        if (res.barbaridades.isNotEmpty()) { abuela = true; feedback.abuela(res.vozAbuela()) }
                     },
                 )
             }
@@ -414,7 +415,7 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
     if (abuela) {
         AbuelaOverlay(
             culpables = res.barbaridades.map { b -> culpable(ui, b, q) },
-            high = res.barbaridades.any { it.high },
+            voz = res.vozAbuela(),
             answer = q.format(res.answer),
             onDone = { abuela = false },
         )
@@ -508,4 +509,4 @@ private fun Podium(p: RoomPlayer?, st: OnlineState, height: Int, pos: String, mo
 }
 
 private fun culpable(ui: OnlineUi, b: OnlineBarbaridad, q: Question) =
-    ui.player(b.id).let { Culpable(it?.avatar ?: "🙂", it?.name ?: "¿?", q.format(b.value)) }
+    culpableDe(ui.player(b.id)?.let { it.avatar to it.name }, q.format(b.value), b.from?.let { ui.player(it)?.name ?: "" })

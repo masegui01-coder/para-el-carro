@@ -14,7 +14,7 @@
   const HOST_GRACE_MS = 1500;  // margen para que llegue una jugada enviada justo al final del plazo
   const OFFLINE_SKIP_MS = 3000; // si le toca a alguien desconectado, se le pasa el turno enseguida
   const BRIDGE_MS = 10500;     // lo que dura la animación del puente antes de ver los puntos
-  const BARBARIDAD_MS = 4800;  // y la abuela, si alguien ha dicho una barbaridad
+  const BARBARIDAD_MARGEN_MS = 300;  // la abuela dura lo que su grabación (P().duracionBarbaridades) y un respiro
 
   let db = null;
   let offset = 0;
@@ -728,7 +728,8 @@
         if (!this.g || this.g.phase !== 'bridge') return;
         this.g.phase = 'score';
         this.publish();
-      }, BRIDGE_MS + (this.g && this.g.result && this.g.result.barbaridades && this.g.result.barbaridades.length ? BARBARIDAD_MS : 0));
+      }, BRIDGE_MS + (this.g && this.g.result && this.g.result.barbaridades && this.g.result.barbaridades.length
+        ? P().duracionBarbaridades(this.g.result.barbaridades) + BARBARIDAD_MARGEN_MS : 0));
     },
 
     next() {

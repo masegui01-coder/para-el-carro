@@ -63,11 +63,41 @@ data class RoundState(
     val log: List<LogEntry> = emptyList(),
 )
 
-/** Un disparate de la ronda: quién, qué cifra dijo y si se pasó ([high]) o se quedó muy corto. */
-data class Barbaridad(val playerId: Int, val value: Double, val high: Boolean) {
+/**
+ * Un disparate de la ronda: quién, qué cifra y si se pasó ([high]) o se quedó muy corto.
+ * [from] es el conductor de la cifra si el jugador no la dijo pero se quedó en el carro con ella.
+ */
+data class Barbaridad(val playerId: Int, val value: Double, val high: Boolean, val from: Int? = null) {
     companion object {
         const val ALTO = "alto"
         const val BAJO = "bajo"
+    }
+}
+
+/**
+ * Las grabaciones de la abuela y lo que dicen, palabra a palabra con el segundo en que suena cada una
+ * (medido sobre el audio). Mismos datos que VOCES_ABUELA en js/game.js.
+ */
+enum class VozAbuela(val ms: Long, val tramos: List<Pair<Double, String>>) {
+    CORTO(2450, listOf(0.6 to "¿No te", 0.9 to "habrás", 1.1 to "quedado", 1.35 to "corto,", 1.7 to "no?")),
+    SANTO(2800, listOf(0.4 to "¡Esto no lo", 0.9 to "arregla", 1.3 to "ni el", 1.55 to "Espíritu", 2.0 to "Santo!")),
+    TRILLONES(11000, listOf(1.0 to "¿Cuatrocientos", 1.8 to "trillones?", 7.4 to "¡¡Cuatrocientos", 8.1 to "trillones!!"));
+
+    val texto: String get() = tramos.joinToString(" ") { it.second }
+
+    /** Lo que dura la escena: la grabación y un respiro (mínimo 4,5 s para leer los culpables). */
+    val escenaMs: Long get() = maxOf(4500L, ms + 1500L)
+
+    companion object {
+        /**
+         * Si alguien se ha pasado, "¿No te habrás quedado corto?" o la de los cuatrocientos trillones
+         * (se elige con las cifras para que todos los móviles de la sala oigan la misma); si no, la del Espíritu Santo.
+         */
+        fun para(values: List<Double>, anyHigh: Boolean): VozAbuela {
+            if (!anyHigh) return SANTO
+            val suma = values.sumOf { kotlin.math.abs(it) }
+            return if (kotlin.math.floor(suma) % 2.0 == 0.0) CORTO else TRILLONES
+        }
     }
 }
 

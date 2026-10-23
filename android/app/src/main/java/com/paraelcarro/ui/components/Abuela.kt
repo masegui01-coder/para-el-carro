@@ -26,6 +26,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import com.paraelcarro.domain.model.VozAbuela
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -45,23 +51,45 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 
-/** Un culpable para la escena: avatar, nombre y lo que dijo ya formateado. */
+/** Un culpable para la escena: avatar, nombre y lo que hizo ("dijo 30.000" / "se subió con 30.000 de Ana"). */
 data class Culpable(val avatar: String, val name: String, val said: String)
 
-const val TEXTO_SE_PASA = "¿No te habrás quedado corto, no?"
-const val TEXTO_CORTO = "¡Esto no lo arregla ni el Espíritu Santo!"
+/**
+ * [player]: avatar y nombre del culpable; [value]: la cifra ya formateada;
+ * [conductor]: nombre de quien la dijo si el culpable solo se quedó en el carro con ella (null si la dijo él).
+ */
+fun culpable(player: Pair<String, String>?, value: String, conductor: String?) = Culpable(
+    player?.first ?: "🙂",
+    player?.second ?: "¿?",
+    when {
+        conductor == null -> "dijo $value"
+        conductor.isEmpty() -> "se subió con $value"
+        else -> "se subió con $value de $conductor"
+    },
+)
 
 /**
- * ¡Qué barbaridad! La abuela entra, suelta su frase y señala a los que dijeron un disparate (−1).
- * Se cierra sola a los 4,5 s o al pulsar "Seguir".
+ * ¡Qué barbaridad! La abuela entra, suelta su frase y señala a los que dijeron un disparate
+ * o se subieron al carro con él (−1). El bocadillo se enciende palabra a palabra con la voz.
+ * Se cierra sola cuando acaba la grabación ([VozAbuela.escenaMs]) o al pulsar "Seguir".
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AbuelaOverlay(culpables: List<Culpable>, high: Boolean, answer: String, onDone: () -> Unit) {
+fun AbuelaOverlay(culpables: List<Culpable>, voz: VozAbuela, answer: String, onDone: () -> Unit) {
     val done by rememberUpdatedState(onDone)
     LaunchedEffect(Unit) {
-        delay(4500)
+        delay(voz.escenaMs)
         done()
+    }
+    // Palabras ya dichas: se encienden al ritmo de la grabación
+    var dichas by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        var t = 0L
+        voz.tramos.forEachIndexed { i, (seg, _) ->
+            val ms = (seg * 1000).toLong()
+            delay(ms - t); t = ms
+            dichas = i + 1
+        }
     }
     val entrada = remember { Animatable(0f) }
     LaunchedEffect(Unit) { entrada.animateTo(1f, spring(dampingRatio = .45f, stiffness = 300f)) }
@@ -81,8 +109,13 @@ fun AbuelaOverlay(culpables: List<Culpable>, high: Boolean, answer: String, onDo
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(24.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Text(
-                    if (high) TEXTO_SE_PASA else TEXTO_CORTO,
-                    color = Color(0xFF2B1D12), fontFamily = FontFamily.Serif, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, lineHeight = 23.sp,
+                    buildAnnotatedString {
+                        voz.tramos.forEachIndexed { i, (_, palabra) ->
+                            withStyle(SpanStyle(color = if (i < dichas) Color(0xFF2B1D12) else Color(0x382B1D12))) { append(palabra) }
+                            if (i < voz.tramos.lastIndex) append(" ")
+                        }
+                    },
+                    fontFamily = FontFamily.Serif, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, lineHeight = 23.sp,
                     modifier = Modifier
                         .scale(entrada.value.coerceIn(0f, 1.2f))
                         .widthIn(max = 190.dp)
@@ -103,7 +136,7 @@ fun AbuelaOverlay(culpables: List<Culpable>, high: Boolean, answer: String, onDo
                             Avatar(c.avatar, 70.dp)
                         }
                         Text(c.name, color = Color(0xFFFFF3E0), fontWeight = FontWeight.Bold)
-                        Text("dijo ${c.said}", color = Color(0xFFCDBFA8), fontSize = 13.sp, textAlign = TextAlign.Center)
+                        Text(c.said, color = Color(0xFFCDBFA8), fontSize = 13.sp, textAlign = TextAlign.Center)
                         Text("−1", color = Color(0xFFFF8A73), fontSize = 26.sp, fontWeight = FontWeight.Black, modifier = Modifier.alpha(entrada.value.coerceIn(0f, 1f)))
                     }
                 }
@@ -122,7 +155,7 @@ fun BarbaridadesPanel(culpables: List<Culpable>, high: List<Boolean>) {
     Panel {
         Text("😱 ¡Qué barbaridad! (−1)", fontWeight = FontWeight.Bold, color = Rustic.Rojo)
         culpables.forEachIndexed { i, c ->
-            PlayerTag(c.avatar, "${c.name} dijo ${c.said} " + if (high.getOrElse(i) { false }) "(¡se pasó!)" else "(¡se quedó cortísimo!)")
+            PlayerTag(c.avatar, "${c.name} ${c.said} " + if (high.getOrElse(i) { false }) "(¡se pasó!)" else "(¡se quedó cortísimo!)")
         }
     }
 }

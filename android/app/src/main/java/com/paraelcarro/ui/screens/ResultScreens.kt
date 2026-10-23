@@ -30,7 +30,7 @@ import com.paraelcarro.domain.model.Player
 import com.paraelcarro.domain.model.RoundResult
 import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.BarbaridadesPanel
-import com.paraelcarro.ui.components.Culpable
+import com.paraelcarro.ui.components.culpable
 import com.paraelcarro.ui.components.Panel
 import com.paraelcarro.ui.components.PlayerTag
 import com.paraelcarro.ui.components.RatingRow
@@ -55,7 +55,7 @@ fun RoundScoreScreen(state: GameState, result: RoundResult, alreadyRated: Boolea
             Text("🎯 ¡Clavada! +2 para el conductor", color = Rustic.AmbarClaro, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         }
         BarbaridadesPanel(
-            result.barbaridades.map { b -> state.player(b.playerId).let { Culpable(it?.avatar ?: "🙂", it?.name ?: "¿?", q.format(b.value)) } },
+            result.barbaridades.map { b -> culpable(state.player(b.playerId)?.let { it.avatar to it.name }, q.format(b.value), b.from?.let { state.player(it)?.name ?: "" }) },
             result.barbaridades.map { it.high },
         )
         Panel {

@@ -85,7 +85,8 @@ object GameEngine {
      * - Conductor: cruza +3 +1 por pasajero (+2 si es ¡Clavada!); cae −3 y paga 1 a cada uno que se bajó.
      * - En el carro: cruza +3; cae −2.
      * - Bajados: cruza 0; cae +2 (+1 que paga el conductor).
-     * - Con [barbaridades]: −1 a cada jugador que haya dicho algún disparate en la ronda (una vez).
+     * - Con [barbaridades]: −1 a cada jugador que haya dicho algún disparate o se haya quedado en el
+     *   carro con uno (lo da por bueno). Una vez por jugador.
      */
     fun score(players: List<Player>, round: RoundState, barbaridades: Boolean = false): RoundResult {
         val bid = requireNotNull(round.bid)
@@ -103,16 +104,37 @@ object GameEngine {
             passengers.forEach { delta[it] = -2 }
             off.forEach { delta[it] = 2 + 1 }
         }
-        val barb = if (!barbaridades) emptyList() else players.mapNotNull { p ->
-            val worst = round.log
-                .filter { it.playerId == p.id && (it.kind == LogKind.ABRE || it.kind == LogKind.SUBE) }
-                .mapNotNull { it.value }
-                .filter { barbaridad(round.question, it) != null }
-                .maxByOrNull { distancia(round.question, it) } ?: return@mapNotNull null
-            delta[p.id] = (delta[p.id] ?: 0) - 1
-            Barbaridad(p.id, worst, barbaridad(round.question, worst) == Barbaridad.ALTO)
-        }
+        val barb = if (barbaridades) barbaridades(players, round) else emptyList()
+        barb.forEach { delta[it.playerId] = (delta[it.playerId] ?: 0) - 1 }
         return RoundResult(round.question, bid, driver, success, bullseye, passengers, off, delta, barb)
+    }
+
+    /**
+     * Quién se lleva el −1 (igual que Logic.barbaridades en js/game.js): el que dice el disparate y
+     * el que se queda en el carro con él. Una vez por jugador: antes lo que dijo él, y la más disparatada.
+     */
+    fun barbaridades(players: List<Player>, round: RoundState): List<Barbaridad> {
+        data class Apoyo(val value: Double, val from: Int?)
+        val apoyos = mutableMapOf<Int, List<Apoyo>>()
+        var bid: Double? = null
+        var driver: Int? = null
+        round.log.forEach { l ->
+            when (l.kind) {
+                LogKind.ABRE, LogKind.SUBE -> l.value?.let { v ->
+                    bid = v; driver = l.playerId
+                    apoyos[l.playerId] = apoyos[l.playerId].orEmpty() + Apoyo(v, null)
+                }
+                LogKind.QUEDA, LogKind.TIEMPO -> bid?.let { v -> apoyos[l.playerId] = apoyos[l.playerId].orEmpty() + Apoyo(v, driver) }
+                LogKind.BAJA -> Unit
+            }
+        }
+        return players.mapNotNull { p ->
+            val peor = apoyos[p.id].orEmpty()
+                .filter { barbaridad(round.question, it.value) != null }
+                .sortedWith(compareBy<Apoyo> { if (it.from == null) 0 else 1 }.thenByDescending { distancia(round.question, it.value) })
+                .firstOrNull() ?: return@mapNotNull null
+            Barbaridad(p.id, peor.value, barbaridad(round.question, peor.value) == Barbaridad.ALTO, peor.from)
+        }
     }
 
     /**

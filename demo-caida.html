@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Caídas del carro</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+  <style>
+    :root { --fondo: #14161c; --panel: #1d212b; --borde: #3a3129; --texto: #f3e9d8; --suave: #b9ad99; --ambar: #f2a93b; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fondo); color: var(--texto); font: 16px/1.45 system-ui, sans-serif; padding: 16px; }
+    h1 { font-family: Georgia, serif; color: var(--ambar); margin: 0 0 4px; font-size: 1.6rem; }
+    .intro { color: var(--suave); margin: 0 0 16px; max-width: 70ch; }
+    .rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+    .demo { background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 12px; }
+    .demo h2 { margin: 0; font-size: 1.1rem; font-family: Georgia, serif; }
+    .demo h2 span { color: var(--ambar); }
+    .demo p { margin: 4px 0 10px; color: var(--suave); font-size: .92rem; }
+    canvas { width: 100%; aspect-ratio: 400 / 260; display: block; border-radius: 10px; background: #07090c; }
+    button { margin-top: 10px; border: 1px solid var(--borde); background: #2a2218; color: var(--texto); border-radius: 10px; padding: 8px 14px; font-weight: 700; cursor: pointer; }
+    button:hover { border-color: var(--ambar); }
+    .barra { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <h1>¿Cómo cae el carro?</h1>
+  <p class="intro">Cuatro versiones de la misma ronda fallida: la burra (con el gato) y la abuela, el loro y el ratón en el carro. La A es la de ahora. Dime cuál te gusta, o qué mezclar de cada una.</p>
+  <div class="barra"><button id="todas">▶ Repetir todas</button></div>
+  <div class="rejilla">
+    <section class="demo" data-caida="clasica">
+      <h2><span>A</span> · La de ahora</h2>
+      <p>El puente se parte en dos, salen todos volando y ¡PLAF!</p>
+      <canvas></canvas><button>▶ Repetir</button>
+    </section>
+    <section class="demo" data-caida="lenta">
+      <h2><span>B</span> · Cámara lenta</h2>
+      <p>Al romperse, todo va a cámara lenta y la cámara se acerca al carro (¡CRAAAC!, viñeta roja). Al tocar el agua vuelve la velocidad normal y tiembla la pantalla.</p>
+      <canvas></canvas><button>▶ Repetir</button>
+    </section>
+    <section class="demo" data-caida="dibujos">
+      <h2><span>C</span> · Dibujos animados</h2>
+      <p>Se quedan flotando en el aire un segundo, la burra mira a cámara con cara de susto y saca un cartel de «¡Ups!»… y entonces caen en picado. Sale una rueda disparada y estrellitas sobre las cabezas.</p>
+      <canvas></canvas><button>▶ Repetir</button>
+    </section>
+    <section class="demo" data-caida="derrumbe">
+      <h2><span>D</span> · Derrumbe</h2>
+      <p>Los tablones se sueltan uno a uno desde el centro, con polvo; el carro se inclina y cae de morros. Gran temblor, burbujas y los tablones se quedan flotando río abajo.</p>
+      <canvas></canvas><button>▶ Repetir</button>
+    </section>
+  </div>
+
+  <script src="js/avatares.js"></script>
+  <script src="js/bridge.js"></script>
+  <script>
+    // Cada repetición en un lienzo nuevo, para que no se pise con la animación anterior
+    const jugar = (sec) => {
+      const viejo = sec.querySelector('canvas'), nuevo = document.createElement('canvas');
+      viejo.replaceWith(nuevo);
+      window.BridgeScene.play(nuevo, {
+        driver: 'av:gato', passengers: ['av:abuela', 'av:loro', 'av:raton'], success: false, caida: sec.dataset.caida,
+      });
+    };
+    const demos = [...document.querySelectorAll('.demo')];
+    demos.forEach((sec) => { sec.querySelector('button').onclick = () => jugar(sec); });
+    document.getElementById('todas').onclick = () => demos.forEach(jugar);
+    // Espera a que carguen los avatares para la primera pasada
+    window.addEventListener('load', () => setTimeout(() => demos.forEach(jugar), 300));
+  </script>
+</body>
+</html>
