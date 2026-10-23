@@ -599,7 +599,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             bridgeTimer?.cancel()
             val game = g ?: return
             bridgeTimer = viewModelScope.launch {
-                delay(BRIDGE_MS + game.result?.barbaridades.orEmpty().let { b -> if (b.isEmpty()) 0L else VozAbuela.para(b.map { it.value }, b.any { it.high }).escenaMs + BARBARIDAD_MARGEN_MS })
+                delay(BRIDGE_MS + game.result?.barbaridades.orEmpty().let { b -> if (b.isEmpty()) 0L else VozAbuela.para(game.question?.id.orEmpty(), game.round, b.any { it.high }).escenaMs + BARBARIDAD_MARGEN_MS })
                 if (g === game && game.phase == "bridge") { game.phase = "score"; publish() }
             }
         }

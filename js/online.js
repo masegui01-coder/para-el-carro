@@ -512,7 +512,7 @@
       },
     });
     P().on('#saltar', 'click', () => scene.skip());
-    scene.done.then(() => P().showBarbaridades(res.barbaridades, st.players, q));
+    scene.done.then(() => P().showBarbaridades(res.barbaridades, st.players, q, st.round));
   }
 
   function viewScore(st, players) {
@@ -731,7 +731,7 @@
         this.g.phase = 'score';
         this.publish();
       }, BRIDGE_MS + (this.g && this.g.result && this.g.result.barbaridades && this.g.result.barbaridades.length
-        ? P().duracionBarbaridades(this.g.result.barbaridades) + BARBARIDAD_MARGEN_MS : 0));
+        ? P().duracionBarbaridades(this.g.result.barbaridades, this.g.R && this.g.R.q, this.g.round) + BARBARIDAD_MARGEN_MS : 0));
     },
 
     next() {

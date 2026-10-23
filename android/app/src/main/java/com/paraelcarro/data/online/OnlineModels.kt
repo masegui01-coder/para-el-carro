@@ -49,8 +49,8 @@ data class OnlineResult(
 )
 
 /** La grabación de la abuela para esta ronda (la misma en todos los móviles). */
-fun OnlineResult.vozAbuela(): com.paraelcarro.domain.model.VozAbuela =
-    com.paraelcarro.domain.model.VozAbuela.para(barbaridades.map { it.value }, barbaridades.any { it.high })
+fun OnlineState.vozAbuela(): com.paraelcarro.domain.model.VozAbuela =
+    com.paraelcarro.domain.model.VozAbuela.para(question.id, round, result?.barbaridades.orEmpty().any { it.high })
 
 /**
  * Un disparate: quién, qué cifra y si se pasó (tipo "alto") o se quedó muy corto ("bajo").

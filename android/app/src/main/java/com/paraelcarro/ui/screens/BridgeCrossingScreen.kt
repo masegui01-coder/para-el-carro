@@ -89,7 +89,7 @@ fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedba
     var animState by remember { mutableStateOf(BridgeAnimState.Walking) }
     var skip by remember { mutableStateOf(false) }
     var abuela by remember { mutableStateOf(false) }
-    val voz = remember(result) { VozAbuela.para(result.barbaridades.map { it.value }, result.barbaridades.any { it.high }) }
+    val voz = remember(result) { VozAbuela.para(result.question.id, state.roundNumber, result.barbaridades.any { it.high }) }
 
     Column(
         Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 60.dp),

@@ -104,9 +104,11 @@ class BarbaridadTest {
 
     @Test
     fun `la voz se elige igual que en la web`() {
-        assertEquals(VozAbuela.SANTO, VozAbuela.para(listOf(150.0, 150.0), anyHigh = false))
-        assertEquals(VozAbuela.CORTO, VozAbuela.para(listOf(30001.0, 30001.0), anyHigh = true))
-        assertEquals(VozAbuela.TRILLONES, VozAbuela.para(listOf(30001.0, 30000.0), anyHigh = true))
+        assertEquals(VozAbuela.SANTO, VozAbuela.para("n121", 1, anyHigh = false))
+        // Alterna con la ronda, aunque todos digan cifras redondas
+        assertEquals(VozAbuela.TRILLONES, VozAbuela.para("n121", 1, anyHigh = true))
+        assertEquals(VozAbuela.CORTO, VozAbuela.para("n121", 2, anyHigh = true))
+        assertEquals(VozAbuela.CORTO, VozAbuela.para("f010", 1, anyHigh = true))
         assertEquals(12500L, VozAbuela.TRILLONES.escenaMs)
         assertEquals(4500L, VozAbuela.CORTO.escenaMs)
     }

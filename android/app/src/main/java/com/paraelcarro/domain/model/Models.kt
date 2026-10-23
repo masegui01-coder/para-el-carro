@@ -90,13 +90,14 @@ enum class VozAbuela(val ms: Long, val tramos: List<Pair<Double, String>>) {
 
     companion object {
         /**
-         * Si alguien se ha pasado, "¿No te habrás quedado corto?" o la de los cuatrocientos trillones
-         * (se elige con las cifras para que todos los móviles de la sala oigan la misma); si no, la del Espíritu Santo.
+         * Si alguien se ha pasado, "¿No te habrás quedado corto?" o la de los cuatrocientos trillones,
+         * alternando según la ronda y la pregunta (todos los móviles de la sala oyen la misma; igual que
+         * vozBarbaridad en js/game.js); si no, la del Espíritu Santo.
          */
-        fun para(values: List<Double>, anyHigh: Boolean): VozAbuela {
+        fun para(questionId: String, round: Int, anyHigh: Boolean): VozAbuela {
             if (!anyHigh) return SANTO
-            val suma = values.sumOf { kotlin.math.abs(it) }
-            return if (kotlin.math.floor(suma) % 2.0 == 0.0) CORTO else TRILLONES
+            val numero = questionId.filter { it.isDigit() }.toIntOrNull() ?: 0
+            return if ((round + numero) % 2 == 0) TRILLONES else CORTO
         }
     }
 }

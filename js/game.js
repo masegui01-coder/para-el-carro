@@ -825,7 +825,7 @@
     on('#saltar', 'click', () => scene.skip());
     scene.done.then(() => {
       G.players.forEach((p) => { p.score += result.delta[p.id]; });
-      showBarbaridades(result.barbaridades, G.players, R.q).then(() => screenRoundScore(result));
+      showBarbaridades(result.barbaridades, G.players, R.q, G.round).then(() => screenRoundScore(result));
     });
   }
 
@@ -888,19 +888,19 @@
 
   /**
    * Qué grabación toca: si alguien se ha pasado, "¿No te habrás quedado corto?" o la de los
-   * cuatrocientos trillones (se elige con las cifras, así todos los móviles de la sala oyen la misma);
-   * si solo se han quedado cortos, la del Espíritu Santo.
+   * cuatrocientos trillones, alternando según la ronda y la pregunta (así todos los móviles de la sala
+   * oyen la misma); si solo se han quedado cortos, la del Espíritu Santo.
    */
-  function vozBarbaridad(lista) {
+  function vozBarbaridad(lista, q, ronda) {
     if (!lista || !lista.some((b) => b.tipo === 'alto')) return 'santo';
-    const suma = lista.reduce((s, b) => s + Math.abs(b.v), 0);
-    return Math.floor(suma) % 2 === 0 ? 'corto' : 'trillones';
+    const numero = parseInt(String((q && q.id) || '').replace(/\D/g, ''), 10) || 0;
+    return ((ronda || 0) + numero) % 2 === 0 ? 'trillones' : 'corto';
   }
 
   /** Cuánto dura la escena de la abuela (0 si no hay barbaridades). Lo usa también el jefe de sala online. */
-  function duracionBarbaridades(lista) {
+  function duracionBarbaridades(lista, q, ronda) {
     if (!lista || !lista.length) return 0;
-    return Math.max(4500, VOCES_ABUELA[vozBarbaridad(lista)].ms + 1500);
+    return Math.max(4500, VOCES_ABUELA[vozBarbaridad(lista, q, ronda)].ms + 1500);
   }
 
   /** Reproduce la grabación y llama a `empieza` cuando suena (o enseguida, si no hay sonido). */
@@ -934,9 +934,9 @@
    * Tras el puente: la abuela señala a quien ha dicho un disparate (o se ha subido al carro con él)
    * y le cae −1. El bocadillo se va encendiendo palabra a palabra al ritmo de la grabación.
    */
-  function showBarbaridades(lista, players, q) {
+  function showBarbaridades(lista, players, q, ronda) {
     if (!lista || !lista.length) return Promise.resolve();
-    const voz = VOCES_ABUELA[vozBarbaridad(lista)];
+    const voz = VOCES_ABUELA[vozBarbaridad(lista, q, ronda)];
     const quien = (id) => players.find((p) => p.id === id) || { name: '¿?', avatar: '🙂' };
     const el = document.createElement('div');
     el.className = 'abuela-escena';
@@ -968,7 +968,7 @@
     return new Promise((resolve) => {
       const fin = () => { timers.forEach(clearTimeout); if (el.isConnected) { el.remove(); resolve(); } };
       el.querySelector('#abuela-seguir').onclick = fin;
-      setTimeout(fin, duracionBarbaridades(lista));
+      setTimeout(fin, duracionBarbaridades(lista, q, ronda));
     });
   }
 

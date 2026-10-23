@@ -400,7 +400,7 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
                         }
                     },
                     onDone = {
-                        if (res.barbaridades.isNotEmpty()) { abuela = true; feedback.abuela(res.vozAbuela()) }
+                        if (res.barbaridades.isNotEmpty()) { abuela = true; feedback.abuela(st.vozAbuela()) }
                     },
                 )
             }
@@ -416,7 +416,7 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
     if (abuela) {
         AbuelaOverlay(
             culpables = res.barbaridades.map { b -> culpable(ui, b, q) },
-            voz = res.vozAbuela(),
+            voz = st.vozAbuela(),
             answer = q.format(res.answer),
             onDone = { abuela = false },
         )
