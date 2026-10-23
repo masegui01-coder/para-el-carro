@@ -3,439 +3,559 @@
   "q": "Si cambias 100 € a dongs vietnamitas (Vietnam), ¿cuántos te dan?",
   "a": 2900000,
   "u": "dongs vietnamitas",
-  "n": "A 1 € = 29.019,19 dongs vietnamitas (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 29.019,19 dongs vietnamitas (cambio del 20/10/2026, sin comisiones).",
+  "e": "En Vietnam casi no se usan monedas: todo se paga con billetes de polímero, y todos llevan la cara de Ho Chi Minh.",
+  "w": "Ho Chi Minh"
  },
  {
   "q": "Si cambias 100 € a rupias indonesias (Indonesia), ¿cuántos te dan?",
   "a": 2020000,
   "u": "rupias indonesias",
-  "n": "A 1 € = 20.170,57 rupias indonesias (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 20.170,57 rupias indonesias (cambio del 20/10/2026, sin comisiones).",
+  "e": "Indonesia lleva años planeando quitarle tres ceros a la rupia, porque los precios tienen cifras enormes: un café puede costar 30.000 rupias.",
+  "w": "Indonesian rupiah"
  },
  {
   "q": "Si cambias 100 € a riales iraníes (Irán), ¿cuántos te dan?",
   "a": 201000000,
   "u": "riales iraníes",
-  "n": "A 1 € = 2.013.339,12 riales iraníes (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 2.013.339,12 riales iraníes (cambio del 20/10/2026, sin comisiones).",
+  "e": "En la calle los iraníes cuentan en «tomanes», que son 10 riales, y el Gobierno ha aprobado quitarle cuatro ceros a la moneda.",
+  "w": "Iranian rial"
  },
  {
   "q": "Si cambias 100 € a kips laosianos (Laos), ¿cuántos te dan?",
   "a": 2510000,
   "u": "kips laosianos",
-  "n": "A 1 € = 25.094,07 kips laosianos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 25.094,07 kips laosianos (cambio del 20/10/2026, sin comisiones).",
+  "e": "En Laos las monedas casi han desaparecido, y en los sitios turísticos también se aceptan dólares y bahts tailandeses.",
+  "w": "Lao kip"
  },
  {
   "q": "Si cambias 100 € a soms uzbekos (Uzbekistán), ¿cuántos te dan?",
   "a": 1360000,
   "u": "soms uzbekos",
-  "n": "A 1 € = 13.604,01 soms uzbekos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 13.604,01 soms uzbekos (cambio del 20/10/2026, sin comisiones).",
+  "e": "Hasta 2017 el cambio oficial era muy distinto al de la calle, y para pagar algo grande había que llevar fajos de billetes en bolsas.",
+  "w": "Uzbekistani soʻm"
  },
  {
   "q": "Si cambias 100 € a guaraníes paraguayos (Paraguay), ¿cuántos te dan?",
   "a": 645000,
   "u": "guaraníes paraguayos",
-  "n": "A 1 € = 6451,91 guaraníes paraguayos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 6451,91 guaraníes paraguayos (cambio del 20/10/2026, sin comisiones).",
+  "e": "Se llama como el pueblo guaraní, cuya lengua es oficial en Paraguay junto al español y la habla la mayoría de la población.",
+  "w": "Paraguayan guaraní"
  },
  {
   "q": "Si cambias 100 € a tugriks mongoles (Mongolia), ¿cuántos te dan?",
   "a": 403000,
   "u": "tugriks mongoles",
-  "n": "A 1 € = 4030,55 tugriks mongoles (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 4030,55 tugriks mongoles (cambio del 20/10/2026, sin comisiones).",
+  "e": "«Tugrik» significa algo así como «moneda redonda». Los billetes grandes llevan el retrato de Gengis Kan.",
+  "w": "Mongolian tögrög"
  },
  {
   "q": "Si cambias 100 € a ariarys malgaches (Madagascar), ¿cuántos te dan?",
   "a": 509000,
   "u": "ariarys malgaches",
-  "n": "A 1 € = 5085,08 ariarys malgaches (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 5085,08 ariarys malgaches (cambio del 20/10/2026, sin comisiones).",
+  "e": "Es una de las dos únicas monedas del mundo que no se divide en 100: un ariary son 5 iraimbilanja. La otra es la ouguiya de Mauritania.",
+  "w": "Malagasy ariary"
  },
  {
   "q": "Si cambias 100 € a rieles camboyanos (Camboya), ¿cuántos te dan?",
   "a": 455000,
   "u": "rieles camboyanos",
-  "n": "A 1 € = 4551,11 rieles camboyanos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 4551,11 rieles camboyanos (cambio del 20/10/2026, sin comisiones).",
+  "e": "En Camboya se usan muchísimo los dólares estadounidenses: el riel sirve sobre todo para dar el cambio de las cantidades pequeñas.",
+  "w": "Cambodian riel"
  },
  {
   "q": "Si cambias 100 € a pesos colombianos (Colombia), ¿cuántos te dan?",
   "a": 356000,
   "u": "pesos colombianos",
-  "n": "A 1 € = 3563,6 pesos colombianos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 3563,6 pesos colombianos (cambio del 20/10/2026, sin comisiones).",
+  "e": "El billete de 50.000 pesos lleva a Gabriel García Márquez, y el de 100.000 a Carlos Lleras Restrepo.",
+  "w": "Colombian peso"
  },
  {
   "q": "Si cambias 100 € a pesos argentinos (Argentina), ¿cuántos te dan?",
   "a": 171000,
   "u": "pesos argentinos",
-  "n": "A 1 € = 1708,8 pesos argentinos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 1708,8 pesos argentinos (cambio del 20/10/2026, sin comisiones).",
+  "e": "Desde 1970 Argentina le ha quitado 13 ceros a su moneda, cambiándole de nombre varias veces (peso ley, peso argentino, austral, peso).",
+  "w": "Argentine peso"
  },
  {
   "q": "Si cambias 100 € a pesos chilenos (Chile), ¿cuántos te dan?",
   "a": 110000,
   "u": "pesos chilenos",
-  "n": "A 1 € = 1102,7 pesos chilenos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 1102,7 pesos chilenos (cambio del 20/10/2026, sin comisiones).",
+  "e": "En Chile a 1.000 pesos se les llama «una luca». El peso chileno no tiene céntimos en circulación.",
+  "w": "Chilean peso"
  },
  {
   "q": "Si cambias 100 € a tenges kazajos (Kazajistán), ¿cuántos te dan?",
   "a": 50700,
   "u": "tenges kazajos",
-  "n": "A 1 € = 507,17 tenges kazajos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 507,17 tenges kazajos (cambio del 20/10/2026, sin comisiones).",
+  "e": "El tenge nació en 1993, tras la URSS, y sus billetes han ganado varias veces el premio al «billete del año» de los coleccionistas.",
+  "w": "Kazakhstani tenge"
  },
  {
   "q": "Si cambias 100 € a francos guineanos (Guinea), ¿cuántos te dan?",
   "a": 991000,
   "u": "francos guineanos",
-  "n": "A 1 € = 9913,29 francos guineanos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 9913,29 francos guineanos (cambio del 20/10/2026, sin comisiones).",
+  "e": "Guinea tiene algunas de las mayores reservas de bauxita del mundo (de donde sale el aluminio), pero su moneda es de las de menor valor de África.",
+  "w": "Guinean franc"
  },
  {
   "q": "Si cambias 100 € a chelines ugandeses (Uganda), ¿cuántos te dan?",
   "a": 453000,
   "u": "chelines ugandeses",
-  "n": "A 1 € = 4525,07 chelines ugandeses (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 4525,07 chelines ugandeses (cambio del 20/10/2026, sin comisiones).",
+  "e": "Se llama «chelín» por el chelín de África Oriental de la época británica. Uganda es la «perla de África» y tiene la mitad de los gorilas de montaña.",
+  "w": "Ugandan shilling"
  },
  {
   "q": "Si cambias 100 € a chelines tanzanos (Tanzania), ¿cuántos te dan?",
   "a": 294000,
   "u": "chelines tanzanos",
-  "n": "A 1 € = 2940,11 chelines tanzanos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 2940,11 chelines tanzanos (cambio del 20/10/2026, sin comisiones).",
+  "e": "En suajili se llama «shilingi». Tanzania tiene el Kilimanjaro, la montaña más alta de África, y el parque del Serengeti.",
+  "w": "Tanzanian shilling"
  },
  {
   "q": "Si cambias 100 € a libras libanesas (Líbano), ¿cuántos te dan?",
   "a": 10000000,
   "u": "libras libanesas",
-  "n": "A 1 € = 100.396,05 libras libanesas (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 100.396,05 libras libanesas (cambio del 20/10/2026, sin comisiones).",
+  "e": "Durante décadas se cambió a 1.507,5 por dólar, pero con la crisis que empezó en 2019 perdió más del 95% de su valor.",
+  "w": "Beirut"
  },
  {
   "q": "Si cambias 100 € a kyats birmanos (Birmania), ¿cuántos te dan?",
   "a": 235000,
   "u": "kyats birmanos",
-  "n": "A 1 € = 2353,14 kyats birmanos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 2353,14 kyats birmanos (cambio del 20/10/2026, sin comisiones).",
+  "e": "En 1987 el dictador Ne Win anuló billetes y sacó otros de 45 y 90 kyats, porque su número de la suerte era el 9.",
+  "w": "Burmese kyat"
  },
  {
   "q": "Si cambias 100 € a francos burundeses (Burundi), ¿cuántos te dan?",
   "a": 337000,
   "u": "francos burundeses",
-  "n": "A 1 € = 3369,6 francos burundeses (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 3369,6 francos burundeses (cambio del 20/10/2026, sin comisiones).",
+  "e": "Burundi es de los países con menor renta del mundo, y el café es su principal exportación.",
+  "w": "Burundian franc"
  },
  {
   "q": "Si cambias 100 € a wons surcoreanos (Corea del Sur), ¿cuántos te dan?",
   "a": 149000,
   "u": "wons surcoreanos",
-  "n": "A 1 € = 1489,17 wons surcoreanos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 1489,17 wons surcoreanos (cambio del 20/10/2026, sin comisiones).",
+  "e": "El billete de 10.000 wones lleva al rey Sejong, que en el siglo XV creó el alfabeto coreano, el hangul.",
+  "w": "South Korean won"
  },
  {
   "q": "Si cambias 100 € a yenes japoneses (Japón), ¿cuántos te dan?",
   "a": 17700,
   "u": "yenes japoneses",
-  "n": "A 1 € = 177,34 yenes japoneses (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 177,34 yenes japoneses (cambio del 20/10/2026, sin comisiones).",
+  "e": "Las monedas de 5 y 50 yenes tienen un agujero. La de 5 se dice «go-en», que suena como «buena relación», y se deja como ofrenda en los templos.",
+  "w": "Japanese yen"
  },
  {
   "q": "Si cambias 100 € a forintos húngaros (Hungría), ¿cuántos te dan?",
   "a": 36500,
   "u": "forintos húngaros",
-  "n": "A 1 € = 364,68 forintos húngaros (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 364,68 forintos húngaros (cambio del 20/10/2026, sin comisiones).",
+  "e": "El nombre viene del florín de Florencia, una famosa moneda de oro medieval. Hungría está en la UE, pero no ha adoptado el euro.",
+  "w": "Hungarian forint"
  },
  {
   "q": "Si cambias 100 € a coronas islandesas (Islandia), ¿cuántos te dan?",
   "a": 13600,
   "u": "coronas islandesas",
-  "n": "A 1 € = 136,2 coronas islandesas (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 136,2 coronas islandesas (cambio del 20/10/2026, sin comisiones).",
+  "e": "Islandia es de los países que menos efectivo usa del mundo. Sus monedas llevan animales marinos como el bacalao, el cangrejo o el delfín.",
+  "w": "Icelandic króna"
  },
  {
   "q": "Si cambias 100 € a rupias indias (India), ¿cuántos te dan?",
   "a": 10600,
   "u": "rupias indias",
-  "n": "A 1 € = 106,46 rupias indias (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 106,46 rupias indias (cambio del 20/10/2026, sin comisiones).",
+  "e": "En 2016 el Gobierno anuló de un día para otro los billetes de 500 y 1.000 rupias, más del 80% del dinero en efectivo del país.",
+  "w": "Indian rupee"
  },
  {
   "q": "Si cambias 100 € a bahts tailandeses (Tailandia), ¿cuántos te dan?",
   "a": 3770,
   "u": "bahts tailandeses",
-  "n": "A 1 € = 37,74 bahts tailandeses (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 37,74 bahts tailandeses (cambio del 20/10/2026, sin comisiones).",
+  "e": "Pisar un billete o una moneda en Tailandia es una gran falta de respeto, porque llevan la imagen del rey.",
+  "w": "Thai baht"
  },
  {
   "q": "Si cambias 100 € a pesos filipinos (Filipinas), ¿cuántos te dan?",
   "a": 7080,
   "u": "pesos filipinos",
-  "n": "A 1 € = 70,8 pesos filipinos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 70,8 pesos filipinos (cambio del 20/10/2026, sin comisiones).",
+  "e": "Su nombre viene de la época española. En filipino se dice «piso», y su símbolo es ₱.",
+  "w": "Philippine peso"
  },
  {
   "q": "Si cambias 100 € a liras turcas (Turquía), ¿cuántos te dan?",
   "a": 5560,
   "u": "liras turcas",
-  "n": "A 1 € = 55,6 liras turcas (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 55,6 liras turcas (cambio del 20/10/2026, sin comisiones).",
+  "e": "En 2005 Turquía le quitó seis ceros a la lira: un millón de liras antiguas pasó a ser una lira nueva.",
+  "w": "Turkish lira"
  },
  {
   "q": "Si cambias 100 € a libras egipcias (Egipto), ¿cuántos te dan?",
   "a": 6040,
   "u": "libras egipcias",
-  "n": "A 1 € = 60,42 libras egipcias (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 60,42 libras egipcias (cambio del 20/10/2026, sin comisiones).",
+  "e": "Sus billetes van en árabe por un lado y en inglés por el otro, y muchos muestran templos y monumentos faraónicos.",
+  "w": "Egyptian pound"
  },
  {
   "q": "Si cambias 100 € a dírhams marroquíes (Marruecos), ¿cuántos te dan?",
   "a": 1100,
   "u": "dírhams marroquíes",
-  "n": "A 1 € = 10,98 dírhams marroquíes (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 10,98 dírhams marroquíes (cambio del 20/10/2026, sin comisiones).",
+  "e": "Es una moneda casi cerrada: no se puede sacar de Marruecos, así que hay que cambiar el dinero al llegar al país.",
+  "w": "Moroccan dirham"
  },
  {
   "q": "Si cambias 100 € a drams armenios (Armenia), ¿cuántos te dan?",
   "a": 40600,
   "u": "drams armenios",
-  "n": "A 1 € = 406,05 drams armenios (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 406,05 drams armenios (cambio del 20/10/2026, sin comisiones).",
+  "e": "«Dram» significa «dinero» y viene de la misma raíz que el dracma griego y el dírham árabe.",
+  "w": "Armenian dram"
  },
  {
   "q": "Si cambias 100 € a soms kirguises (Kirguistán), ¿cuántos te dan?",
   "a": 9820,
   "u": "soms kirguises",
-  "n": "A 1 € = 98,15 soms kirguises (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 98,15 soms kirguises (cambio del 20/10/2026, sin comisiones).",
+  "e": "En 1993 Kirguistán fue el primer país de Asia Central en tener moneda propia tras la URSS. «Som» significa «puro», como el oro puro.",
+  "w": "Kyrgyzstani som"
  },
  {
   "q": "Si cambias 100 € a rupias nepalíes (Nepal), ¿cuántos te dan?",
   "a": 17000,
   "u": "rupias nepalíes",
-  "n": "A 1 € = 170,33 rupias nepalíes (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 170,33 rupias nepalíes (cambio del 20/10/2026, sin comisiones).",
+  "e": "Tiene un cambio fijo con la rupia india: 1,6 rupias nepalíes por cada una. Nepal también es famoso por tener la única bandera nacional que no es rectangular.",
+  "w": "Nepalese rupee"
  },
  {
   "q": "Si cambias 100 € a colones costarricenses (Costa Rica), ¿cuántos te dan?",
   "a": 51000,
   "u": "colones costarricenses",
-  "n": "A 1 € = 509,9 colones costarricenses (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 509,9 colones costarricenses (cambio del 20/10/2026, sin comisiones).",
+  "e": "Se llama así por Cristóbal Colón. Sus billetes muestran la fauna del país, como el perezoso, el colibrí o el tiburón toro.",
+  "w": "Costa Rican colón"
  },
  {
   "q": "Si cambias 100 € a pesos dominicanos (República Dominicana), ¿cuántos te dan?",
   "a": 6900,
   "u": "pesos dominicanos",
-  "n": "A 1 € = 68,99 pesos dominicanos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 68,99 pesos dominicanos (cambio del 20/10/2026, sin comisiones).",
+  "e": "La República Dominicana comparte la isla de La Española con Haití, cuya moneda es la gourde.",
+  "w": "Dominican peso"
  },
  {
   "q": "Si cambias 100 € a nairas nigerianas (Nigeria), ¿cuántos te dan?",
   "a": 149000,
   "u": "nairas nigerianas",
-  "n": "A 1 € = 1494,62 nairas nigerianas (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 1494,62 nairas nigerianas (cambio del 20/10/2026, sin comisiones).",
+  "e": "Nigeria es el país más poblado de África. En 2023 el cambio a billetes nuevos causó una grave escasez de efectivo.",
+  "w": "Nigerian naira"
  },
  {
   "q": "Si cambias 100 € a birrs etíopes (Etiopía), ¿cuántos te dan?",
   "a": 18500,
   "u": "birrs etíopes",
-  "n": "A 1 € = 184,89 birrs etíopes (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 184,89 birrs etíopes (cambio del 20/10/2026, sin comisiones).",
+  "e": "Etiopía usa su propio calendario, de 13 meses, y va unos 7 u 8 años por detrás del nuestro.",
+  "w": "Ethiopian birr"
  },
  {
   "q": "Si cambias 100 € a leones de Sierra Leona (Sierra Leona), ¿cuántos te dan?",
   "a": 2730,
   "u": "leones de Sierra Leona",
-  "n": "A 1 € = 27,32 leones de Sierra Leona (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 27,32 leones de Sierra Leona (cambio del 20/10/2026, sin comisiones).",
+  "e": "En 2022 se creó el «nuevo leone» quitando tres ceros: 1.000 leones antiguos pasaron a ser 1.",
+  "w": "Sierra Leonean leone"
  },
  {
   "q": "Si cambias 100 € a coronas checas (República Checa), ¿cuántos te dan?",
   "a": 2430,
   "u": "coronas checas",
-  "n": "A 1 € = 24,33 coronas checas (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 24,33 coronas checas (cambio del 20/10/2026, sin comisiones).",
+  "e": "La República Checa está en la Unión Europea, pero mantiene su corona y no ha adoptado el euro.",
+  "w": "Czech koruna"
  },
  {
   "q": "Si cambias 100 € a zlotys polacos (Polonia), ¿cuántos te dan?",
   "a": 438,
   "u": "zlotys polacos",
-  "n": "A 1 € = 4,38 zlotys polacos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 4,38 zlotys polacos (cambio del 20/10/2026, sin comisiones).",
+  "e": "«Złoty» significa «dorado». Polonia está en la UE desde 2004, pero sigue con su propia moneda.",
+  "w": "Warsaw"
  },
  {
   "q": "Si cambias 100 € a rands sudafricanos (Sudáfrica), ¿cuántos te dan?",
   "a": 1850,
   "u": "rands sudafricanos",
-  "n": "A 1 € = 18,48 rands sudafricanos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 18,48 rands sudafricanos (cambio del 20/10/2026, sin comisiones).",
+  "e": "Se llama así por el Witwatersrand, la cordillera donde se descubrió la mayor reserva de oro del mundo. De allí viene también la moneda de oro Krugerrand.",
+  "w": "South African rand"
  },
  {
   "q": "Si cambias 100 € a reales brasileños (Brasil), ¿cuántos te dan?",
   "a": 563,
   "u": "reales brasileños",
-  "n": "A 1 € = 5,63 reales brasileños (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 5,63 reales brasileños (cambio del 20/10/2026, sin comisiones).",
+  "e": "Nació en 1994 con el Plan Real, que acabó con una hiperinflación brutal. Sus billetes llevan animales como el jaguar o la tortuga marina.",
+  "w": "Brazilian real"
  },
  {
   "q": "Si cambias 100 € a pesos mexicanos (México), ¿cuántos te dan?",
   "a": 2080,
   "u": "pesos mexicanos",
-  "n": "A 1 € = 20,77 pesos mexicanos (cambio del 20/10/2026, sin comisiones)."
+  "n": "A 1 € = 20,77 pesos mexicanos (cambio del 20/10/2026, sin comisiones).",
+  "e": "El símbolo del dólar ($) viene en realidad del peso hispanoamericano, que se usaba en medio mundo en los siglos XVII y XVIII.",
+  "w": "Mexican peso"
  },
  {
   "q": "Si cambias 100 € a escudos caboverdianos (Cabo Verde), ¿cuántos te dan?",
   "a": 11026.5,
   "u": "escudos caboverdianos",
-  "n": "Tiene cambio fijo con el euro: 1 € = 110,27 escudos caboverdianos."
+  "n": "Tiene cambio fijo con el euro: 1 € = 110,27 escudos caboverdianos.",
+  "e": "Primero tuvo cambio fijo con el escudo portugués y después con el euro. Cabo Verde es un archipiélago volcánico frente a Senegal.",
+  "w": "Cape Verdean escudo"
  },
  {
   "q": "Si cambias 100 € a francos CFA (Senegal, Costa de Marfil y otros 12 países de África), ¿cuántos te dan?",
   "a": 65595.7,
   "u": "francos CFA",
-  "n": "Tiene cambio fijo con el euro: 1 € = 655,96 francos CFA."
+  "n": "Tiene cambio fijo con el euro: 1 € = 655,96 francos CFA.",
+  "e": "Son dos monedas, la de África Occidental y la de África Central, y Francia garantizaba su cambio. La occidental tiene previsto pasar a llamarse «eco».",
+  "w": "CFA franc"
  },
  {
   "q": "Si cambias 100 € a francos comorenses (Comoras), ¿cuántos te dan?",
   "a": 49196.78,
   "u": "francos comorenses",
-  "n": "Tiene cambio fijo con el euro: 1 € = 491,97 francos comorenses."
+  "n": "Tiene cambio fijo con el euro: 1 € = 491,97 francos comorenses.",
+  "e": "Las Comoras son de los mayores productores del mundo de ylang-ylang, una flor que se usa en perfumes muy famosos.",
+  "w": "Cananga odorata"
  },
  {
   "q": "Si cambias 100 € a dobras (Santo Tomé y Príncipe), ¿cuántos te dan?",
   "a": 2450,
   "u": "dobras",
-  "n": "Tiene cambio fijo con el euro: 1 € = 24,5 dobras."
+  "n": "Tiene cambio fijo con el euro: 1 € = 24,5 dobras.",
+  "e": "Santo Tomé y Príncipe es de los países más pequeños de África. En 2018 la dobra perdió tres ceros.",
+  "w": "São Tomé and Príncipe dobra"
  },
  {
   "q": "Si cambias 100 € a marcos convertibles (Bosnia y Herzegovina), ¿cuántos te dan?",
   "a": 195.58,
   "u": "marcos convertibles",
-  "n": "Tiene cambio fijo con el euro: 1 € = 1,96 marcos convertibles."
+  "n": "Tiene cambio fijo con el euro: 1 € = 1,96 marcos convertibles.",
+  "e": "Se llama así por el marco alemán, al que estaba ligado 1 a 1. Cada una de las dos entidades del país usa diseños distintos en sus billetes.",
+  "w": "Bosnia and Herzegovina convertible mark"
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un bloque de pisos entre medianeras de 4 plantas y 1.000 m² construidos, sin contar el suelo?",
   "a": 954000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 954 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 954 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un edificio de viviendas aislado de 4 plantas y 1.200 m², sin contar el suelo?",
   "a": 1230000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1023 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1023 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un chalet aislado de 180 m², sin contar el suelo?",
   "a": 241000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1341 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1341 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una casa adosada de 140 m², sin contar el suelo?",
   "a": 155000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1104 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1104 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un hotel de 5 estrellas de 8.000 m², sin contar el suelo?",
   "a": 19600000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 2456 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 2456 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un hotel de 3 estrellas de 5.000 m², sin contar el suelo?",
   "a": 8110000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1622 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1622 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una piscina descubierta de 8 × 4 metros de lámina de agua, sin contar el suelo?",
   "a": 19400,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 607 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 607 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un hospital de 20.000 m², sin contar el suelo?",
   "a": 39900000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1995 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1995 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un colegio de 3.000 m², sin contar el suelo?",
   "a": 3200000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1067 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1067 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un campo de golf de 60 hectáreas, sin contar el suelo?",
   "a": 32400000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 54 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 54 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una discoteca de 800 m², sin contar el suelo?",
   "a": 1080000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1353 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1353 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un bar de 120 m², sin contar el suelo?",
   "a": 145000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1205 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1205 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una nave industrial sencilla de 1.000 m², sin contar el suelo?",
   "a": 391000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 391 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 391 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una iglesia de 600 m², sin contar el suelo?",
   "a": 975000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1625 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1625 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una residencia de ancianos de 4.000 m², sin contar el suelo?",
   "a": 5070000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1268 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1268 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga una terminal de aeropuerto de 50.000 m², sin contar el suelo?",
   "a": 143000000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 2865 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 2865 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un tanatorio de 1.500 m², sin contar el suelo?",
   "a": 2020000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1344 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 1344 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Málaga un gimnasio de 1.000 m², sin contar el suelo?",
   "a": 999000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 999 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Málaga 2026: 999 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un bloque de pisos entre medianeras de 4 plantas y 1.000 m² construidos, sin contar el suelo?",
   "a": 814000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 813,94 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 813,94 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un chalet aislado de 150 m², sin contar el suelo?",
   "a": 149000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 991,98 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 991,98 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un garaje subterráneo de 2.500 m², sin contar el suelo?",
   "a": 1270000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 508,71 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 508,71 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un teatro de 3.000 m², sin contar el suelo?",
   "a": 6100000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 2034,84 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 2034,84 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un hotel de 5 estrellas de 8.000 m², sin contar el suelo?",
   "a": 15300000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 1913,1 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 1913,1 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un multicine de 2.000 m², sin contar el suelo?",
   "a": 2650000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 1322,65 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 1322,65 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un supermercado de 1.500 m², sin contar el suelo?",
   "a": 1140000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 763,07 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 763,07 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "Aproximadamente, ¿cuántos euros cuesta construir en la provincia de Cádiz un restaurante de 200 m², sin contar el suelo?",
   "a": 183000,
   "u": "€",
-  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 915,68 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios)."
+  "n": "Coste de referencia del Colegio de Arquitectos de Cádiz 2026: 915,68 €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).",
+  "e": "Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio."
  },
  {
   "q": "¿Cuántos segundos tiene un año (no bisiesto)?",

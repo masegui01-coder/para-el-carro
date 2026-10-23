@@ -380,7 +380,7 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
                 if (fSunk) {
                     clipRect(0f, 0f, W, RIVER_Y + 4) { group(fx, gy, rot, t / 60f, riders = false, party = false, lantern = .3f, sad = true) }
                 } else {
-                    group(fx, gy, rot, t / 60f, riders = !falling, party = false, lantern = 1f, sad = true)
+                    group(fx, gy, rot, t / 60f, riders = !falling, party = false, lantern = 1f, sad = true, scared = true)
                 }
                 riders.forEachIndexed { i, r ->
                     val y = if (r.sunk) RIVER_Y + 1 + sin(t / 250f + i) * 1.5f else r.y
@@ -515,10 +515,10 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
         }
     }
 
-    private fun DrawScope.group(x: Float, y: Float, angle: Float, step: Float, riders: Boolean, party: Boolean, lantern: Float, sad: Boolean) {
+    private fun DrawScope.group(x: Float, y: Float, angle: Float, step: Float, riders: Boolean, party: Boolean, lantern: Float, sad: Boolean, scared: Boolean = false) {
         withTransform({ translate(x, y); rotate(deg(angle), Offset.Zero); scale(GS, GS, Offset.Zero) }) {
             cart(x / 9f, lantern)
-            donkey(step, sad)
+            donkey(step, sad, scared)
             if (riders) {
                 passengers.forEachIndexed { i, p ->
                     val s = seatOf(i, passengers.size)
@@ -555,7 +555,7 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
         drawRect(Color(0xFFFFCF6E), Offset(-1.5f, -34f), Size(5f, 6f))
     }
 
-    private fun DrawScope.donkey(step: Float, sad: Boolean) {
+    private fun DrawScope.donkey(step: Float, sad: Boolean, scared: Boolean = false) {
         val leg = sin(step) * 4f
         val legC = Color(0xFF4E4339)
         listOf(16f to leg, 20f to -leg, 33f to -leg, 37f to leg).forEach { (lx, d) ->
@@ -576,6 +576,14 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
         val earC = Color(0xFF6A5C4F)
         withTransform({ translate(45f, -37f); rotate(deg(-.35f + ear), Offset.Zero) }) { oval(earC, 0f, -6f, 1.8f, 6f) }
         withTransform({ translate(47f, -37f); rotate(deg(.05f + ear), Offset.Zero) }) { oval(earC, 0f, -6f, 1.8f, 6f) }
+        // Ojos como platos cuando se rompe el puente (igual que en js/bridge.js)
+        if (scared) {
+            listOf(47.2f, 52.2f).forEach { ex ->
+                oval(Color.White, ex, -37f, 2.5f, 3.2f)
+                drawOval(Color(0xFF111111), Offset(ex - 2.5f, -40.2f), androidx.compose.ui.geometry.Size(5f, 6.4f), style = Stroke(.6f))
+                drawCircle(Color(0xFF111111), 1.05f, Offset(ex + .3f, -36.4f))
+            }
+        }
     }
 }
 

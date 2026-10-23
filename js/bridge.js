@@ -163,7 +163,7 @@
     ctx.fillStyle = '#ffcf6e'; ctx.fillRect(-1.5, -34, 5, 6);
   }
 
-  function drawDonkey(ctx, step, sad) {
+  function drawDonkey(ctx, step, sad, asustada) {
     const leg = Math.sin(step) * 4;
     ctx.strokeStyle = '#4e4339'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
     ctx.beginPath();
@@ -198,6 +198,14 @@
     ctx.beginPath(); ctx.ellipse(0, -6, 1.8, 6, 0, 0, 7); ctx.fill(); ctx.restore();
     ctx.save(); ctx.translate(47, -37); ctx.rotate(.05 + ear);
     ctx.beginPath(); ctx.ellipse(0, -6, 1.8, 6, 0, 0, 7); ctx.fill(); ctx.restore();
+    // Ojos como platos cuando se rompe el puente
+    if (asustada) {
+      [47.2, 52.2].forEach((ex) => {
+        ctx.fillStyle = '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = .6;
+        ctx.beginPath(); ctx.ellipse(ex, -37, 2.5, 3.2, 0, 0, 7); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(ex + .3, -36.4, 1.05, 0, 7); ctx.fill();
+      });
+    }
   }
 
   /**
@@ -396,7 +404,7 @@
       ctx.save();
       ctx.translate(x, y); ctx.rotate(ang); ctx.scale(GS, GS);
       drawCart(ctx, t, x / 9, opt.lantern);
-      drawDonkey(ctx, opt.step, opt.sad);
+      drawDonkey(ctx, opt.step, opt.sad, opt.asustada);
       if (opt.riders) {
         passengers.forEach((p, i) => {
           const s = seatOf(i, passengers.length);
@@ -505,7 +513,7 @@
         }
         ctx.save();
         if (fall.sunk) { ctx.beginPath(); ctx.rect(0, 0, W, RIVER_Y + 4); ctx.clip(); }
-        drawGroup(t, fall.x, gy, rot, { step: t / 60, riders: false, lantern: fall.sunk ? .3 : 1, sad: true });
+        drawGroup(t, fall.x, gy, rot, { step: t / 60, riders: false, lantern: fall.sunk ? .3 : 1, sad: true, asustada: !fall.sunk && caida !== CAIDAS.dibujos });
         ctx.restore();
         if (caida === CAIDAS.dibujos && !fall.sunk) {
           if (colgando || hangT < caida.hang + 120) drawUps(fall.x, gy, t, Math.max(0, hangT));

@@ -31,6 +31,7 @@ import com.paraelcarro.domain.model.RoundResult
 import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.BarbaridadesPanel
 import com.paraelcarro.ui.components.culpable
+import com.paraelcarro.ui.components.LearnCard
 import com.paraelcarro.ui.components.Panel
 import com.paraelcarro.ui.components.PlayerTag
 import com.paraelcarro.ui.components.RatingRow
@@ -62,6 +63,7 @@ fun RoundScoreScreen(state: GameState, result: RoundResult, alreadyRated: Boolea
             Text(q.text, fontFamily = FontFamily.Serif)
             Text("Respuesta: ${q.format(q.answer)} · ${driver.name} dijo ${q.format(result.bid)}", fontWeight = FontWeight.Bold, color = Rustic.AmbarClaro)
             if (q.note.isNotEmpty()) Text("💡 ${q.note}", color = Rustic.TextoSuave)
+            LearnCard(q.id)
             RatingRow(q.id, alreadyRated, onRate)
         }
         Panel {

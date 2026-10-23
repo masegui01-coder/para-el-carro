@@ -176,6 +176,7 @@
     sonido: store.get('sonido', true),
     vibracion: store.get('vibracion', true),
     tema: store.get('tema', 'oscuro'), // 'oscuro' | 'claro' | 'sistema'
+    imagenes: store.get('imagenes', true), // ilustraciones de Wikipedia en "¿Sabías que…?" (usan datos)
     set(k, v) { Ajustes[k] = v; store.set(k, v); if (k === 'tema') aplicarTema(); pintarBarra(); },
   };
 
@@ -254,12 +255,14 @@
         <h2>Ajustes</h2>
         <label class="fila"><span class="crece">🔊 Sonido</span><input type="checkbox" id="aj-sonido" ${Ajustes.sonido ? 'checked' : ''}></label>
         <label class="fila"><span class="crece">📳 Vibración</span><input type="checkbox" id="aj-vibracion" ${Ajustes.vibracion ? 'checked' : ''}></label>
+        <label class="fila"><span class="crece">🖼️ Ilustraciones<br><span class="suave">En «¿Sabías que…?», desde Wikipedia (usan datos)</span></span><input type="checkbox" id="aj-imagenes" ${Ajustes.imagenes ? 'checked' : ''}></label>
         <div>🌗 Tema</div>
         <div class="segmentado">${[['oscuro', '🌙 Oscuro'], ['claro', '☀️ Claro'], ['sistema', '📱 Sistema']].map(([k, l]) => `<button data-tema="${k}" class="${Ajustes.tema === k ? 'sel' : ''}">${l}</button>`).join('')}</div>
         <button class="btn ambar bloque" id="aj-cerrar">Listo</button>
       </div>`;
       m.querySelector('#aj-sonido').onchange = (e) => { Ajustes.set('sonido', e.target.checked); sfx.click(); };
       m.querySelector('#aj-vibracion').onchange = (e) => { Ajustes.set('vibracion', e.target.checked); vibrate(40); };
+      m.querySelector('#aj-imagenes').onchange = (e) => { Ajustes.set('imagenes', e.target.checked); };
       m.querySelectorAll('[data-tema]').forEach((b) => { b.onclick = () => { Ajustes.set('tema', b.dataset.tema); pintar(); }; });
       m.querySelector('#aj-cerrar').onclick = () => m.remove();
     };
@@ -354,6 +357,61 @@
     round: 0,
     R: null,
     openAttempts: 0,
+  };
+
+  // ---------------------------------------------------------------- ¿Sabías que…? (aprender con cada pregunta)
+
+  /**
+   * Tras cada ronda, una explicación de la respuesta (js/aprende.json: id -> [texto, artículo de Wikipedia]).
+   * El fichero se descarga una sola vez, cuando hace falta, y la ilustración se pide a Wikipedia al momento
+   * (no ocupa nada en la app y se puede desactivar en Ajustes).
+   */
+  const Aprende = {
+    datos: null,
+    carga: null,
+    fotos: new Map(),
+    cargar() {
+      if (!this.carga) {
+        this.carga = fetch('js/aprende.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({}))
+          .then((d) => { this.datos = d || {}; return this.datos; });
+      }
+      return this.carga;
+    },
+    /** Hueco en la pantalla de puntos; se rellena con bind() cuando están los datos. */
+    hueco(qid) {
+      this.cargar();
+      return `<div class="aprende" data-aprende="${esc(qid)}" hidden></div>`;
+    },
+    async bind() {
+      const el = document.querySelector('[data-aprende]');
+      if (!el) return;
+      const datos = await this.cargar();
+      const entrada = datos[el.dataset.aprende];
+      if (!entrada || !el.isConnected) return;
+      const [texto, articulo] = entrada;
+      el.innerHTML = `<div class="aprende-titulo">📚 ¿Sabías que…?</div><p>${esc(texto)}</p>`;
+      el.hidden = false;
+      if (Ajustes.imagenes && articulo) this.ilustrar(el, articulo);
+    },
+    /** Miniatura del artículo de Wikipedia (si no hay o no hay conexión, simplemente no sale). */
+    async ilustrar(el, articulo) {
+      try {
+        if (!this.fotos.has(articulo)) {
+          const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(articulo.replace(/ /g, '_'))}`);
+          const j = r.ok ? await r.json() : null;
+          this.fotos.set(articulo, (j && j.thumbnail && j.thumbnail.source) || '');
+        }
+        const src = this.fotos.get(articulo);
+        if (!src || !el.isConnected) return;
+        const fig = document.createElement('figure');
+        fig.className = 'aprende-img';
+        fig.innerHTML = `<img alt="" loading="lazy"><figcaption>Imagen: Wikipedia</figcaption>`;
+        const img = fig.querySelector('img');
+        img.onerror = () => fig.remove();
+        img.src = src;
+        el.insertBefore(fig, el.children[1]);
+      } catch (e) { /* sin conexión: solo texto */ }
+    },
   };
 
   // ---------------------------------------------------------------- Valoraciones de preguntas
@@ -790,6 +848,7 @@
         <div class="pregunta" style="font-size:1rem">${esc(q.q)}</div>
         <p>Respuesta: <b style="color:var(--ambar-claro)">${esc(fmtQ(q.a, q))}</b> · ${tag(driver)} dijo <b>${esc(fmtQ(R.bid, q))}</b></p>
         ${q.n ? `<p class="suave" style="margin:0">💡 ${esc(q.n)}</p>` : ''}
+        ${Aprende.hueco(q.id)}
         ${Ratings.widget(q.id)}
       </div>
       <div class="panel"><table class="puntos">
@@ -801,6 +860,7 @@
       if (last || G.round % AD_EVERY_ROUNDS === 0) showInterstitial(next); else next();
     });
     Ratings.bind();
+    Aprende.bind();
   }
 
   // ---------------------------------------------------------------- ¡Qué barbaridad! (abuela)
@@ -968,7 +1028,7 @@
   window.ParaElCarro = {
     Logic, AVATARS, OPEN_SECONDS, TURN_SECONDS, MIN_PLAYERS, MAX_PLAYERS, AD_EVERY_ROUNDS,
     esc, fmtQ, parseCifra, avatarHTML, ico, feedback, store, sfx, vibrate, render, on, startTimer, stopTimer,
-    pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome, Ratings,
+    pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome, Ratings, Aprende,
     showBarbaridades, barbaridadesHTML, duracionBarbaridades,
   };
   Ratings.refresh();

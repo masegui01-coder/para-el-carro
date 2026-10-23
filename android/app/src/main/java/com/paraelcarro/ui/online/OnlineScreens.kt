@@ -55,6 +55,7 @@ import com.paraelcarro.ui.components.Avatar
 import com.paraelcarro.ui.components.BarbaridadesPanel
 import com.paraelcarro.ui.components.BarbaridadesSwitch
 import com.paraelcarro.ui.components.culpable as culpableDe
+import com.paraelcarro.ui.components.LearnCard
 import com.paraelcarro.data.online.vozAbuela
 import com.paraelcarro.data.online.OnlineBarbaridad
 import com.paraelcarro.domain.model.Question
@@ -440,6 +441,7 @@ private fun ScoreView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
             Text(q.text, fontFamily = FontFamily.Serif)
             Text("Respuesta: ${q.format(res.answer)} · ${ui.player(r.driver).tag()} dijo ${q.format(r.bid)}", fontWeight = FontWeight.Bold, color = Rustic.AmbarClaro)
             if (res.note.isNotEmpty()) Text("💡 ${res.note}", color = Rustic.TextoSuave)
+            LearnCard(q.id)
             RatingRow(q.id, vm.isRated(q.id)) { vm.rate(q.id, it) }
         }
         BarbaridadesPanel(res.barbaridades.map { b -> culpable(ui, b, q) }, res.barbaridades.map { it.high })

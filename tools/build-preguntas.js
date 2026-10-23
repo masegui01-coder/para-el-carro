@@ -12,10 +12,26 @@ const FECHAS = ['fechas.json', 'fechas2.json'];
 const NUMEROS = ['numeros.json', 'numeros2.json', 'estimaciones.json'];
 
 const pad = (i) => String(i + 1).padStart(3, '0');
+const fechas = FECHAS.flatMap(read).map((p, i) => ({ ...p, id: 'f' + pad(i) }));
+const numeros = NUMEROS.flatMap(read).map((p, i) => ({ ...p, id: 'n' + pad(i) }));
 const preguntas = [
-  ...FECHAS.flatMap(read).map((p, i) => ({ id: 'f' + pad(i), tipo: 'fecha', q: p.q, a: p.a, u: '', n: p.n || '' })),
-  ...NUMEROS.flatMap(read).map((p, i) => ({ id: 'n' + pad(i), tipo: 'numero', q: p.q, a: p.a, u: p.u || '', n: p.n || '' })),
+  ...fechas.map((p) => ({ id: p.id, tipo: 'fecha', q: p.q, a: p.a, u: '', n: p.n || '' })),
+  ...numeros.map((p) => ({ id: p.id, tipo: 'numero', q: p.q, a: p.a, u: p.u || '', n: p.n || '' })),
 ];
+
+// "¿Sabías que…?" de cada pregunta: shared/aprende/*.json (por id) y los campos e/w de las generadas.
+// Va en un fichero aparte (id -> [texto, artículo de Wikipedia en inglés]) para que la web lo cargue solo al usarlo.
+const aprende = {};
+const dirAprende = path.join(root, 'shared', 'aprende');
+for (const f of fs.readdirSync(dirAprende).filter((x) => x.endsWith('.json')).sort()) {
+  Object.assign(aprende, JSON.parse(fs.readFileSync(path.join(dirAprende, f), 'utf8')));
+}
+[...fechas, ...numeros].forEach((p) => { if (p.e && !aprende[p.id]) aprende[p.id] = [p.e, p.w || '']; });
+const ids = new Set(preguntas.map((p) => p.id));
+for (const id of Object.keys(aprende)) {
+  if (!ids.has(id)) throw new Error(`aprende: no existe la pregunta ${id}`);
+  if (!Array.isArray(aprende[id]) || typeof aprende[id][0] !== 'string' || !aprende[id][0]) throw new Error(`aprende: ${id} sin texto`);
+}
 
 // Comprobaciones básicas
 const vistos = new Map();
@@ -32,4 +48,8 @@ fs.writeFileSync(path.join(root, 'js', 'preguntas.js'), '// Generado por tools/b
 const assets = path.join(root, 'android', 'app', 'src', 'main', 'assets');
 fs.mkdirSync(assets, { recursive: true });
 fs.writeFileSync(path.join(assets, 'preguntas.json'), json);
+const jsonAprende = JSON.stringify(aprende);
+fs.writeFileSync(path.join(root, 'js', 'aprende.json'), jsonAprende);
+fs.writeFileSync(path.join(assets, 'aprende.json'), jsonAprende);
+console.log(`${Object.keys(aprende).length} con «¿Sabías que…?» (${Math.round(jsonAprende.length / 1024)} KB)`);
 console.log(`${preguntas.length} preguntas (${preguntas.filter((p) => p.tipo === 'fecha').length} fechas, ${preguntas.filter((p) => p.tipo === 'numero').length} números)`);

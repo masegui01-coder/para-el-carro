@@ -5,7 +5,8 @@ const fs = require('fs');
 const path = require('path');
 
 const out = [];
-const add = (q, a, u, n) => out.push({ q, a, u, n });
+// e: "¿Sabías que…?" que se enseña tras la ronda; w: artículo de Wikipedia (en inglés) para la ilustración
+const add = (q, a, u, n, e, w) => out.push({ q, a, u, n, ...(e ? { e } : {}), ...(w ? { w } : {}) });
 // Redondeo "humano": 3 cifras significativas (las cifras grandes no se pueden adivinar al euro)
 const r3 = (x) => {
   if (x === 0) return 0;
@@ -60,9 +61,61 @@ const divisas = [
   ['reales brasileños', 'Brasil', 5.6339, 100],
   ['pesos mexicanos', 'México', 20.7719, 100],
 ];
+// Una curiosidad de cada moneda (y su artículo de Wikipedia, para la ilustración)
+const MONEDAS = {
+  'dongs vietnamitas': ['En Vietnam casi no se usan monedas: todo se paga con billetes de polímero, y todos llevan la cara de Ho Chi Minh.', 'Ho Chi Minh'],
+  'rupias indonesias': ['Indonesia lleva años planeando quitarle tres ceros a la rupia, porque los precios tienen cifras enormes: un café puede costar 30.000 rupias.', 'Indonesian rupiah'],
+  'riales iraníes': ['En la calle los iraníes cuentan en «tomanes», que son 10 riales, y el Gobierno ha aprobado quitarle cuatro ceros a la moneda.', 'Iranian rial'],
+  'kips laosianos': ['En Laos las monedas casi han desaparecido, y en los sitios turísticos también se aceptan dólares y bahts tailandeses.', 'Lao kip'],
+  'soms uzbekos': ['Hasta 2017 el cambio oficial era muy distinto al de la calle, y para pagar algo grande había que llevar fajos de billetes en bolsas.', 'Uzbekistani soʻm'],
+  'guaraníes paraguayos': ['Se llama como el pueblo guaraní, cuya lengua es oficial en Paraguay junto al español y la habla la mayoría de la población.', 'Paraguayan guaraní'],
+  'tugriks mongoles': ['«Tugrik» significa algo así como «moneda redonda». Los billetes grandes llevan el retrato de Gengis Kan.', 'Mongolian tögrög'],
+  'ariarys malgaches': ['Es una de las dos únicas monedas del mundo que no se divide en 100: un ariary son 5 iraimbilanja. La otra es la ouguiya de Mauritania.', 'Malagasy ariary'],
+  'rieles camboyanos': ['En Camboya se usan muchísimo los dólares estadounidenses: el riel sirve sobre todo para dar el cambio de las cantidades pequeñas.', 'Cambodian riel'],
+  'pesos colombianos': ['El billete de 50.000 pesos lleva a Gabriel García Márquez, y el de 100.000 a Carlos Lleras Restrepo.', 'Colombian peso'],
+  'pesos argentinos': ['Desde 1970 Argentina le ha quitado 13 ceros a su moneda, cambiándole de nombre varias veces (peso ley, peso argentino, austral, peso).', 'Argentine peso'],
+  'pesos chilenos': ['En Chile a 1.000 pesos se les llama «una luca». El peso chileno no tiene céntimos en circulación.', 'Chilean peso'],
+  'tenges kazajos': ['El tenge nació en 1993, tras la URSS, y sus billetes han ganado varias veces el premio al «billete del año» de los coleccionistas.', 'Kazakhstani tenge'],
+  'francos guineanos': ['Guinea tiene algunas de las mayores reservas de bauxita del mundo (de donde sale el aluminio), pero su moneda es de las de menor valor de África.', 'Guinean franc'],
+  'chelines ugandeses': ['Se llama «chelín» por el chelín de África Oriental de la época británica. Uganda es la «perla de África» y tiene la mitad de los gorilas de montaña.', 'Ugandan shilling'],
+  'chelines tanzanos': ['En suajili se llama «shilingi». Tanzania tiene el Kilimanjaro, la montaña más alta de África, y el parque del Serengeti.', 'Tanzanian shilling'],
+  'libras libanesas': ['Durante décadas se cambió a 1.507,5 por dólar, pero con la crisis que empezó en 2019 perdió más del 95% de su valor.', 'Beirut'],
+  'kyats birmanos': ['En 1987 el dictador Ne Win anuló billetes y sacó otros de 45 y 90 kyats, porque su número de la suerte era el 9.', 'Burmese kyat'],
+  'francos burundeses': ['Burundi es de los países con menor renta del mundo, y el café es su principal exportación.', 'Burundian franc'],
+  'wons surcoreanos': ['El billete de 10.000 wones lleva al rey Sejong, que en el siglo XV creó el alfabeto coreano, el hangul.', 'South Korean won'],
+  'yenes japoneses': ['Las monedas de 5 y 50 yenes tienen un agujero. La de 5 se dice «go-en», que suena como «buena relación», y se deja como ofrenda en los templos.', 'Japanese yen'],
+  'forintos húngaros': ['El nombre viene del florín de Florencia, una famosa moneda de oro medieval. Hungría está en la UE, pero no ha adoptado el euro.', 'Hungarian forint'],
+  'coronas islandesas': ['Islandia es de los países que menos efectivo usa del mundo. Sus monedas llevan animales marinos como el bacalao, el cangrejo o el delfín.', 'Icelandic króna'],
+  'rupias indias': ['En 2016 el Gobierno anuló de un día para otro los billetes de 500 y 1.000 rupias, más del 80% del dinero en efectivo del país.', 'Indian rupee'],
+  'bahts tailandeses': ['Pisar un billete o una moneda en Tailandia es una gran falta de respeto, porque llevan la imagen del rey.', 'Thai baht'],
+  'pesos filipinos': ['Su nombre viene de la época española. En filipino se dice «piso», y su símbolo es ₱.', 'Philippine peso'],
+  'liras turcas': ['En 2005 Turquía le quitó seis ceros a la lira: un millón de liras antiguas pasó a ser una lira nueva.', 'Turkish lira'],
+  'libras egipcias': ['Sus billetes van en árabe por un lado y en inglés por el otro, y muchos muestran templos y monumentos faraónicos.', 'Egyptian pound'],
+  'dírhams marroquíes': ['Es una moneda casi cerrada: no se puede sacar de Marruecos, así que hay que cambiar el dinero al llegar al país.', 'Moroccan dirham'],
+  'drams armenios': ['«Dram» significa «dinero» y viene de la misma raíz que el dracma griego y el dírham árabe.', 'Armenian dram'],
+  'soms kirguises': ['En 1993 Kirguistán fue el primer país de Asia Central en tener moneda propia tras la URSS. «Som» significa «puro», como el oro puro.', 'Kyrgyzstani som'],
+  'rupias nepalíes': ['Tiene un cambio fijo con la rupia india: 1,6 rupias nepalíes por cada una. Nepal también es famoso por tener la única bandera nacional que no es rectangular.', 'Nepalese rupee'],
+  'colones costarricenses': ['Se llama así por Cristóbal Colón. Sus billetes muestran la fauna del país, como el perezoso, el colibrí o el tiburón toro.', 'Costa Rican colón'],
+  'pesos dominicanos': ['La República Dominicana comparte la isla de La Española con Haití, cuya moneda es la gourde.', 'Dominican peso'],
+  'nairas nigerianas': ['Nigeria es el país más poblado de África. En 2023 el cambio a billetes nuevos causó una grave escasez de efectivo.', 'Nigerian naira'],
+  'birrs etíopes': ['Etiopía usa su propio calendario, de 13 meses, y va unos 7 u 8 años por detrás del nuestro.', 'Ethiopian birr'],
+  'leones de Sierra Leona': ['En 2022 se creó el «nuevo leone» quitando tres ceros: 1.000 leones antiguos pasaron a ser 1.', 'Sierra Leonean leone'],
+  'coronas checas': ['La República Checa está en la Unión Europea, pero mantiene su corona y no ha adoptado el euro.', 'Czech koruna'],
+  'zlotys polacos': ['«Złoty» significa «dorado». Polonia está en la UE desde 2004, pero sigue con su propia moneda.', 'Warsaw'],
+  'rands sudafricanos': ['Se llama así por el Witwatersrand, la cordillera donde se descubrió la mayor reserva de oro del mundo. De allí viene también la moneda de oro Krugerrand.', 'South African rand'],
+  'reales brasileños': ['Nació en 1994 con el Plan Real, que acabó con una hiperinflación brutal. Sus billetes llevan animales como el jaguar o la tortuga marina.', 'Brazilian real'],
+  'pesos mexicanos': ['El símbolo del dólar ($) viene en realidad del peso hispanoamericano, que se usaba en medio mundo en los siglos XVII y XVIII.', 'Mexican peso'],
+  'escudos caboverdianos': ['Primero tuvo cambio fijo con el escudo portugués y después con el euro. Cabo Verde es un archipiélago volcánico frente a Senegal.', 'Cape Verdean escudo'],
+  'francos CFA': ['Son dos monedas, la de África Occidental y la de África Central, y Francia garantizaba su cambio. La occidental tiene previsto pasar a llamarse «eco».', 'CFA franc'],
+  'francos comorenses': ['Las Comoras son de los mayores productores del mundo de ylang-ylang, una flor que se usa en perfumes muy famosos.', 'Cananga odorata'],
+  'dobras': ['Santo Tomé y Príncipe es de los países más pequeños de África. En 2018 la dobra perdió tres ceros.', 'São Tomé and Príncipe dobra'],
+  'marcos convertibles': ['Se llama así por el marco alemán, al que estaba ligado 1 a 1. Cada una de las dos entidades del país usa diseños distintos en sus billetes.', 'Bosnia and Herzegovina convertible mark'],
+};
+const curiosidad = (moneda) => MONEDAS[moneda] || [];
+
 for (const [moneda, pais, tasa, euros] of divisas) {
   add(`Si cambias ${euros} € a ${moneda} (${pais}), ¿cuántos te dan?`, r3(tasa * euros), moneda,
-    `A 1 € = ${fmt(tasa)} ${moneda} (${FECHA_CAMBIO}, sin comisiones).`);
+    `A 1 € = ${fmt(tasa)} ${moneda} (${FECHA_CAMBIO}, sin comisiones).`, ...curiosidad(moneda));
 }
 const fijas = [
   ['escudos caboverdianos', 'Cabo Verde', 110.265],
@@ -73,12 +126,13 @@ const fijas = [
 ];
 for (const [moneda, pais, tasa] of fijas) {
   add(`Si cambias 100 € a ${moneda} (${pais}), ¿cuántos te dan?`, Math.round(tasa * 100 * 100) / 100, moneda,
-    `Tiene cambio fijo con el euro: 1 € = ${fmt(tasa)} ${moneda}.`);
+    `Tiene cambio fijo con el euro: 1 € = ${fmt(tasa)} ${moneda}.`, ...curiosidad(moneda));
 }
 
 // ------------------------------------------------------------------ Construcción (sin suelo)
 // Costes de ejecución material de referencia 2026 de los Colegios de Arquitectos de Málaga y Cádiz.
 // No incluyen suelo, licencias, IVA, honorarios ni beneficio del constructor: el precio final real es mayor.
+const APRENDE_OBRA = 'Ese es el coste de la obra en sí. Al precio final hay que sumarle los honorarios del arquitecto, las licencias y los impuestos, así que suele salir bastante más caro. Y en una ciudad, el suelo puede costar tanto como el edificio.';
 const NOTA_OBRA = (colegio, eur) => `Coste de referencia del Colegio de Arquitectos de ${colegio} 2026: ${fmt(eur)} €/m² (ejecución material, sin suelo, licencias, IVA ni honorarios).`;
 const obras = [
   ['Málaga', 'un bloque de pisos entre medianeras de 4 plantas y 1.000 m² construidos', 954, 1000],
@@ -110,7 +164,7 @@ const obras = [
 ];
 for (const [colegio, que, eur, m2] of obras) {
   add(`Aproximadamente, ¿cuántos euros cuesta construir en la provincia de ${colegio} ${que}, sin contar el suelo?`,
-    r3(eur * m2), '€', NOTA_OBRA(colegio, eur));
+    r3(eur * m2), '€', NOTA_OBRA(colegio, eur), APRENDE_OBRA);
 }
 
 // ------------------------------------------------------------------ Cálculos curiosos

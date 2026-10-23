@@ -315,3 +315,12 @@ label { display: block; }
   margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(160, 112, 60, .35);
 }
 .valorar .btn { font-size: 1.3rem; min-width: 48px; }
+
+/* ¿Sabías que…? */
+.aprende { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--chip); border-left: 4px solid var(--ambar); }
+.aprende-titulo { font-weight: 800; color: var(--ambar-claro); margin-bottom: 4px; }
+.aprende p { margin: 0; line-height: 1.45; }
+.aprende-img { float: right; margin: 2px 0 6px 10px; width: 38%; max-width: 160px; }
+.aprende-img img { width: 100%; border-radius: 8px; display: block; background: #0002; }
+.aprende-img figcaption { font-size: .7rem; opacity: .6; text-align: right; margin-top: 2px; }
+.aprende::after { content: ''; display: block; clear: both; }

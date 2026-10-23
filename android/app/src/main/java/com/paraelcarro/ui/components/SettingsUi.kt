@@ -74,6 +74,13 @@ fun SettingsDialog(onTest: () -> Unit, onDismiss: () -> Unit) {
                     Text("📳 Vibración", Modifier.weight(1f))
                     Switch(Settings.vibration, { Settings.updateVibration(it) }, colors = switchColors)
                 }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("🖼️ Ilustraciones")
+                        Text("En «¿Sabías que…?», desde Wikipedia (usan datos)", color = Rustic.TextoSuave, fontSize = 12.sp)
+                    }
+                    Switch(Settings.images, { Settings.updateImages(it) }, colors = switchColors)
+                }
                 Text("🌗 Tema")
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     listOf(ThemeMode.OSCURO to "🌙 Oscuro", ThemeMode.CLARO to "☀️ Claro", ThemeMode.SISTEMA to "📱 Sistema").forEach { (mode, label) ->

@@ -533,6 +533,7 @@
         <div class="pregunta" style="font-size:1rem">${P().esc(q.q)}</div>
         <p>Respuesta: <b style="color:var(--ambar-claro)">${P().esc(P().fmtQ(res.a, q))}</b> · ${tag(driver)} dijo <b>${P().esc(P().fmtQ(R.bid, q))}</b></p>
         ${res.n ? `<p class="suave" style="margin:0">💡 ${P().esc(res.n)}</p>` : ''}
+        ${P().Aprende.hueco(q.id)}
         ${P().Ratings.widget(q.id)}
       </div>
       ${P().barbaridadesHTML(res.barbaridades, players, q)}
@@ -543,6 +544,7 @@
         : `<p class="suave centro">⏳ Esperando a que el jefe pase a ${last ? 'el podio' : 'la siguiente ronda'}…</p>`}`, true);
     P().on('#seguir', 'click', () => H.next());
     P().Ratings.bind();
+    P().Aprende.bind();
     // Anuncio cada 2 rondas y antes del podio, en la pantalla de puntos (no hay cuenta atrás corriendo)
     if ((last || st.round % P().AD_EVERY_ROUNDS === 0) && S.adShownRound !== st.round) {
       S.adShownRound = st.round;
