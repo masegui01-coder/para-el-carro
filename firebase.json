@@ -1,5 +1,18 @@
 {
   "database": {
     "rules": "firebase/database.rules.json"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json", ".firebaserc", ".git/**", ".gitignore", ".gitattributes", ".claude/**",
+      "android/**", "tools/**", "shared/**", "firebase/**", "audio/provisional/**",
+      "**/node_modules/**", "*.apk", "README.md"
+    ],
+    "headers": [
+      { "source": "**/*.@(js|css|html|json)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "**/*.@(jpg|png|svg|wav|ogg)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] },
+      { "source": "/.well-known/assetlinks.json", "headers": [{ "key": "Content-Type", "value": "application/json" }] }
+    ]
   }
 }

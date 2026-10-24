@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.paraelcarro",
+    "sha256_cert_fingerprints": ["49:06:8A:2E:D6:54:48:61:FC:A0:FB:01:2C:99:9D:C5:58:EC:DC:48:CC:B5:F7:D3:76:05:C0:B6:5F:54:7E:30"]
+  }
+}]

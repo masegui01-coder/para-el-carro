@@ -29,8 +29,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Invitación a sala: https://masegui01-coder.github.io/para-el-carro/?sala=ABCDE
-                 (sin verificar, Android pregunta si abrirlo con la app; si no la tienen, se juega en la web) -->
+            <!-- Invitación a sala: https://para-el-carro-91ke5.web.app/?sala=ABCDE
+                 Verificado con /.well-known/assetlinks.json: se abre directamente en la app; si no la tienen, se juega en la web -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="para-el-carro-91ke5.web.app" />
+                <data android:host="para-el-carro-91ke5.firebaseapp.com" />
+            </intent-filter>
+            <!-- Enlaces antiguos de GitHub Pages (sin verificar: Android pregunta con qué abrirlos) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

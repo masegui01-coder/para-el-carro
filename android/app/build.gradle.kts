@@ -11,8 +11,8 @@ android {
         applicationId = "com.paraelcarro"
         minSdk = 26
         targetSdk = 37
-        versionCode = 10
-        versionName = "0.7.1"
+        versionCode = 11
+        versionName = "0.8.0"
 
         // AdMob: IDs de PRUEBA de Google. Pon los tuyos en ~/.gradle/gradle.properties
         // (admobAppId, admobInterstitialId, admobBannerId) antes de publicar en Google Play.

@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
         handleInvite(intent)
     }
 
-    /** Enlace de invitación https://masegui01-coder.github.io/para-el-carro/?sala=CODIGO */
+    /** Enlace de invitación https://para-el-carro-91ke5.web.app/?sala=CODIGO (o el antiguo de GitHub) */
     private fun handleInvite(intent: Intent?) {
         val code = intent?.data?.getQueryParameter("sala") ?: return
         online.openJoin(code)

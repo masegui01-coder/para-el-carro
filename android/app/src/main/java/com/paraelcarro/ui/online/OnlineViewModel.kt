@@ -88,7 +88,7 @@ data class OnlineUi(
     val inviteLink: String get() = "$WEB_URL?sala=$code"
 }
 
-const val WEB_URL = "https://masegui01-coder.github.io/para-el-carro/"
+const val WEB_URL = "https://para-el-carro-91ke5.web.app/"
 private const val HOST_GRACE_MS = 1500L   // margen para jugadas enviadas justo al final del plazo
 private const val OFFLINE_SKIP_MS = 3000L // si le toca a un desconectado, se le pasa el turno enseguida
 private const val BRIDGE_MS = 10500L      // lo que dura la animación del puente
