@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "757876990914",
+    "firebase_url": "https://para-el-carro-91ke5-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "para-el-carro-91ke5",
+    "storage_bucket": "para-el-carro-91ke5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757876990914:android:f8f7af1554b0f8d9e1ac5b",
+        "android_client_info": {
+          "package_name": "com.paraelcarro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEwl1dZ-cBHDSd7GjRitwWLaxJkWBEP5M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

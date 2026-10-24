@@ -22,12 +22,13 @@
 
   function connect() {
     if (db) return db;
-    firebase.initializeApp(window.FIREBASE_CONFIG);
+    if (!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG); // normalmente ya lo hizo js/metricas.js
     db = firebase.database();
     db.ref('.info/serverTimeOffset').on('value', (s) => { offset = s.val() || 0; });
     return db;
   }
 
+  const evento = (nombre, params) => window.Metricas && window.Metricas.evento(nombre, params);
   const newId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const randomCode = () => Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
   const inviteLink = (code) => `${location.origin}${location.pathname}?sala=${code}`;
@@ -119,6 +120,7 @@
         }
         if (!code) throw new Error('No se pudo crear la sala');
         await db.ref(`rooms/${code}/players/${pid}`).set({ name: f.name, avatar: f.avatar, order: Date.now(), online: true });
+        evento('sala_crear');
         enterRoom(code, pid);
       } catch (e) {
         form.busy(false);
@@ -155,6 +157,7 @@
         if (others.some((p) => p.avatar === avatar)) avatar = P().AVATARS.find((a) => !others.some((p) => p.avatar === a));
         const pid = newId();
         await db.ref(`rooms/${f.code}/players/${pid}`).set({ name: f.name, avatar, order: Date.now(), online: true });
+        evento('sala_unirse');
         enterRoom(f.code, pid);
       } catch (e) {
         form.busy(false);
@@ -637,6 +640,7 @@
       this.g = { players, rounds: S.meta.rounds, mode: S.meta.mode, round: 0, scores: Object.fromEntries(players.map((p) => [p.id, 0])), seq: Date.now() };
       // seq empieza en la hora actual: así nunca coincide con el de una partida anterior de la sala
       S.adShownRound = 0;
+      evento('partida_inicio', { modo: 'sala', jugadores: players.length, rondas: S.meta.rounds, barbaridades: S.meta.barbaridades ? 1 : 0 });
       roomRef('meta/status').set('playing');
       this.nextRound();
     },
@@ -739,6 +743,7 @@
       if (!g || g.phase !== 'score') return;
       if (g.round >= g.rounds) {
         g.phase = 'final';
+        evento('partida_fin', { modo: 'sala', rondas: g.round });
         roomRef('meta/status').set('final');
         this.publish();
       } else {

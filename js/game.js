@@ -189,6 +189,9 @@
   aplicarTema();
   try { matchMedia('(prefers-color-scheme: light)').addEventListener('change', aplicarTema); } catch (e) { /* navegador antiguo */ }
 
+  /** Estadísticas de uso (js/metricas.js); nunca rompen el juego. */
+  const evento = (nombre, params) => window.Metricas && window.Metricas.evento(nombre, params);
+
   /** Iconos ilustrados de las opciones (img/iconos). */
   const ico = (nombre) => `<img class="ico" src="img/iconos/${nombre}.svg" alt="">`;
 
@@ -279,6 +282,7 @@
   let avisoFallo = null;
   function mostrarFallo(err) {
     try { console.error('[Para el Carro]', err); } catch (e) { /* nada */ }
+    evento('error_web', { mensaje: String((err && err.message) || err).slice(0, 100) });
     if (avisoFallo) return;
     avisoFallo = document.createElement('div');
     avisoFallo.className = 'aviso-fallo';
@@ -453,6 +457,7 @@
         const box = b.closest('.valorar');
         const qid = box.dataset.q;
         if (window.Online) window.Online.rate(qid, b.dataset.r);
+        evento('pregunta_valorada', { valor: b.dataset.r });
         store.set('rated', [...store.get('rated', []), qid].slice(-3000));
         box.innerHTML = '<span class="suave">¡Gracias! Tu voto ayuda a elegir las mejores preguntas.</span>';
       }));
@@ -595,6 +600,7 @@
       G.players.forEach((p, i) => { p.name = p.name.trim() || `Jugador ${i + 1}`; p.score = 0; });
       save();
       G.round = 0;
+      evento('partida_inicio', { modo: 'local', jugadores: G.players.length, rondas: G.rounds, barbaridades: G.barbaridades ? 1 : 0 });
       nextRound();
     });
   }
@@ -798,6 +804,7 @@
   function screenBridge() {
     const R = G.R, q = R.q;
     const result = Logic.score(G.players, R, G.barbaridades);
+    evento('ronda_fin', { modo: 'local', exito: result.success ? 1 : 0, barbaridades: result.barbaridades.length, tipo: R.q.tipo });
     const driver = playerById(R.driver);
     const passengers = result.passengers.map((id) => playerById(id).avatar);
     render(`
@@ -1006,6 +1013,7 @@
   }
 
   function screenFinal() {
+    evento('partida_fin', { modo: 'local', rondas: G.round });
     const ranking = G.players.slice().sort((a, b) => b.score - a.score);
     const [p1, p2, p3] = ranking;
     const peana = (p, h, pos) => p ? `<div><div class="podio-av">${avatarHTML(p.avatar, 'grande')}</div><div>${esc(p.name)}</div><div class="peana" style="height:${h}px">${pos}<br>${p.score}</div></div>` : '<div></div>';

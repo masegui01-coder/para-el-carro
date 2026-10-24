@@ -2,6 +2,7 @@ package com.paraelcarro.ui
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.paraelcarro.analytics.Metrics
 import androidx.lifecycle.viewModelScope
 import com.paraelcarro.data.LobbyStore
 import com.paraelcarro.data.QuestionRepository
@@ -48,7 +49,10 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun isRated(qid: String) = ratings.isRated(qid)
-    fun rate(qid: String, kind: String) = ratings.rate(qid, kind)
+    fun rate(qid: String, kind: String) {
+        Metrics.event("pregunta_valorada", "valor" to kind)
+        ratings.rate(qid, kind)
+    }
 
     private val _state = MutableStateFlow(GameState(players = lobby.loadPlayers(), config = lobby.loadConfig()))
     val state: StateFlow<GameState> = _state.asStateFlow()
@@ -107,12 +111,18 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
                 roundNumber = 0,
             )
         }
+        logStart()
         nextRound()
     }
 
     fun rematch() {
         _state.update { s -> s.copy(players = s.players.map { it.copy(score = 0) }, roundNumber = 0) }
+        logStart()
         nextRound()
+    }
+
+    private fun logStart() = _state.value.let { s ->
+        Metrics.event("partida_inicio", "modo" to "local", "jugadores" to s.players.size, "rondas" to s.config.rounds, "barbaridades" to s.config.barbaridades)
     }
 
     // ------------------------------------------------------------ Ronda
@@ -243,6 +253,7 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
 
     fun onBridgeFinished() {
         val phase = _state.value.phase as? GamePhase.Bridge ?: return
+        Metrics.event("ronda_fin", "modo" to "local", "exito" to phase.result.success, "barbaridades" to phase.result.barbaridades.size, "tipo" to phase.result.question.type.name.lowercase())
         _state.update { s ->
             s.copy(
                 players = s.players.map { it.copy(score = it.score + (phase.result.delta[it.id] ?: 0)) },
@@ -254,7 +265,12 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
     fun shouldShowAdBeforeNext(): Boolean = _state.value.let { it.isLastRound || it.roundNumber % AD_EVERY_ROUNDS == 0 }
 
     fun nextAfterScore() {
-        if (_state.value.isLastRound) setPhase(GamePhase.Final) else nextRound()
+        if (_state.value.isLastRound) {
+            Metrics.event("partida_fin", "modo" to "local", "rondas" to _state.value.roundNumber)
+            setPhase(GamePhase.Final)
+        } else {
+            nextRound()
+        }
     }
 
     // ------------------------------------------------------------ Temporizador

@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    // Firebase: google-services.json (Analytics, Crashlytics, App Check)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -11,8 +14,8 @@ android {
         applicationId = "com.paraelcarro"
         minSdk = 26
         targetSdk = 37
-        versionCode = 11
-        versionName = "0.8.0"
+        versionCode = 12
+        versionName = "0.9.0"
 
         // AdMob: IDs de PRUEBA de Google. Pon los tuyos en ~/.gradle/gradle.properties
         // (admobAppId, admobInterstitialId, admobBannerId) antes de publicar en Google Play.
@@ -65,6 +68,11 @@ dependencies {
     // Salas online: el mismo proyecto Firebase que la web (ver data/online/FirebaseSetup.kt)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    // App Check: Play Integrity en la versión de tienda; en las de prueba, el proveedor de depuración
+    implementation(libs.firebase.appcheck.playintegrity)
+    debugImplementation(libs.firebase.appcheck.debug)
 
     testImplementation(libs.junit)
     // org.json real para los tests de JVM (en Android lo da el sistema)

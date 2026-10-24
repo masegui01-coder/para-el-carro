@@ -8,4 +8,8 @@ window.FIREBASE_CONFIG = {
   storageBucket: 'para-el-carro-91ke5.firebasestorage.app',
   messagingSenderId: '757876990914',
   appId: '1:757876990914:web:45a025511e1c677ae1ac5b',
+  // Google Analytics: se rellena al activarlo en la consola (Configuración del proyecto → Integraciones)
+  measurementId: '',
+  // App Check: clave de sitio de reCAPTCHA Enterprise (consola → App Check → app web)
+  appCheckSiteKey: '',
 };

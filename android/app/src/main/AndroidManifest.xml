@@ -13,6 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ParaElCarro">
 
+        <!-- Analytics: sin datos para anuncios hasta que el jugador lo acepte (UMP; ver Metrics.setAdConsent) -->
+        <meta-data android:name="google_analytics_default_allow_ad_storage" android:value="false" />
+        <meta-data android:name="google_analytics_default_allow_ad_user_data" android:value="false" />
+        <meta-data android:name="google_analytics_default_allow_ad_personalization_signals" android:value="false" />
+
         <!-- AdMob (IDs de prueba por defecto; ver app/build.gradle.kts) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

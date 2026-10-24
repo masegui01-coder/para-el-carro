@@ -20,19 +20,21 @@ import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-/** Proyecto Firebase "Para el Carro" (el mismo que la web: js/firebase-config.js). */
+/** Proyecto Firebase "Para el Carro" (el mismo que la web: js/firebase-config.js). Normalmente ya lo inicia google-services.json. */
+private const val DATABASE_URL = "https://para-el-carro-91ke5-default-rtdb.europe-west1.firebasedatabase.app"
+
 private val OPTIONS = FirebaseOptions.Builder()
     .setProjectId("para-el-carro-91ke5")
     .setApplicationId("1:757876990914:android:f8f7af1554b0f8d9e1ac5b")
     .setApiKey("AIzaSyCPsNHeUgWRxP5P6cgKQzdr8g0AmLSUSSg")
-    .setDatabaseUrl("https://para-el-carro-91ke5-default-rtdb.europe-west1.firebasedatabase.app")
+    .setDatabaseUrl(DATABASE_URL)
     .build()
 
 /** Acceso a rooms/CODIGO en Realtime Database. */
 class RoomRepository(context: Context) {
     val db: FirebaseDatabase = run {
         val app = FirebaseApp.getApps(context).firstOrNull() ?: FirebaseApp.initializeApp(context, OPTIONS)
-        FirebaseDatabase.getInstance(app)
+        FirebaseDatabase.getInstance(app, DATABASE_URL)
     }
 
     fun room(code: String): DatabaseReference = db.getReference("rooms/$code")

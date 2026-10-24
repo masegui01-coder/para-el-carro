@@ -1,5 +1,6 @@
 package com.paraelcarro.ads
 
+import com.paraelcarro.analytics.Metrics
 import android.app.Activity
 import android.content.Context
 import com.google.android.gms.ads.AdError
@@ -48,6 +49,7 @@ class AdsManager(private val context: Context) {
     }
 
     private fun start() {
+        Metrics.setAdConsent(true)
         if (!started.compareAndSet(false, true)) return
         MobileAds.initialize(context) {
             _ready.value = true

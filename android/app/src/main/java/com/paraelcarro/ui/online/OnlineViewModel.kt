@@ -3,6 +3,7 @@ package com.paraelcarro.ui.online
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
+import com.paraelcarro.analytics.Metrics
 import androidx.lifecycle.viewModelScope
 import com.paraelcarro.data.QuestionRepository
 import com.paraelcarro.data.online.CODE_CHARS
@@ -110,7 +111,10 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun isRated(qid: String) = ratings.isRated(qid)
-    fun rate(qid: String, kind: String) = ratings.rate(qid, kind)
+    fun rate(qid: String, kind: String) {
+        Metrics.event("pregunta_valorada", "valor" to kind)
+        ratings.rate(qid, kind)
+    }
 
     private val _ui = MutableStateFlow(
         OnlineUi(
@@ -179,6 +183,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 val c = code ?: return@launch fail("No se pudo crear la sala.")
                 repo.addPlayer(c, pid, name, _ui.value.avatar)
+                Metrics.event("sala_crear")
                 enterRoom(c, pid)
             } catch (e: Exception) {
                 fail("No hay conexión con el servidor. Inténtalo de nuevo.")
@@ -204,6 +209,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
                 val avatar = s.avatar.takeIf { a -> others.none { it.avatar == a } } ?: AVATARS.first { a -> others.none { it.avatar == a } }
                 val pid = newId()
                 repo.addPlayer(code, pid, name, avatar)
+                Metrics.event("sala_unirse")
                 enterRoom(code, pid)
             } catch (e: Exception) {
                 fail("No hay conexión con el servidor. Inténtalo de nuevo.")
@@ -493,6 +499,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             // seq empieza en la hora actual: así nunca coincide con el de una partida anterior de la sala
             g = HostGame(players, s.meta?.rounds ?: 6, s.meta?.mode ?: "mezcla", players.associate { it.id to 0 }.toMutableMap(), System.currentTimeMillis())
             adShownRound = 0
+            Metrics.event("partida_inicio", "modo" to "sala", "jugadores" to players.size, "rondas" to (s.meta?.rounds ?: 6), "barbaridades" to (s.meta?.barbaridades ?: false))
             repo.room(code ?: return).child("meta/status").setValue("playing")
             nextRound()
         }
@@ -608,6 +615,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             val game = g ?: return
             if (game.phase != "score") return
             if (game.round >= game.rounds) {
+                Metrics.event("partida_fin", "modo" to "sala", "rondas" to game.round)
                 game.phase = "final"
                 repo.room(code ?: return).child("meta/status").setValue("final")
                 publish()
