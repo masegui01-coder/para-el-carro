@@ -9,7 +9,7 @@ window.FIREBASE_CONFIG = {
   messagingSenderId: '757876990914',
   appId: '1:757876990914:web:45a025511e1c677ae1ac5b',
   // Google Analytics: se rellena al activarlo en la consola (Configuración del proyecto → Integraciones)
-  measurementId: '',
+  measurementId: 'G-41KYH7RX79',
   // App Check: clave de sitio de reCAPTCHA Enterprise (consola → App Check → app web)
-  appCheckSiteKey: '',
+  appCheckSiteKey: '6LdKcAAuAAAAAAcCuLKaltY3w_d7BDQQTDm3ZM3i',
 };
