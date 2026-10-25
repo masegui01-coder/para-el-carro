@@ -250,6 +250,13 @@
     $barra.querySelector('#silencio').onclick = () => { Ajustes.set('sonido', !Ajustes.sonido); sfx.click(); };
     $barra.querySelector('#ajustes').onclick = abrirAjustes;
   }
+  // Correo del estudio: el alias "+carro" hace que Gmail lo etiquete como Para el Carro.
+  const SUPPORT_EMAIL = 'tizaestudiogames+carro@gmail.com';
+  function enlaceSoporte() {
+    const asunto = '[Para el Carro] Sugerencia o error (web)';
+    const cuerpo = '\n\n—\n' + navigator.userAgent;
+    return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+  }
   function abrirAjustes() {
     const m = document.createElement('div');
     m.className = 'modal';
@@ -261,6 +268,7 @@
         <label class="fila"><span class="crece">🖼️ Ilustraciones<br><span class="suave">En «¿Sabías que…?», desde Wikipedia (usan datos)</span></span><input type="checkbox" id="aj-imagenes" ${Ajustes.imagenes ? 'checked' : ''}></label>
         <div>🌗 Tema</div>
         <div class="segmentado">${[['oscuro', '🌙 Oscuro'], ['claro', '☀️ Claro'], ['sistema', '📱 Sistema']].map(([k, l]) => `<button data-tema="${k}" class="${Ajustes.tema === k ? 'sel' : ''}">${l}</button>`).join('')}</div>
+        <a class="btn fantasma bloque" href="${enlaceSoporte()}">✉️ Enviar sugerencia o error</a>
         <button class="btn ambar bloque" id="aj-cerrar">Listo</button>
       </div>`;
       m.querySelector('#aj-sonido').onchange = (e) => { Ajustes.set('sonido', e.target.checked); sfx.click(); };

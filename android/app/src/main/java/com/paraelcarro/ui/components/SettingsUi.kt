@@ -20,6 +20,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.paraelcarro.data.Settings
 import com.paraelcarro.data.ThemeMode
+import com.paraelcarro.ui.sendFeedback
 import com.paraelcarro.ui.theme.Rustic
 
 /** Botones de arriba a la derecha: silencio rápido y ajustes. */
@@ -56,6 +58,7 @@ private fun RoundButton(emoji: String, description: String, onClick: () -> Unit)
 /** Ajustes: sonido, vibración y tema (oscuro, claro o el del sistema). */
 @Composable
 fun SettingsDialog(onTest: () -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
     val switchColors = SwitchDefaults.colors(checkedTrackColor = Rustic.Ambar, checkedThumbColor = Rustic.MaderaOscura)
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -87,6 +90,7 @@ fun SettingsDialog(onTest: () -> Unit, onDismiss: () -> Unit) {
                         WoodButton(label, { Settings.updateTheme(mode) }, Modifier.weight(1f), small = true, tone = if (Settings.theme == mode) Tone.AMBAR else Tone.FANTASMA)
                     }
                 }
+                WoodButton("✉️ Enviar sugerencia o error", { sendFeedback(context) }, Modifier.fillMaxWidth(), small = true, tone = Tone.FANTASMA)
             }
         },
     )
