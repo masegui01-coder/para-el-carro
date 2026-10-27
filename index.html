@@ -6,8 +6,10 @@
   <meta name="theme-color" content="#14161c">
   <title>Para el Carro</title>
   <script>
-    // La web se mudó a Firebase Hosting: los enlaces antiguos de GitHub (con su ?sala=) llevan a la nueva
-    if (location.hostname === 'masegui01-coder.github.io') location.replace('https://para-el-carro-91ke5.web.app/' + location.search);
+    // Dirección oficial: paraelcarroyomebajo.com. Las antiguas (GitHub y las de Firebase) llevan allí conservando el ?sala=
+    if (['masegui01-coder.github.io', 'para-el-carro-91ke5.web.app', 'para-el-carro-91ke5.firebaseapp.com'].includes(location.hostname)) {
+      location.replace('https://paraelcarroyomebajo.com/' + location.search);
+    }
   </script>
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="img/icono-192.png">

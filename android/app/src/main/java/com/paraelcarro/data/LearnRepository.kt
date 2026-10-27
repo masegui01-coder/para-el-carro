@@ -53,7 +53,7 @@ object LearnRepository {
         c.connectTimeout = 5000
         c.readTimeout = 8000
         // Wikipedia pide identificar la app
-        c.setRequestProperty("User-Agent", "ParaElCarro/0.7 (https://para-el-carro-91ke5.web.app/)")
+        c.setRequestProperty("User-Agent", "ParaElCarro/0.7 (https://paraelcarroyomebajo.com/)")
         try {
             if (c.responseCode !in 200..299) error("HTTP ${c.responseCode}")
             return c.inputStream.use { it.readBytes() }

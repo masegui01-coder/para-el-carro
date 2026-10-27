@@ -17,7 +17,7 @@ Cada jugador juega desde su propio móvil:
 
 1. Uno pulsa **🌐 Crear sala privada**: es el **jefe de sala** (elige rondas y tipo de preguntas, y empieza).
 2. Invita con **📤 Invitar amigos** (WhatsApp, Telegram… con el menú de compartir del móvil) o pasando el
-   código de 5 letras. El enlace tiene la forma `https://para-el-carro-91ke5.web.app/?sala=ABCDE`.
+   código de 5 letras. El enlace tiene la forma `https://paraelcarroyomebajo.com/?sala=ABCDE`.
 3. Los amigos abren el enlace (o pulsan **🔑 Unirme con un código**), ponen su nombre y eligen avatar.
 4. Con 3 o más conectados, el jefe empieza. Si alguien recarga la página, vuelve a entrar como él mismo.
 
