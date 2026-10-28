@@ -324,3 +324,6 @@ label { display: block; }
 .aprende-img img { width: 100%; border-radius: 8px; display: block; background: #0002; }
 .aprende-img figcaption { font-size: .7rem; opacity: .6; text-align: right; margin-top: 2px; }
 .aprende::after { content: ''; display: block; clear: both; }
+
+/* Barra para subir la cifra */
+.barra-subir { width: 100%; accent-color: var(--ambar); height: 32px; cursor: pointer; }

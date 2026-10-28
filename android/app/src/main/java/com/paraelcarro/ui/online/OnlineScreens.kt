@@ -75,7 +75,10 @@ import com.paraelcarro.ui.screens.BridgeScene
 import com.paraelcarro.ui.screens.RigPlayer
 import com.paraelcarro.ui.screens.TurnRig
 import com.paraelcarro.ui.theme.Rustic
-import kotlin.math.ceil
+import com.paraelcarro.domain.GameEngine
+import com.paraelcarro.ui.screens.PasosSubida
+import com.paraelcarro.ui.screens.BarraSubida
+import com.paraelcarro.ui.screens.textoSubir
 
 private val fieldColors @Composable get() = OutlinedTextFieldDefaults.colors(focusedBorderColor = Rustic.Ambar, unfocusedBorderColor = Rustic.MaderaClara)
 
@@ -281,16 +284,9 @@ private fun TurnView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
     val mine = turnId == ui.me
     val bid = r.bid
     val value = vm.draftValue(ui)
-    val steps: List<Pair<String, () -> Double>> = if (q.type == QuestionType.FECHA) {
-        listOf(1, 5, 25, 100).map { n -> "+$n" to { bid + n } }
-    } else {
-        listOf(
-            "+1" to { bid + 1 },
-            "+10 %" to { maxOf(bid + 1, ceil(bid * 1.1)) },
-            "×2" to { if (bid > 0) bid * 2 else bid + 1 },
-            "×10" to { if (bid > 0) bid * 10 else bid + 1 },
-        )
-    }
+    val steps = GameEngine.pasosSubida(q, bid)
+    val minimo = GameEngine.minSubida(q, bid)
+    val quedan = vm.subidasQuedan(ui)
     val where = when (r.status[ui.me]) { "conductor" -> "Vas montado en la burra."; "bajado" -> "Te has bajado del carro."; else -> "Vas en el carro." }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Header(ui, st)
@@ -307,15 +303,17 @@ private fun TurnView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
         )
         if (mine) {
             Text("¡Te toca! ¿Qué haces?", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            if (!ui.draft.raiseOpen) {
-                WoodButton("Subir la cifra", { vm.openRaise(steps.first().second()) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent, icon = R.drawable.ic_subir)
+            if (quedan <= 0) {
+                WoodButton("Ya has subido ${GameEngine.MAX_SUBIDAS} veces", {}, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = false, icon = R.drawable.ic_subir)
+            } else if (!ui.draft.raiseOpen) {
+                WoodButton(textoSubir(quedan), { vm.openRaise(minimo) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent, icon = R.drawable.ic_subir)
             } else {
                 Panel {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
-                        steps.forEach { (label, f) -> WoodButton(label, { vm.setDraftValue(f()) }, small = true) }
-                    }
+                    Text("Mínimo: ${q.format(minimo)} · desliza para subir más", color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    BarraSubida(q, bid, vm::setDraftValue)
+                    PasosSubida(steps, vm::setDraftValue)
                     CifraField(q, ui.draft, "Nueva cifra (mayor)", vm::onDraftText, vm::onDraftBeforeChrist)
-                    WoodButton("Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent && value != null && value > bid, icon = R.drawable.ic_burra)
+                    WoodButton("Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent && value != null && vm.puedeSubirCon(value, ui), icon = R.drawable.ic_burra)
                 }
             }
             WoodButton("Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO, enabled = !ui.sent, icon = R.drawable.ic_carreta)

@@ -7,6 +7,11 @@
   const TURN_SECONDS = 15;   // cada jugador tiene 15 s para subir, quedarse o bajarse
   const MIN_PLAYERS = 3, MAX_PLAYERS = 8;
   const AD_EVERY_ROUNDS = 2; // intersticial cada 2 rondas y antes del podio
+  // Para que las rondas no se eternicen (p. ej. "¿cuánto mide el Everest?" subiendo de 1 en 1):
+  const MAX_SUBIDAS = 3;       // cada jugador puede subir la cifra como mucho 3 veces por ronda
+  const SUBIDA_MIN = 0.10;     // en los números hay que subir al menos un 10 % (en las fechas, 1 año)
+  const BARRA_NUMEROS = 10;    // la barra para subir llega hasta ×10 la subida mínima…
+  const BARRA_FECHAS = 200;    // …o hasta 200 años más en las fechas
   // Avatares ilustrados (js/avatares.js, generado desde shared/avatares/*.svg)
   const AVATARS = (window.AVATARES || []).map((a) => a.id);
 
@@ -36,11 +41,43 @@
       R.log.push({ id: playerId, action: 'abre', value });
     },
 
-    /** action: 'subir' (con value > bid), 'quedar' o 'bajar'. Devuelve true si la ronda ha terminado. */
+    /**
+     * La cifra mínima para subir. Fechas: un año más. Números: al menos un 10 % más, redondeado
+     * hacia arriba a 3 cifras significativas (8.848 → 9.740) y, si la cifra es entera, al menos +1.
+     */
+    minSubida(q, bid) {
+      if (q.tipo === 'fecha') return bid + 1;
+      if (!(bid > 0)) return bid + Math.max(1, Math.abs(bid) * SUBIDA_MIN);
+      const x = bid * (1 + SUBIDA_MIN);
+      const paso = Math.pow(10, Math.floor(Math.log10(x)) - 2);
+      let min = Math.ceil(x / paso - 1e-9) * paso;
+      if (paso < 1) min = Number(min.toFixed(12)); // 15.100000000000001 → 15.1
+      if (Number.isInteger(bid)) min = Math.max(min, bid + 1);
+      return min;
+    },
+
+    /** ¿Vale esta cifra para subir? (con un margen mínimo por los redondeos entre web y app) */
+    subidaValida(q, bid, v) {
+      if (typeof v !== 'number' || !isFinite(v) || !(v > bid)) return false;
+      const min = Logic.minSubida(q, bid);
+      return v >= min - Math.abs(min) * 1e-9;
+    },
+
+    /** Cuántas veces ha subido ya la cifra este jugador en la ronda (abrir no cuenta). */
+    subidas(R, playerId) {
+      return (R.log || []).filter((l) => l.id === playerId && l.action === 'subir').length;
+    },
+
+    puedeSubir(R, playerId) {
+      return Logic.subidas(R, playerId) < MAX_SUBIDAS;
+    },
+
+    /** action: 'subir' (cifra válida y le quedan subidas), 'quedar' o 'bajar'. Devuelve true si la ronda ha terminado. */
     act(players, R, playerId, action, value) {
       if (R.queue[0] !== playerId) throw new Error('No es su turno');
       if (action === 'subir') {
-        if (!(value > R.bid)) throw new Error('La cifra debe ser mayor');
+        if (!Logic.puedeSubir(R, playerId)) throw new Error('Ya ha subido ' + MAX_SUBIDAS + ' veces');
+        if (!Logic.subidaValida(R.q, R.bid, value)) throw new Error('Hay que subir al menos hasta ' + Logic.minSubida(R.q, R.bid));
         R.status[R.driver] = 'carro';
         R.status[playerId] = 'conductor';
         R.driver = playerId; R.bid = value;
@@ -78,12 +115,6 @@
       return null;
     },
 
-    /** Lo lejos que está una cifra de la respuesta (para quedarse con la peor de cada jugador). */
-    distancia(q, v) {
-      if (q.tipo === 'fecha') return Math.abs(v - q.a);
-      return Math.abs(Math.log(Math.max(v, 1e-9) / Math.max(q.a, 1e-9)));
-    },
-
     /**
      * Puntos de la ronda. La burra aguanta si la respuesta real es IGUAL O MAYOR que la cifra.
      * Con `barbaridades`, cada jugador que haya dicho algún disparate en la ronda pierde 1 punto (una vez).
@@ -110,28 +141,26 @@
 
     /**
      * Quién se lleva el −1 de las barbaridades: el que dice el disparate y también el que se queda
-     * en el carro con él (lo da por bueno). Una vez por jugador, con su peor cifra.
+     * en el carro con él (lo da por bueno). Cuenta la ÚLTIMA cifra que dijo o apoyó cada jugador:
+     * si empezó con una barbaridad pero luego la corrigió subiendo, ya no se le castiga.
      * Devuelve [{ id, v, tipo, de }] — `de` es el conductor de la cifra apoyada (null si la dijo él).
      */
     barbaridades(R) {
-      const apoyos = new Map();
-      const apunta = (id, v, de) => apoyos.set(id, [...(apoyos.get(id) || []), { v, de }]);
+      const ultima = new Map();
+      const apunta = (id, v, de) => ultima.set(id, { v, de });
       let bid = null, driver = null;
       (R.log || []).forEach((l) => {
         if (l.action === 'abre' || l.action === 'subir') {
           bid = l.value; driver = l.id;
           apunta(l.id, l.value, null);
-        } else if (l.action === 'quedar' && bid !== null) {
+        } else if ((l.action === 'quedar' || l.action === 'tiempo') && bid !== null) {
           apunta(l.id, bid, driver);
         }
       });
       const out = [];
-      apoyos.forEach((cifras, id) => {
-        // Antes lo que dijo él mismo; dentro de eso, la más disparatada
-        const propia = (c) => (c.de === null ? 0 : 1);
-        const peor = cifras.filter((c) => Logic.barbaridad(R.q, c.v))
-          .sort((x, y) => propia(x) - propia(y) || Logic.distancia(R.q, y.v) - Logic.distancia(R.q, x.v))[0];
-        if (peor) out.push({ id, v: peor.v, tipo: Logic.barbaridad(R.q, peor.v), de: peor.de });
+      ultima.forEach((c, id) => {
+        const tipo = Logic.barbaridad(R.q, c.v);
+        if (tipo) out.push({ id, v: c.v, tipo, de: c.de });
       });
       return out;
     },
@@ -530,6 +559,8 @@
             <br>${ico('subir')} <b>Subir la cifra</b> (pasa a ser el conductor y el anterior se sube al carro),
             <br>${ico('carreta')} <b>Quedarse en el carro</b>, o
             <br>${ico('bajar')} <b>Bajarse</b> (ya no puede volver a subir ni pujar en esta ronda).</li>
+          <li>Para subir hay que subir de verdad: en los números, <b>al menos un 10 %</b> (en las fechas, un año).
+            Y cada jugador puede subir <b>como mucho ${MAX_SUBIDAS} veces</b> por ronda.</li>
           <li>Se sigue dando vueltas hasta que nadie sube la cifra.</li>
           <li>El carro cruza el puente si la <b>respuesta real es igual o mayor</b> que la cifra del conductor. Si no… ¡al río!</li>
         </ol>
@@ -731,12 +762,73 @@
     screenHandoff(playerById(R.queue[0]), screenTurn);
   }
 
+  /** Botones rápidos para subir: el mínimo permitido y saltos grandes. */
+  function pasosSubida(q) {
+    return q.tipo === 'fecha'
+      ? [['+1', '1'], ['+5', '5'], ['+25', '25'], ['+100', '100']]
+      : [['Mínimo (+10 %)', 'min'], ['+50 %', 'p50'], ['×2', 'x2'], ['×10', 'x10']];
+  }
+
+  /** La cifra que propone cada botón rápido (nunca por debajo del mínimo). */
+  function cifraSubida(q, bid, step) {
+    const min = Logic.minSubida(q, bid);
+    if (step === 'min') return min;
+    if (/^\d+$/.test(step)) return Math.max(min, bid + Number(step));
+    if (!(bid > 0)) return min;
+    const v = step === 'p50' ? bid * 1.5 : step === 'x2' ? bid * 2 : bid * 10;
+    return Math.max(min, redondea(v));
+  }
+
+  /**
+   * La barra para subir: f = 0 es la subida mínima y f = 1 el tope (×10 en los números, +200 años en las
+   * fechas). En los números avanza en escala logarítmica: los primeros milímetros son subidas pequeñas
+   * y al final, saltos grandes. Mismo cálculo que GameEngine.cifraBarra en Android.
+   */
+  function cifraBarra(q, bid, f) {
+    const min = Logic.minSubida(q, bid);
+    const t = Math.min(1, Math.max(0, f));
+    if (q.tipo === 'fecha') return Math.round(min + t * BARRA_FECHAS);
+    if (!(min > 0)) return min;
+    return Math.max(min, redondea(min * Math.pow(BARRA_NUMEROS, t)));
+  }
+
+  /** La barra mueve la cifra del campo (que se puede seguir escribiendo a mano). */
+  function bindBarra(q, bid, field) {
+    const barra = document.querySelector('#barra-subir');
+    if (!barra) return;
+    barra.addEventListener('input', () => field.set(cifraBarra(q, bid, Number(barra.value) / 1000)));
+  }
+
+  /** 13.290 → 13.300 (3 cifras significativas), para que los botones den cifras limpias. */
+  function redondea(v) {
+    if (!(v > 0)) return v;
+    const paso = Math.pow(10, Math.floor(Math.log10(v)) - 2);
+    const r = Math.round(v / paso) * paso;
+    return paso < 1 ? Number(r.toFixed(12)) : r;
+  }
+
+  /** Botón "Subir la cifra" con su panel, o el aviso de que ya no le quedan subidas. */
+  function subirHTML(q, quedan, minimo, stepBtns) {
+    if (quedan <= 0) {
+      return `<button class="btn ambar bloque" id="subir" disabled>${ico('subir')} Ya has subido ${MAX_SUBIDAS} veces</button>`;
+    }
+    return `
+        <button class="btn ambar bloque" id="subir">${ico('subir')} Subir la cifra <span class="suave">(${quedan === 1 ? 'última vez' : `te quedan ${quedan}`})</span></button>
+        <div class="panel col" id="panel-subir" hidden>
+          <p class="suave centro" style="margin:0">Mínimo: <b>${esc(fmtQ(minimo, q))}</b> · desliza para subir más</p>
+          <input type="range" id="barra-subir" class="barra-subir" min="0" max="1000" value="0" aria-label="Cuánto subir la cifra">
+          <div class="botones-rapidos">${stepBtns.map(([l, s]) => `<button class="btn peq" data-step="${s}">${l}</button>`).join('')}</div>
+          ${cifraInput(q, 'Nueva cifra (mayor)')}
+          <button class="btn ambar bloque" id="ok-subir" disabled>${ico('burra')} Me monto en la burra</button>
+        </div>`;
+  }
+
   function screenTurn(player) {
     const R = G.R, q = R.q;
     const driver = playerById(R.driver);
-    const stepBtns = q.tipo === 'fecha'
-      ? [['+1', 1], ['+5', 5], ['+25', 25], ['+100', 100]]
-      : [['+1', 'a1'], ['+10 %', 'p10'], ['×2', 'x2'], ['×10', 'x10']];
+    const stepBtns = pasosSubida(q);
+    const quedan = MAX_SUBIDAS - Logic.subidas(R, player.id);
+    const minimo = Logic.minSubida(q, R.bid);
     render(`
       ${header()}
       ${questionPanel()}
@@ -747,30 +839,19 @@
       <p class="centro">${tag(player)}, ¿qué haces?</p>
       <div id="rig"></div>
       <div class="col">
-        <button class="btn ambar bloque" id="subir">${ico('subir')} Subir la cifra</button>
-        <div class="panel col" id="panel-subir" hidden>
-          <div class="botones-rapidos">${stepBtns.map(([l, s]) => `<button class="btn peq" data-step="${s}">${l}</button>`).join('')}</div>
-          ${cifraInput(q, 'Nueva cifra (mayor)')}
-          <button class="btn ambar bloque" id="ok-subir" disabled>${ico('burra')} Me monto en la burra</button>
-        </div>
+        ${subirHTML(q, quedan, minimo, stepBtns)}
         <button class="btn musgo bloque" id="quedar">${ico('carreta')} Me quedo en el carro</button>
         <button class="btn sangre bloque" id="bajar">${ico('bajar')} Me bajo del carro</button>
       </div>
       ${cartPanel()}`);
 
     const okBtn = $app.querySelector('#ok-subir');
-    const field = bindCifra(q, (v) => { okBtn.disabled = v === null || !(v > R.bid); });
-    const raise = (step) => {
-      const b = R.bid;
-      if (typeof step === 'number') return b + step;
-      if (step === 'a1') return b + 1;
-      if (step === 'p10') return Math.max(b + 1, Math.ceil(b * 1.1));
-      if (step === 'x2') return b > 0 ? b * 2 : b + 1;
-      return b > 0 ? b * 10 : b + 1;
-    };
+    const valida = (v) => quedan > 0 && v !== null && Logic.subidaValida(q, R.bid, v);
+    const field = bindCifra(q, (v) => { okBtn.disabled = !valida(v); });
+    const raise = (step) => cifraSubida(q, R.bid, step);
+    bindBarra(q, R.bid, field);
     $app.querySelectorAll('[data-step]').forEach((el) => el.addEventListener('click', () => {
-      const s = el.dataset.step;
-      field.set(raise(/^\d+$/.test(s) ? Number(s) : s));
+      field.set(raise(el.dataset.step));
     }));
     const rigEl = $app.querySelector('#rig');
     window.BridgeScene.rig(rigEl, G.players, R);
@@ -794,16 +875,17 @@
     on('#subir', 'click', () => {
       $app.querySelector('#panel-subir').hidden = false;
       $app.querySelector('#subir').hidden = true;
-      field.set(raise(q.tipo === 'fecha' ? 1 : 'a1'));
+      field.set(raise('min'));
       field.focus();
     });
-    okBtn.addEventListener('click', () => { const v = field.read(); if (v !== null && v > R.bid) act('subir', v); });
+    okBtn.addEventListener('click', () => { const v = field.read(); if (valida(v)) act('subir', v); });
     on('#quedar', 'click', () => act('quedar'));
     on('#bajar', 'click', () => act('bajar'));
     startTimer(TURN_SECONDS, () => {
       const v = field.read();
-      const raising = !$app.querySelector('#panel-subir').hidden;
-      if (raising && v !== null && v > R.bid) return act('subir', v);
+      const panel = $app.querySelector('#panel-subir');
+      const raising = panel && !panel.hidden;
+      if (raising && valida(v)) return act('subir', v);
       // Si se acaba el tiempo, se queda en el carro.
       act('quedar', undefined, true);
     });
@@ -1042,7 +1124,8 @@
 
   // Piezas compartidas con el modo online (js/online.js)
   window.ParaElCarro = {
-    Logic, AVATARS, OPEN_SECONDS, TURN_SECONDS, MIN_PLAYERS, MAX_PLAYERS, AD_EVERY_ROUNDS,
+    Logic, AVATARS, OPEN_SECONDS, TURN_SECONDS, MIN_PLAYERS, MAX_PLAYERS, AD_EVERY_ROUNDS, MAX_SUBIDAS,
+    pasosSubida, cifraSubida, subirHTML, cifraBarra, bindBarra,
     esc, fmtQ, parseCifra, avatarHTML, ico, feedback, store, sfx, vibrate, render, on, startTimer, stopTimer,
     pickQuestion, avatarPicker, cifraInput, bindCifra, cartPanel, showInterstitial, screenHome, Ratings, Aprende,
     showBarbaridades, barbaridadesHTML, duracionBarbaridades,

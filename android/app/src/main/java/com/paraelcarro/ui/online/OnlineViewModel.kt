@@ -339,7 +339,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             if (!mine || s.sent) return@launch
             val v = draftValue() ?: return@launch
             if (st.phase == "open") send("abre", v)
-            else if (s.draft.raiseOpen && v > (st.r?.bid ?: Double.MAX_VALUE)) send("subir", v)
+            else if (s.draft.raiseOpen && puedeSubirCon(v, s)) send("subir", v)
         }
     }
 
@@ -370,7 +370,20 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
     fun submitOpening() { draftValue()?.let { _events.tryEmit(OnlineEvent.Bid); send("abre", it) } }
     fun submitRaise() {
         val v = draftValue() ?: return
-        if (v > (_ui.value.state?.r?.bid ?: return)) { _events.tryEmit(OnlineEvent.Raise); playThenSend("subir", v) }
+        if (puedeSubirCon(v)) { _events.tryEmit(OnlineEvent.Raise); playThenSend("subir", v) }
+    }
+
+    /** Cuántas subidas me quedan en esta ronda (como mucho [GameEngine.MAX_SUBIDAS]). */
+    fun subidasQuedan(s: OnlineUi = _ui.value): Int {
+        val r = s.state?.r ?: return 0
+        return GameEngine.MAX_SUBIDAS - r.log.count { it.id == s.me && it.action == "subir" }
+    }
+
+    /** ¿Puedo subir a esta cifra? (subida mínima y máximo de subidas; el jefe lo vuelve a comprobar) */
+    fun puedeSubirCon(v: Double, s: OnlineUi = _ui.value): Boolean {
+        val st = s.state ?: return false
+        val r = st.r ?: return false
+        return subidasQuedan(s) > 0 && GameEngine.subidaValida(st.question, r.bid, v)
     }
     fun stay() { _events.tryEmit(OnlineEvent.Stay); playThenSend("quedar", null) }
     fun getOff() { _events.tryEmit(OnlineEvent.GetOff); playThenSend("bajar", null) }
@@ -576,7 +589,8 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
                     }
                     game.phase == "turn" && rs.queue.firstOrNull() == idx -> {
                         val action = when (a) {
-                            "subir" -> if (v != null && v > (rs.bid ?: Double.MAX_VALUE)) TurnAction.Raise(v) else return
+                            // Subida mínima y máximo de subidas: si no se cumple, se ignora (GameEngine.act lo exige)
+                            "subir" -> if (v != null && rs.bid != null && GameEngine.puedeSubir(rs, idx) && GameEngine.subidaValida(rs.question, rs.bid, v)) TurnAction.Raise(v) else return
                             "quedar" -> TurnAction.Stay
                             "bajar" -> TurnAction.GetOff
                             else -> return

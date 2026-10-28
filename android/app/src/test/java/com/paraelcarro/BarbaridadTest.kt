@@ -43,15 +43,25 @@ class BarbaridadTest {
         val players = (1..3).map { Player(it, "J$it", "av:gato") }
         var r = GameEngine.open(players, RoundState(kanjis, 0), 1, 1.0) // abre con 1: barbaridad por lo bajo
         r = GameEngine.act(players, r, 2, TurnAction.Raise(5.0))       // otra barbaridad del jugador 2
-        r = GameEngine.act(players, r, 3, TurnAction.Raise(2000.0))    // razonable
+        r = GameEngine.act(players, r, 3, TurnAction.Stay)             // J3 la da por buena
         r = GameEngine.act(players, r, 1, TurnAction.Stay)
-        r = GameEngine.act(players, r, 2, TurnAction.Stay)
         val sin = GameEngine.score(players, r, barbaridades = false)
         assertTrue(sin.barbaridades.isEmpty())
         val con = GameEngine.score(players, r, barbaridades = true)
-        assertEquals(setOf(1, 2), con.barbaridades.map { it.playerId }.toSet())
+        assertEquals(listOf(1, 2, 3), con.barbaridades.map { it.playerId })
         con.barbaridades.forEach { assertEquals(sin.delta[it.playerId]!! - 1, con.delta[it.playerId]) }
-        assertEquals(sin.delta[3], con.delta[3])
+    }
+
+    @Test
+    fun `si corrige la barbaridad subiendo ya no pierde el punto`() {
+        val players = (1..3).map { Player(it, "J$it", "av:gato") }
+        var r = GameEngine.open(players, RoundState(kanjis, 0), 1, 10.0) // J1 empieza con una barbaridad
+        r = GameEngine.act(players, r, 2, TurnAction.Stay)              // J2 la apoya…
+        r = GameEngine.act(players, r, 3, TurnAction.Raise(1500.0))     // …pero J3 sube a algo razonable
+        r = GameEngine.act(players, r, 1, TurnAction.Raise(2000.0))     // y J1 corrige
+        r = GameEngine.act(players, r, 2, TurnAction.Stay)              // J2 se queda con 2000
+        r = GameEngine.act(players, r, 3, TurnAction.Stay)
+        assertTrue(GameEngine.score(players, r, barbaridades = true).barbaridades.isEmpty())
     }
 
     @Test
@@ -76,29 +86,28 @@ class BarbaridadTest {
         val players = (1..4).map { Player(it, "J$it", "av:gato") }
         var r = GameEngine.open(players, RoundState(kanjis, 0), 1, 150.0) // J1 se queda cortísimo
         r = GameEngine.act(players, r, 2, TurnAction.Stay)             // J2 lo da por bueno → −1
-        r = GameEngine.act(players, r, 3, TurnAction.Raise(2000.0))    // J3 sube a algo razonable
-        r = GameEngine.act(players, r, 4, TurnAction.Stay)             // J4 se queda con 2000 → nada
-        r = GameEngine.act(players, r, 1, TurnAction.Stay)
-        r = GameEngine.act(players, r, 2, TurnAction.Stay)
+        r = GameEngine.act(players, r, 3, TurnAction.GetOff)           // J3 se baja → nada
+        r = GameEngine.act(players, r, 4, TurnAction.Stay, timedOut = true) // J4 se queda por tiempo → −1
         val sin = GameEngine.score(players, r, barbaridades = false)
         val con = GameEngine.score(players, r, barbaridades = true)
-        assertEquals(listOf(1, 2), con.barbaridades.map { it.playerId })
+        assertEquals(listOf(1, 2, 4), con.barbaridades.map { it.playerId })
         assertNull(con.barbaridades[0].from)
         assertEquals(1, con.barbaridades[1].from)
         assertEquals(150.0, con.barbaridades[1].value, 0.0)
-        assertEquals(sin.delta.mapValues { (id, d) -> if (id <= 2) d - 1 else d }, con.delta)
+        assertEquals(sin.delta.mapValues { (id, d) -> if (id == 3) d else d - 1 }, con.delta)
     }
 
     @Test
-    fun `lo que dijo uno mismo cuenta antes que lo que apoyo`() {
+    fun `cuenta la ultima cifra que dijo o apoyo cada uno`() {
         val players = (1..3).map { Player(it, "J$it", "av:gato") }
         var r = GameEngine.open(players, RoundState(kanjis, 0), 1, 30000.0)
         r = GameEngine.act(players, r, 2, TurnAction.Raise(90000.0))
         r = GameEngine.act(players, r, 3, TurnAction.Stay)
-        r = GameEngine.act(players, r, 1, TurnAction.Stay)              // J1 apoya 90000, pero dijo 30000
+        r = GameEngine.act(players, r, 1, TurnAction.Stay)              // J1 dijo 30000 y luego apoya 90000
         val b = GameEngine.score(players, r, barbaridades = true).barbaridades.associateBy { it.playerId }
-        assertEquals(30000.0, b.getValue(1).value, 0.0)
-        assertNull(b.getValue(1).from)
+        assertEquals(90000.0, b.getValue(1).value, 0.0)
+        assertEquals(2, b.getValue(1).from)
+        assertNull(b.getValue(2).from)
         assertEquals(2, b.getValue(3).from)
     }
 

@@ -38,7 +38,11 @@ Funciona con **Firebase Realtime Database** (proyecto `para-el-carro-91ke5`, sep
 1. El jugador que abre tiene **50 s** para decir una cifra y se monta en la burra (conductor).
 2. Por turnos, cada uno tiene **15 s** para: ⬆️ **subir la cifra** (pasa a conductor), 🛒 **quedarse en el carro**
    o 🚶 **bajarse** (ya no puede volver a subir ni pujar en esa ronda). Si se acaba el tiempo, se queda.
-3. Se dan vueltas hasta que nadie sube. El jefe de sala (jugador 1) elige el número de rondas y el tipo de preguntas.
+3. Para que las rondas no se eternicen: en los números hay que subir **al menos un 10 %** (redondeado a 3 cifras:
+   del Everest, 8.848 → 9.740; en las fechas, un año) y cada jugador puede subir **como mucho 3 veces** por ronda
+   (`MAX_SUBIDAS` / `SUBIDA_MIN` en `js/game.js` y `GameEngine.kt`). El jefe de sala ignora las subidas que no lo cumplan.
+   Para subir deprisa hay una **barra**: del mínimo a ×10 (o +200 años), en escala logarítmica, además de botones rápidos.
+4. Se dan vueltas hasta que nadie sube. El jefe de sala (jugador 1) elige el número de rondas y el tipo de preguntas.
 
 | | Cruza | Al río |
 |---|---|---|
@@ -47,6 +51,10 @@ Funciona con **Firebase Realtime Database** (proyecto `para-el-carro-91ke5`, sep
 | 🚶 Bajados | 0 | +3 (2 + 1 que paga el conductor) |
 
 ¡Clavada! = la cifra está a menos de un 10 % por debajo de la respuesta (o a 5 años en las fechas).
+
+😱 Modo barbaridades: −1 a quien diga un disparate (10 veces más o menos, o más de 100 años) o se quede en el carro
+con él. Cuenta la **última** cifra que dijo o apoyó cada jugador: si empezó con una barbaridad y luego la corrigió
+subiendo, ya no pierde el punto.
 
 ## Probar la web en local
 

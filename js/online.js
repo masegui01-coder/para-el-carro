@@ -404,14 +404,10 @@
     const mine = turnId === S.me;
     const driver = pl(R.driver);
     const myStatus = R.status[S.me];
-    const steps = q.tipo === 'fecha' ? [['+1', 1], ['+5', 5], ['+25', 25], ['+100', 100]] : [['+1', 'a1'], ['+10 %', 'p10'], ['×2', 'x2'], ['×10', 'x10']];
-    const raise = (s) => {
-      const b = R.bid;
-      if (typeof s === 'number') return b + s;
-      if (s === 'a1') return b + 1;
-      if (s === 'p10') return Math.max(b + 1, Math.ceil(b * 1.1));
-      return b > 0 ? b * (s === 'x2' ? 2 : 10) : b + 1;
-    };
+    const steps = P().pasosSubida(q);
+    const raise = (s) => P().cifraSubida(q, R.bid, s);
+    const quedan = P().MAX_SUBIDAS - P().Logic.subidas(R, S.me);
+    const minimo = P().Logic.minSubida(q, R.bid);
     const where = myStatus === 'conductor' ? `${P().ico('burra')} Vas montado en la burra.`
       : myStatus === 'bajado' ? `${P().ico('bajar')} Te has bajado del carro.` : `${P().ico('carreta')} Vas en el carro.`;
     P().render(`
@@ -424,12 +420,7 @@
       <div id="rig"></div>
       ${mine ? `<p class="centro"><b>¡Te toca!</b> ¿Qué haces?</p>
         <div class="col" id="acciones">
-          <button class="btn ambar bloque" id="subir">${P().ico('subir')} Subir la cifra</button>
-          <div class="panel col" id="panel-subir" hidden>
-            <div class="botones-rapidos">${steps.map(([l, s]) => `<button class="btn peq" data-step="${s}">${l}</button>`).join('')}</div>
-            ${P().cifraInput(q, 'Nueva cifra (mayor)')}
-            <button class="btn ambar bloque" id="ok-subir" disabled>${P().ico('burra')} Me monto en la burra</button>
-          </div>
+          ${P().subirHTML(q, quedan, minimo, steps)}
           <button class="btn musgo bloque" id="quedar">${P().ico('carreta')} Me quedo en el carro</button>
           <button class="btn sangre bloque" id="bajar">${P().ico('bajar')} Me bajo del carro</button>
         </div>`
@@ -453,7 +444,8 @@
     if (mine) {
       P().vibrate(60);
       const okBtn = document.querySelector('#ok-subir');
-      field = P().bindCifra(q, (v) => { okBtn.disabled = v === null || !(v > R.bid); });
+      const valida = (v) => quedan > 0 && v !== null && P().Logic.subidaValida(q, R.bid, v);
+      field = P().bindCifra(q, (v) => { okBtn.disabled = !valida(v); });
       const act = (a, v) => {
         if (S.sent) return;
         S.sent = true; // evita que el temporizador envíe otra jugada mientras salta el muñeco
@@ -461,6 +453,7 @@
         P().feedback(a);
         // Primero el muñeco se sube, se baja o se alegra; después se envía la jugada
         const after = JSON.parse(JSON.stringify(R));
+        after.q = q;
         let anim;
         try {
           P().Logic.act(players, after, S.me, a, v);
@@ -469,23 +462,24 @@
         anim.then(() => send(a, v));
       };
       document.querySelectorAll('[data-step]').forEach((el) => el.addEventListener('click', () => {
-        const s = el.dataset.step; field.set(raise(/^\d+$/.test(s) ? Number(s) : s));
+        field.set(raise(el.dataset.step));
       }));
+      P().bindBarra(q, R.bid, field);
       P().on('#subir', 'click', () => {
         raising = true;
         document.querySelector('#panel-subir').hidden = false;
         document.querySelector('#subir').hidden = true;
-        field.set(raise(q.tipo === 'fecha' ? 1 : 'a1'));
+        field.set(raise('min'));
         field.focus();
       });
-      okBtn.addEventListener('click', () => { const v = field.read(); if (v !== null && v > R.bid) act('subir', v); });
+      okBtn.addEventListener('click', () => { const v = field.read(); if (valida(v)) act('subir', v); });
       P().on('#quedar', 'click', () => act('quedar'));
       P().on('#bajar', 'click', () => act('bajar'));
     }
     P().startTimer(P().TURN_SECONDS, () => {
       if (!mine || S.sent) return;
       const v = field.read();
-      if (raising && v !== null && v > R.bid) send('subir', v);
+      if (raising && quedan > 0 && v !== null && P().Logic.subidaValida(q, R.bid, v)) send('subir', v);
       // si no, el anfitrión le deja en el carro al vencer el plazo
     }, st.deadline, now);
   }
@@ -709,7 +703,8 @@
           P().Logic.open(g.players, g.R, act.pid, act.v);
           this.after();
         } else if (g.phase === 'turn' && act.pid === g.R.queue[0] && ['subir', 'quedar', 'bajar'].includes(act.a)) {
-          if (act.a === 'subir' && !(typeof act.v === 'number' && act.v > g.R.bid)) return;
+          // El árbitro comprueba la subida mínima y el máximo de subidas (también lo hace Logic.act)
+          if (act.a === 'subir' && !(P().Logic.puedeSubir(g.R, act.pid) && P().Logic.subidaValida(g.R.q, g.R.bid, act.v))) return;
           P().Logic.act(g.players, g.R, act.pid, act.a, act.v);
           this.after();
         }

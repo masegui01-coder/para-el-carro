@@ -188,8 +188,16 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
     fun submitRaise() {
         val s = _state.value
         val value = draftValue(s) ?: return
-        if (value <= (s.round?.bid ?: return)) return
+        if (!puedeSubirCon(s, value)) return
         act(TurnAction.Raise(value))
+    }
+
+    /** ¿Puede el jugador del turno subir a esta cifra? (subida mínima y máximo de subidas) */
+    fun puedeSubirCon(s: GameState, value: Double): Boolean {
+        val round = s.round ?: return false
+        val bid = round.bid ?: return false
+        val phase = s.phase as? GamePhase.Turn ?: return false
+        return GameEngine.puedeSubir(round, phase.playerId) && GameEngine.subidaValida(round.question, bid, value)
     }
 
     fun stay() = act(TurnAction.Stay)
@@ -242,7 +250,7 @@ class GameViewModel(app: Application) : AndroidViewModel(app) {
             }
             is GamePhase.Turn -> {
                 val v = draftValue(s)
-                if (s.draft.raiseOpen && v != null && v > (s.round?.bid ?: Double.MAX_VALUE)) act(TurnAction.Raise(v))
+                if (s.draft.raiseOpen && v != null && puedeSubirCon(s, v)) act(TurnAction.Raise(v))
                 else act(TurnAction.Stay, timedOut = true) // si se acaba el tiempo, se queda en el carro
             }
             else -> Unit

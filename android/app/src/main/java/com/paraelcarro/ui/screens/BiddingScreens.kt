@@ -15,7 +15,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.paraelcarro.domain.model.Question
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -27,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.paraelcarro.domain.GameEngine
 import com.paraelcarro.domain.format
 import com.paraelcarro.domain.model.GamePhase
 import com.paraelcarro.domain.model.GameState
@@ -44,7 +52,6 @@ import com.paraelcarro.ui.components.TimerBar
 import com.paraelcarro.ui.components.Tone
 import com.paraelcarro.ui.components.WoodButton
 import com.paraelcarro.ui.theme.Rustic
-import kotlin.math.ceil
 
 /** "Pasa el móvil a…": el temporizador no empieza hasta que el jugador lo coge. */
 @Composable
@@ -94,16 +101,9 @@ fun TurnScreen(state: GameState, phase: GamePhase.Turn, vm: GameViewModel) {
     val bid = round.bid!!
     val driver = state.player(round.driverId)!!
     val value = vm.draftValue(state)
-    val steps: List<Pair<String, () -> Double>> = if (q.type == QuestionType.FECHA) {
-        listOf(1, 5, 25, 100).map { n -> "+$n" to { bid + n } }
-    } else {
-        listOf(
-            "+1" to { bid + 1 },
-            "+10 %" to { maxOf(bid + 1, ceil(bid * 1.1)) },
-            "×2" to { if (bid > 0) bid * 2 else bid + 1 },
-            "×10" to { if (bid > 0) bid * 10 else bid + 1 },
-        )
-    }
+    val steps = GameEngine.pasosSubida(q, bid)
+    val minimo = GameEngine.minSubida(q, bid)
+    val quedan = GameEngine.MAX_SUBIDAS - GameEngine.subidas(round, p.id)
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         RoundHeader(state.roundNumber, state.config.rounds, q)
@@ -120,20 +120,50 @@ fun TurnScreen(state: GameState, phase: GamePhase.Turn, vm: GameViewModel) {
             cheerKey = state.cheerId?.let { round.log.size },
         )
         val free = !state.animating
-        if (!state.draft.raiseOpen) {
-            WoodButton("Subir la cifra", { vm.openRaise(steps.first().second()) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free, icon = R.drawable.ic_subir)
+        if (quedan <= 0) {
+            WoodButton("Ya has subido ${GameEngine.MAX_SUBIDAS} veces", {}, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = false, icon = R.drawable.ic_subir)
+        } else if (!state.draft.raiseOpen) {
+            WoodButton(textoSubir(quedan), { vm.openRaise(minimo) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free, icon = R.drawable.ic_subir)
         } else {
             Panel {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)) {
-                    steps.forEach { (label, f) -> WoodButton(label, { vm.setDraftValue(f()) }, small = true) }
-                }
+                Text("Mínimo: ${q.format(minimo)} · desliza para subir más", color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                BarraSubida(q, bid, vm::setDraftValue)
+                PasosSubida(steps, vm::setDraftValue)
                 CifraField(q, state.draft, "Nueva cifra (mayor)", vm::onDraftText, vm::onDraftBeforeChrist)
-                WoodButton("Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free && value != null && value > bid, icon = R.drawable.ic_burra)
+                WoodButton("Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = free && value != null && vm.puedeSubirCon(state, value), icon = R.drawable.ic_burra)
             }
         }
         WoodButton("Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO, enabled = free, icon = R.drawable.ic_carreta)
         WoodButton("Me bajo del carro", vm::getOff, Modifier.fillMaxWidth(), tone = Tone.SANGRE, enabled = free, icon = R.drawable.ic_bajar)
         CartPanel(state)
+    }
+}
+
+/** "Subir la cifra (te quedan 2)" / "(última vez)". */
+fun textoSubir(quedan: Int): String = "Subir la cifra (" + (if (quedan == 1) "última vez" else "te quedan $quedan") + ")"
+
+/** Barra para subir deprisa: del mínimo permitido a ×10 (o +200 años), sin tener que escribir. */
+@Composable
+fun BarraSubida(question: Question, bid: Double, onPick: (Double) -> Unit) {
+    var f by remember(question.id, bid) { mutableFloatStateOf(0f) }
+    Slider(
+        value = f,
+        onValueChange = { f = it; onPick(GameEngine.cifraBarra(question, bid, it.toDouble())) },
+        colors = SliderDefaults.colors(thumbColor = Rustic.Ambar, activeTrackColor = Rustic.Ambar),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+/** Botones rápidos para subir (en dos filas si no caben: "Mínimo (+10 %)" es largo). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun PasosSubida(steps: List<Pair<String, Double>>, onPick: (Double) -> Unit) {
+    FlowRow(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        steps.forEach { (label, v) -> WoodButton(label, { onPick(v) }, small = true) }
     }
 }
 

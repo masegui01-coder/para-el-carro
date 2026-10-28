@@ -87,8 +87,9 @@ fun RulesScreen(onBack: () -> Unit) {
             RuleOption(R.drawable.ic_subir, "Subir la cifra (pasa a conductor y el anterior se sube al carro)")
             RuleOption(R.drawable.ic_carreta, "Quedarse en el carro")
             RuleOption(R.drawable.ic_bajar, "Bajarse (ya no puede volver ni pujar en la ronda)")
-            Text("4. Se dan vueltas hasta que nadie sube la cifra.")
-            Text("5. El carro cruza si la respuesta real es IGUAL O MAYOR que la cifra del conductor. Si no… ¡al río!")
+            Text("4. Para subir hay que subir de verdad: en los números, al menos un 10 % (en las fechas, un año). Cada jugador puede subir como mucho ${com.paraelcarro.domain.GameEngine.MAX_SUBIDAS} veces por ronda.")
+            Text("5. Se dan vueltas hasta que nadie sube la cifra.")
+            Text("6. El carro cruza si la respuesta real es IGUAL O MAYOR que la cifra del conductor. Si no… ¡al río!")
         }
         Title("Puntos")
         Panel {
