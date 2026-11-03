@@ -37,7 +37,7 @@ data class Question(
 )
 
 /** También sirve como "categoría" de la ronda: Fechas o Números. */
-val Question.category: String get() = if (type == QuestionType.FECHA) "📅 Fecha" else "🔢 Número"
+val Question.category: String get() = if (type == QuestionType.FECHA) "Fecha" else "Número"
 
 enum class PlayerStatus { CONDUCTOR, EN_CARRO, BAJADO }
 

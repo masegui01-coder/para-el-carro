@@ -71,22 +71,30 @@
   function profileForm(title, intro, codeValue, button) {
     const prof = P().store.get('perfil', { name: '', avatar: P().AVATARS[Math.floor(Math.random() * 12)] });
     P().render(`
-      <div class="cabecera"><button class="btn fantasma peq" id="atras">← Inicio</button><span>Sala privada</span></div>
+      <div class="cabecera"><button class="btn peq" id="atras">${P().icono('atras')} Inicio</button><span class="ronda">SALA PRIVADA</span></div>
       <h2 style="margin-top:12px">${title}</h2>
       <p class="suave">${intro}</p>
       <div class="panel col">
         ${codeValue !== null ? `<label>Código de la sala<input type="text" id="codigo" maxlength="5" autocomplete="off" value="${P().esc(codeValue)}" class="codigo-input" placeholder="ABCDE"></label>` : ''}
         <div class="jugador">
-          <button class="avatar-btn" id="avatar" aria-label="Elegir avatar">${P().avatarHTML(prof.avatar, 'grande')}</button>
-          <input type="text" id="nombre" maxlength="14" placeholder="Tu nombre" value="${P().esc(prof.name)}">
+          <button class="avatar-btn" id="avatar" style="background:${P().personaje(prof.avatar).color}" aria-label="Elegir personaje (ahora ${P().esc(P().personaje(prof.avatar).nombre)})">${P().avatarHTML(prof.avatar, 'grande')}</button>
+          <input type="text" id="nombre" maxlength="14" placeholder="Tu nombre" aria-label="Tu nombre" value="${P().esc(prof.name)}">
         </div>
-        <div id="error" class="error"></div>
-        <button class="btn ambar bloque" id="ok">${button}</button>
+        <div id="error" class="error" role="alert"></div>
+        <button class="btn ambar bloque gordo" id="ok">${button}</button>
       </div>`, true);
     P().on('#atras', 'click', () => { history.replaceState(null, '', location.pathname); P().screenHome(); });
-    P().on('#avatar', 'click', () => P().avatarPicker(prof.avatar, [], (a) => {
-      if (a) { prof.avatar = a; document.querySelector('#avatar').innerHTML = P().avatarHTML(a, 'grande'); }
-    }));
+    P().on('#avatar', 'click', () => {
+      const campo = document.querySelector('#nombre');
+      P().avatarPicker(prof.avatar, [], (a, nombre) => {
+        if (typeof nombre === 'string') campo.value = nombre.slice(0, 14);
+        if (!a) return;
+        prof.avatar = a;
+        const btn = document.querySelector('#avatar');
+        btn.innerHTML = P().avatarHTML(a, 'grande');
+        btn.style.background = P().personaje(a).color;
+      }, { nombre: campo.value });
+    });
     const codeInput = document.querySelector('#codigo');
     if (codeInput) codeInput.addEventListener('input', () => { codeInput.value = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
     return {
@@ -101,7 +109,7 @@
   }
 
   function screenCreate() {
-    const form = profileForm('Crear sala privada', 'Serás el jefe de sala: eliges las rondas y empiezas la partida. Luego invitas a tus amigos con el código o el enlace.', null, '🌐 Crear sala');
+    const form = profileForm('Crear sala privada', 'Serás el jefe de sala: eliges las rondas y empiezas la partida. Luego invitas a tus amigos con el código o el enlace.', null, 'Crear sala');
     document.querySelector('#ok').addEventListener('click', async () => {
       const f = form.read();
       if (!f.name) return form.error('Escribe tu nombre.');
@@ -139,7 +147,7 @@
         if (snap.exists()) return enterRoom(code, saved.pid);
       } catch (e) { /* sigue al formulario */ }
     }
-    const form = profileForm('Unirme a una sala', 'Escribe el código que te han pasado (o abre su enlace), tu nombre y elige avatar.', code || '', '🔑 Entrar en la sala');
+    const form = profileForm('Unirme a una sala', 'Escribe el código que te han pasado (o abre su enlace), tu nombre y elige avatar.', code || '', 'Entrar en la sala');
     document.querySelector('#ok').addEventListener('click', async () => {
       const f = form.read();
       if (!/^[A-HJ-NP-Z2-9]{5}$/.test(f.code || '')) return form.error('El código tiene 5 letras o números.');
@@ -235,15 +243,15 @@
     const host = isHost();
     const onlineCount = players.filter((p) => p.online !== false).length;
     const link = inviteLink(S.code);
-    const modeName = { fecha: '📅 Fechas', numero: '🔢 Números', mezcla: '🎲 Mezcla' };
+    const modeName = { fecha: `${P().icono('calendario')} Fechas`, numero: `${P().icono('numero')} Números`, mezcla: `${P().icono('mezcla')} Mezcla` };
     P().render(`
-      <div class="cabecera"><button class="btn fantasma peq" id="salir">← Salir</button><span>Sala privada</span></div>
+      <div class="cabecera"><button class="btn peq" id="salir">${P().icono('atras')} Salir</button><span class="ronda">SALA PRIVADA</span></div>
       <div class="panel centro" style="margin-top:12px">
         <div class="suave">Código de la sala</div>
         <div class="codigo">${S.code}</div>
         <div class="fila" style="justify-content:center">
-          <button class="btn ambar" id="invitar">📤 Invitar amigos</button>
-          <button class="btn fantasma" id="copiar">🔗 Copiar enlace</button>
+          <button class="btn ambar" id="invitar">${P().icono('amigos')} Invitar amigos</button>
+          <button class="btn" id="copiar">Copiar enlace</button>
         </div>
         <div class="enlace suave" id="enlace">${P().esc(link)}</div>
       </div>
@@ -251,33 +259,33 @@
       <div class="panel col">
         ${players.map((p) => `
           <div class="fila">
-            <button class="avatar-btn" ${p.id === S.me ? 'id="mi-avatar"' : 'disabled'}>${P().avatarHTML(p.avatar, 'grande')}</button>
+            <button class="avatar-btn" style="background:${P().personaje(p.avatar).color}" ${p.id === S.me ? 'id="mi-avatar" aria-label="Cambiar tu personaje"' : `disabled aria-label="${P().esc(P().personaje(p.avatar).nombre)}"`}>${P().avatarHTML(p.avatar, 'grande')}</button>
             <span class="crece">${P().esc(p.name)}${p.id === S.me ? ' <span class="suave">(tú)</span>' : ''}</span>
-            ${p.id === S.meta.host ? '<span class="corona">👑 Jefe</span>' : ''}
-            ${p.online === false ? '<span class="suave">📴</span>' : ''}
-            ${host && p.id !== S.me ? `<button class="btn fantasma peq" data-echar="${p.id}" aria-label="Echar">✕</button>` : ''}
+            ${p.id === S.meta.host ? `<span class="corona">${P().icono('corona')} Jefe</span>` : ''}
+            ${p.online === false ? `<span class="suave">${P().icono('desconectado', 'desconectado')}</span>` : ''}
+            ${host && p.id !== S.me ? `<button class="btn fantasma peq" data-echar="${p.id}" aria-label="Echar a ${P().esc(p.name)}">${P().icono('cerrar')}</button>` : ''}
           </div>`).join('')}
       </div>
-      <h2>👑 ${host ? 'Tú decides' : 'El jefe de sala decide'}</h2>
+      <h2>${P().icono('corona')} ${host ? 'Tú decides' : 'El jefe decide'}</h2>
       <div class="panel col">
         <div class="fila"><span class="crece">Número de rondas</span>
-          ${host ? `<div class="contador"><button class="btn peq" id="menos">−</button><b>${S.meta.rounds}</b><button class="btn peq" id="mas">+</button></div>` : `<b class="ambar">${S.meta.rounds}</b>`}
+          ${host ? `<div class="contador"><button class="btn peq" id="menos" aria-label="Menos rondas">${P().icono('menos')}</button><b aria-live="polite">${S.meta.rounds}</b><button class="btn peq" id="mas" aria-label="Más rondas">${P().icono('mas')}</button></div>` : `<b class="ambar">${S.meta.rounds}</b>`}
         </div>
         ${host ? `<div class="segmentado">${Object.entries(modeName).map(([k, l]) => `<button data-mode="${k}" class="${S.meta.mode === k ? 'sel' : ''}">${l}</button>`).join('')}</div>`
           : `<div class="fila"><span class="crece">Preguntas</span><b class="ambar">${modeName[S.meta.mode]}</b></div>`}
-        ${host ? `<label class="fila"><span class="crece">😱 Modo barbaridades<br><span class="suave">−1 a quien diga un disparate</span></span><input type="checkbox" id="barbaridades" ${S.meta.barbaridades ? 'checked' : ''}></label>`
-          : `<div class="fila"><span class="crece">😱 Modo barbaridades</span><b class="ambar">${S.meta.barbaridades ? 'Sí' : 'No'}</b></div>`}
+        ${host ? `<label class="fila"><span class="crece"><b>Modo barbaridades</b><br><span class="suave">−1 a quien diga un disparate</span></span><input type="checkbox" role="switch" id="barbaridades" ${S.meta.barbaridades ? 'checked' : ''}></label>`
+          : `<div class="fila"><span class="crece">Modo barbaridades</span><b class="ambar">${S.meta.barbaridades ? 'Sí' : 'No'}</b></div>`}
       </div>
       ${host
-        ? `<button class="btn ambar bloque" id="empezar" ${onlineCount < P().MIN_PLAYERS ? 'disabled' : ''}>¡Arre, burra! Empezar</button>
+        ? `<button class="btn ambar bloque gordo" id="empezar" ${onlineCount < P().MIN_PLAYERS ? 'disabled' : ''}>¡Arre, burra! Empezar</button>
            ${onlineCount < P().MIN_PLAYERS ? `<p class="suave centro">Hacen falta al menos ${P().MIN_PLAYERS} jugadores conectados.</p>` : ''}`
-        : '<p class="suave centro">⏳ Esperando a que el jefe empiece la partida…</p>'}`, true);
+        : '<p class="suave centro">Esperando a que el jefe empiece la partida…</p>'}`, true);
 
     P().on('#salir', 'click', exitRoom);
     P().on('#invitar', 'click', () => shareInvite(link));
     P().on('#copiar', 'click', () => copy(link, '#copiar'));
     P().on('#mi-avatar', 'click', () => {
-      const used = players.filter((p) => p.id !== S.me).map((p) => p.avatar);
+      const used = players.filter((p) => p.id !== S.me).map((p) => ({ avatar: p.avatar, name: p.name }));
       P().avatarPicker(S.players[S.me].avatar, used, (a) => { if (a) roomRef(`players/${S.me}/avatar`).set(a); });
     });
     if (!host) return;
@@ -310,7 +318,7 @@
       ta.remove();
     }
     const b = document.querySelector(btnSel);
-    if (b) { const t = b.textContent; b.textContent = '✅ Copiado'; setTimeout(() => { b.textContent = t; }, 1500); }
+    if (b) { const t = b.textContent; b.textContent = '¡Copiado!'; setTimeout(() => { b.textContent = t; }, 1500); }
   }
 
   async function exitRoom() {
@@ -332,7 +340,7 @@
   }
 
   function header(st) {
-    return `<div class="cabecera"><span>Ronda ${st.round}/${st.rounds} · Sala ${S.code}</span><span class="etiqueta ${st.q.tipo}">${st.q.tipo === 'fecha' ? '📅 Fecha' : '🔢 Número'}</span></div>`;
+    return `<div class="cabecera"><span class="ronda">RONDA ${st.round}/${st.rounds} · ${S.code}</span><span class="etiqueta ${st.q.tipo}">${st.q.tipo === 'fecha' ? `${P().icono('calendario')} Fecha` : `${P().icono('numero')} Número`}</span></div>`;
   }
 
   const question = (st) => `<div class="panel"><div class="pregunta">${P().esc(st.q.q)}</div></div>`;
@@ -340,7 +348,7 @@
 
   function hostOfflineBanner() {
     const h = S.players[S.meta.host];
-    return h && h.online === false ? '<p class="aviso">📴 El jefe de sala se ha desconectado. La partida sigue cuando vuelva.</p>' : '';
+    return h && h.online === false ? `<p class="aviso">${P().icono('desconectado')} El jefe de sala se ha desconectado. La partida sigue cuando vuelva.</p>` : '';
   }
 
   function updatePresenceChips() {
@@ -369,8 +377,8 @@
     P().render(`
       ${header(st)}<div id="aviso-jefe">${hostOfflineBanner()}</div>
       ${question(st)}
-      <p class="centro">${mine ? 'Te toca abrir: di una cifra.<br><span class="suave">Te montarás en la burra como conductor.</span>' : `⏳ ${tag(opener)} está pensando una cifra…`}</p>
-      <div class="segundos">${P().OPEN_SECONDS}</div>
+      <p class="centro">${mine ? 'Te toca abrir: di una cifra.<br><span class="suave">Te montarás en la burra como conductor.</span>' : `${tag(opener)} está pensando una cifra…`}</p>
+      <div class="segundos" role="timer"><span class="n">${P().OPEN_SECONDS}</span><span class="sr-only"> segundos</span></div>
       <div class="temporizador"><div style="width:100%"></div></div>
       ${mine ? `<div class="panel col">
         ${P().cifraInput(st.q, st.q.tipo === 'fecha' ? 'Año, p. ej. 1890' : 'Tu cifra')}
@@ -410,22 +418,23 @@
     const minimo = P().Logic.minSubida(q, R.bid);
     const where = myStatus === 'conductor' ? `${P().ico('burra')} Vas montado en la burra.`
       : myStatus === 'bajado' ? `${P().ico('bajar')} Te has bajado del carro.` : `${P().ico('carreta')} Vas en el carro.`;
-    P().render(`
+    P().render(`<div class="turno-rejilla"><div>
       ${header(st)}<div id="aviso-jefe">${hostOfflineBanner()}</div>
+      ${mine ? '<span class="sr-only" role="alert">¡Te toca!</span>' : ''}<div class="turno-cab"><h2>${mine ? '¡Te toca!' : `Le toca a ${P().esc((pl(turnId) || {}).name || '')}`}</h2><div class="segundos" role="timer"><span class="n">${P().TURN_SECONDS}</span><span class="sr-only"> segundos</span></div></div>
+      <div class="temporizador" aria-hidden="true"><div style="width:100%"></div></div>
       ${question(st)}
-      <div class="cifra-sub">${tag(driver)} va en la burra con</div>
-      <div class="cifra-grande">${P().esc(P().fmtQ(R.bid, q))}</div>
-      <div class="segundos" style="margin-top:8px">${P().TURN_SECONDS}</div>
-      <div class="temporizador"><div style="width:100%"></div></div>
+      ${P().tarjetaPuja(driver || { name: '¿?', avatar: '' }, R.bid, q)}
       <div id="rig"></div>
-      ${mine ? `<p class="centro"><b>¡Te toca!</b> ¿Qué haces?</p>
-        <div class="col" id="acciones">
+      </div><div>
+      ${mine ? `<div class="col" id="acciones">
           ${P().subirHTML(q, quedan, minimo, steps)}
-          <button class="btn musgo bloque" id="quedar">${P().ico('carreta')} Me quedo en el carro</button>
-          <button class="btn sangre bloque" id="bajar">${P().ico('bajar')} Me bajo del carro</button>
+          <div class="dos">
+            <button class="btn musgo gordo" id="quedar">${P().ico('carreta')} Me quedo</button>
+            <button class="btn sangre gordo" id="bajar">${P().ico('bajar')} Me bajo</button>
+          </div>
         </div>`
-        : `<p class="centro">⏳ Le toca a ${tag(pl(turnId))}<br><span class="suave">${where}</span></p>`}
-      ${P().cartPanel(players, R, turnId)}`);
+        : `<p class="centro">Le toca a ${tag(pl(turnId))}<br><span class="suave">${where}</span></p>`}
+      ${P().cartPanel(players, R, turnId)}</div></div>`);
     // Mini escena: los demás ven saltar al que acaba de jugar (el propio jugador ya lo vio al pulsar)
     const rigEl = document.querySelector('#rig');
     const scene = window.BridgeScene;
@@ -492,9 +501,9 @@
       <div class="panel"><div class="pregunta" style="font-size:1.05rem">${P().esc(q.q)}</div></div>
       <div class="escena">
         <canvas id="puente" width="400" height="260"></canvas>
-        <div class="revelacion" id="rev">${P().avatarHTML(driver.avatar)} apuesta por <span style="color:var(--ambar-claro)">${P().esc(P().fmtQ(R.bid, q))}</span></div>
+        <div class="revelacion" id="rev" aria-live="polite">${P().avatarHTML(driver.avatar)} apuesta por <span style="color:#FFC93C">${P().esc(P().fmtQ(R.bid, q))}</span></div>
       </div>
-      <button class="btn fantasma bloque peq" id="saltar" style="margin-top:10px">Saltar ⏩</button>`);
+      <button class="btn bloque peq" id="saltar" style="margin-top:12px">Saltar ${P().icono('flecha')}</button>`);
     const scene = window.BridgeScene.play(document.querySelector('#puente'), {
       driver: driver.avatar,
       passengers: res.passengers.map((id) => (pl(id) || {}).avatar || '🙂'),
@@ -502,7 +511,7 @@
       onSuspense() {
         P().sfx.creak(); P().vibrate(80);
         const rev = document.querySelector('#rev');
-        if (rev) rev.innerHTML = `Respuesta real: <span style="color:${res.success ? '#8fd18f' : '#ff8a73'}">${P().esc(P().fmtQ(res.a, q))}</span>`;
+        if (rev) rev.innerHTML = `Respuesta real: <span style="color:${res.success ? '#7BE0A8' : '#FF8A80'}">${P().esc(P().fmtQ(res.a, q))}</span>`;
       },
       onImpact(ok) {
         if (ok) { P().sfx.win(); P().vibrate([40, 60, 40, 60, 120]); } else { P().sfx.lose(); P().vibrate([300, 80, 500]); }
@@ -524,12 +533,12 @@
     }).join('');
     P().render(`
       ${header(st)}<div id="aviso-jefe">${hostOfflineBanner()}</div>
-      <div class="resultado-titulo ${res.success ? 'ok' : 'ko'}">${res.success ? '¡El carro cruzó el puente!' : '¡Al río con la burra!'}</div>
-      ${res.bullseye ? '<p class="centro" style="color:var(--ambar-claro);font-weight:800">🎯 ¡Clavada! +2 para el conductor</p>' : ''}
+      <h2 class="resultado-titulo ${res.success ? 'ok' : 'ko'}">${res.success ? '¡El carro cruzó el puente!' : '¡Al río con la burra!'}</h2>
+      ${res.bullseye ? `<p class="centro" style="color:var(--ambar-claro);font-weight:800">${P().icono('diana')} ¡Clavada! +2 para el conductor</p>` : ''}
       <div class="panel">
         <div class="pregunta" style="font-size:1rem">${P().esc(q.q)}</div>
         <p>Respuesta: <b style="color:var(--ambar-claro)">${P().esc(P().fmtQ(res.a, q))}</b> · ${tag(driver)} dijo <b>${P().esc(P().fmtQ(R.bid, q))}</b></p>
-        ${res.n ? `<p class="suave" style="margin:0">💡 ${P().esc(res.n)}</p>` : ''}
+        ${res.n ? `<p class="suave" style="margin:0">${P().icono('bombilla')} ${P().esc(res.n)}</p>` : ''}
         ${P().Aprende.hueco(q.id)}
         ${P().Ratings.widget(q.id)}
       </div>
@@ -537,8 +546,8 @@
       <div class="panel"><table class="puntos">
         <tr class="suave"><td>Jugador</td><td class="num">Ronda</td><td class="num">Total</td></tr>${rows}
       </table></div>
-      ${isHost() ? `<button class="btn ambar bloque" id="seguir">${last ? '🏆 Ver el podio' : 'Siguiente ronda ➜'}</button>`
-        : `<p class="suave centro">⏳ Esperando a que el jefe pase a ${last ? 'el podio' : 'la siguiente ronda'}…</p>`}`, true);
+      ${isHost() ? `<button class="btn ambar bloque" id="seguir">${last ? `${P().icono('trofeo')} Ver el podio` : `Siguiente ronda ${P().icono('flecha')}`}</button>`
+        : `<p class="suave centro">Esperando a que el jefe pase a ${last ? 'el podio' : 'la siguiente ronda'}…</p>`}`, true);
     P().on('#seguir', 'click', () => H.next());
     P().Ratings.bind();
     P().Aprende.bind();
@@ -555,14 +564,14 @@
     const sc = (p) => st.scores[p.id] || 0;
     const peana = (p, h, pos) => p ? `<div><div class="podio-av">${P().avatarHTML(p.avatar, 'grande')}</div><div>${P().esc(p.name)}</div><div class="peana" style="height:${h}px">${pos}<br>${sc(p)}</div></div>` : '<div></div>';
     P().render(`
-      <h1 class="centro">🏆 ${P().esc(p1.name)} gana</h1>
+      <h1 class="centro">¡${P().esc(p1.name)} gana!</h1>
       <div class="podio">${peana(p2, 70, '2º')}${peana(p1, 100, '1º')}${peana(p3, 50, '3º')}</div>
       <div class="panel"><table class="puntos">
         ${ranking.map((p, i) => `<tr><td>${i + 1}. ${tag(p)}${p.id === S.me ? ' <span class="suave">(tú)</span>' : ''}</td><td class="num">${sc(p)}</td></tr>`).join('')}
       </table></div>
       <div class="col">
         ${isHost() ? `<button class="btn ambar bloque" id="revancha">Revancha (mismos jugadores)</button>
-          <button class="btn fantasma bloque" id="sala">Volver a la sala</button>` : '<p class="suave centro">⏳ El jefe decide si hay revancha…</p>'}
+          <button class="btn fantasma bloque" id="sala">Volver a la sala</button>` : '<p class="suave centro">El jefe decide si hay revancha…</p>'}
         <button class="btn fantasma bloque" id="salir">Salir de la sala</button>
       </div>`, true);
     P().sfx.win();

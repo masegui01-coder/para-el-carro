@@ -242,7 +242,9 @@
     // Derrumbe: cada tablón se suelta un poco después que el de al lado, del centro hacia fuera
     if (caida === CAIDAS.derrumbe) planks.forEach((p) => { p.suelta = (Math.abs(p.x - MID) / HALF) * 900 + plankRand() * 120; });
 
-    let start = null, last = null, finished = false, skipped = false, resolveDone;
+    // Con "reducir movimiento" la escena va acelerada desde el principio
+    const reducir = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let start = null, last = null, finished = false, skipped = reducir, resolveDone;
     let suspenseFired = false, impactFired = false;
     const done = new Promise((r) => { resolveDone = r; });
     const particles = [];

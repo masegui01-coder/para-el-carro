@@ -3,14 +3,14 @@ package com.paraelcarro.ui.online
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
-import com.paraelcarro.analytics.Metrics
 import androidx.lifecycle.viewModelScope
+import com.paraelcarro.analytics.Metrics
 import com.paraelcarro.data.QuestionRepository
 import com.paraelcarro.data.online.CODE_CHARS
 import com.paraelcarro.data.online.CODE_REGEX
 import com.paraelcarro.data.online.OnlineResult
-import com.paraelcarro.data.online.QuestionRatings
 import com.paraelcarro.data.online.OnlineState
+import com.paraelcarro.data.online.QuestionRatings
 import com.paraelcarro.data.online.RoomMeta
 import com.paraelcarro.data.online.RoomPlayer
 import com.paraelcarro.data.online.RoomRepository
@@ -31,9 +31,10 @@ import com.paraelcarro.domain.model.QuestionMode
 import com.paraelcarro.domain.model.QuestionType
 import com.paraelcarro.domain.model.RoundState
 import com.paraelcarro.domain.model.TURN_SECONDS
-import com.paraelcarro.domain.model.VozAbuela
 import com.paraelcarro.domain.model.TurnAction
+import com.paraelcarro.domain.model.VozAbuela
 import com.paraelcarro.domain.parseCifra
+import java.math.BigDecimal
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 
 enum class OnlineScreen { NONE, CREATE, JOIN, ROOM }
 
@@ -173,7 +173,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 val pid = newId()
                 val rounds = prefs.getInt("rondas", 6)
-                val mode = prefs.getString("modo", "mezcla")!!
+                val mode = prefs.getString("modo", null) ?: "mezcla"
                 var code: String? = null
                 repeat(6) {
                     if (code == null) {
@@ -609,7 +609,7 @@ class OnlineViewModel(app: Application) : AndroidViewModel(app) {
             if (!GameEngine.isFinished(rs)) return setTurn()
             val res = GameEngine.score(game.engine, rs, _ui.value.meta?.barbaridades == true)
             res.delta.forEach { (i, d) -> game.scores[game.pids[i]] = (game.scores[game.pids[i]] ?: 0) + d }
-            game.result = res.toOnline(game.pids, game.question!!)
+            game.result = res.toOnline(game.pids, game.question ?: return)
             game.phase = "bridge"
             game.deadline = 0
             publish()

@@ -3,6 +3,7 @@ package com.paraelcarro.ui.components
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,29 +43,28 @@ fun LearnCard(questionId: String) {
     LaunchedEffect(l.article, Settings.images) {
         image = if (Settings.images) LearnRepository.thumbnail(l.article) else null
     }
-    // Franja ámbar a la izquierda, como en la web
+    // Tarjeta de cómic con fondo suave, como en la web
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Rustic.Ambar)
-            .padding(start = 4.dp),
+            .clip(RoundedCornerShape(16.dp))
+            .border(3.dp, Rustic.Tinta, RoundedCornerShape(16.dp)),
     ) {
         Row(
-            Modifier.fillMaxWidth().background(Rustic.Noche2).padding(10.dp),
+            Modifier.fillMaxWidth().background(Rustic.Chip).padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("📚 ¿Sabías que…?", color = Rustic.AmbarClaro, fontWeight = FontWeight.ExtraBold)
+                Text("¿Sabías que…?", fontFamily = Rustic.Titulos, color = Rustic.AmbarClaro, fontWeight = FontWeight.ExtraBold)
                 Text(l.text, color = Rustic.Texto, lineHeight = 20.sp)
             }
             image?.let { bmp ->
                 Column(Modifier.width(110.dp)) {
                     Image(
                         bmp.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxWidth().height(110.dp).clip(RoundedCornerShape(8.dp)),
+                        modifier = Modifier.fillMaxWidth().height(110.dp).clip(RoundedCornerShape(10.dp)).border(2.dp, Rustic.Tinta, RoundedCornerShape(10.dp)),
                     )
-                    Text("Imagen: Wikipedia", color = Rustic.TextoSuave, fontSize = 10.sp)
+                    Text("Imagen: Wikipedia", color = Rustic.TextoSuave, fontSize = 12.sp)
                 }
             }
         }

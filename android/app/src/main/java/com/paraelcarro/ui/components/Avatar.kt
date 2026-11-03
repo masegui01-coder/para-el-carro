@@ -14,11 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.paraelcarro.ui.theme.Rustic
 
 /** Avatar ilustrado ("av:gato") o, si es un jugador antiguo, su emoji. */
@@ -29,14 +30,15 @@ fun Avatar(avatar: String, size: Dp, modifier: Modifier = Modifier, highlight: B
         modifier
             .size(size)
             .clip(CircleShape)
-            .then(if (background) Modifier.background(Color(0xFF2A2F3A)) else Modifier)
-            .then(if (highlight) Modifier.border(2.dp, Rustic.AmbarClaro, CircleShape) else Modifier),
+            .then(if (background) Modifier.background(avatarColor(avatar)).border(if (size >= 40.dp) 2.dp else 1.5.dp, Rustic.Tinta, CircleShape) else Modifier)
+            .then(if (highlight) Modifier.border(3.dp, Rustic.Foco, CircleShape) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         if (res != null) {
-            Image(painterResource(res), contentDescription = AvatarAssets.names[avatar], modifier = Modifier.size(size))
-        } else {
-            Text(avatar.ifEmpty { "🙂" }, fontSize = (size.value * 0.7f).sp)
+            Image(painterResource(res), contentDescription = null, modifier = Modifier.size(size))
+        } else if (avatar.isNotEmpty()) {
+            // Jugadores antiguos con emoji: tamaño fijo a la caja (no escala con la letra del sistema)
+            Text(avatar, fontSize = with(LocalDensity.current) { (size * 0.62f).toSp() }, modifier = Modifier.clearAndSetSemantics {})
         }
     }
 }

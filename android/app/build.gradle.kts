@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     // Firebase: google-services.json (Analytics, Crashlytics, App Check)
@@ -14,8 +14,8 @@ android {
         applicationId = "com.paraelcarro"
         minSdk = 26
         targetSdk = 37
-        versionCode = 13
-        versionName = "0.10.0"
+        versionCode = 14
+        versionName = "0.11.0"
 
         // AdMob: IDs de PRUEBA de Google. Pon los tuyos en ~/.gradle/gradle.properties
         // (admobAppId, admobInterstitialId, admobBannerId) antes de publicar en Google Play.
@@ -32,7 +32,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Para probar en el móvil se firma con la clave de depuración. Antes de subir a
+            // Para probar en el mÃ³vil se firma con la clave de depuraciÃ³n. Antes de subir a
             // Google Play, crea tu propia clave de subida y cambia esto por su signingConfig.
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -70,7 +70,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
-    // App Check: Play Integrity en la versión de tienda; en las de prueba, el proveedor de depuración
+    // App Check: Play Integrity en la versiÃ³n de tienda; en las de prueba, el proveedor de depuraciÃ³n
     implementation(libs.firebase.appcheck.playintegrity)
     debugImplementation(libs.firebase.appcheck.debug)
 

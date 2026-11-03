@@ -86,7 +86,7 @@ object GameEngine {
         val min = minSubida(question, bid)
         if (question.type == QuestionType.FECHA) return listOf(1, 5, 25, 100).map { n -> "+$n" to maxOf(min, bid + n) }
         fun salto(f: Double) = if (bid > 0) maxOf(min, redondea(bid * f)) else min
-        return listOf("Mínimo (+10 %)" to min, "+50 %" to salto(1.5), "×2" to salto(2.0), "×10" to salto(10.0))
+        return listOf("Mín." to min, "+50 %" to salto(1.5), "×2" to salto(2.0), "×10" to salto(10.0))
     }
 
     /** 13.290 → 13.300 (3 cifras significativas), para que los botones den cifras limpias. */

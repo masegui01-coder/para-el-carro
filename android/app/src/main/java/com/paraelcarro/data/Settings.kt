@@ -18,7 +18,7 @@ object Settings {
         private set
     var vibration by mutableStateOf(true)
         private set
-    var theme by mutableStateOf(ThemeMode.OSCURO)
+    var theme by mutableStateOf(ThemeMode.CLARO)
         private set
     /** Ilustraciones de Wikipedia en "¿Sabías que…?" (usan datos). */
     var images by mutableStateOf(true)
@@ -30,7 +30,7 @@ object Settings {
         sound = p.getBoolean("sonido", true)
         vibration = p.getBoolean("vibracion", true)
         images = p.getBoolean("imagenes", true)
-        theme = runCatching { ThemeMode.valueOf(p.getString("tema", null)!!) }.getOrDefault(ThemeMode.OSCURO)
+        theme = runCatching { ThemeMode.valueOf(p.getString("tema", null) ?: "CLARO") }.getOrDefault(ThemeMode.CLARO)
     }
 
     fun updateSound(on: Boolean) { sound = on; prefs?.edit()?.putBoolean("sonido", on)?.apply() }

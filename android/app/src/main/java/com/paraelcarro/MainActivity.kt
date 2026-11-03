@@ -14,28 +14,33 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paraelcarro.ads.AdsManager
 import com.paraelcarro.domain.model.GamePhase
@@ -43,6 +48,10 @@ import com.paraelcarro.ui.Feedback
 import com.paraelcarro.ui.GameEvent
 import com.paraelcarro.ui.GameViewModel
 import com.paraelcarro.ui.components.AdBanner
+import com.paraelcarro.ui.components.ConfirmDialog
+import com.paraelcarro.ui.components.ScreenEnter
+import com.paraelcarro.ui.components.SettingsBar
+import com.paraelcarro.ui.components.SettingsDialog
 import com.paraelcarro.ui.online.OnlineBridgeScreen
 import com.paraelcarro.ui.online.OnlineEvent
 import com.paraelcarro.ui.online.OnlineFormScreen
@@ -60,12 +69,9 @@ import com.paraelcarro.ui.screens.OpeningBidScreen
 import com.paraelcarro.ui.screens.RoundScoreScreen
 import com.paraelcarro.ui.screens.RulesScreen
 import com.paraelcarro.ui.screens.TurnScreen
-import androidx.compose.ui.zIndex
-import com.paraelcarro.ui.components.SettingsBar
-import com.paraelcarro.ui.components.SettingsDialog
 import com.paraelcarro.ui.theme.ParaElCarroTheme
-import com.paraelcarro.ui.theme.ThemeState
 import com.paraelcarro.ui.theme.Rustic
+import com.paraelcarro.ui.theme.ThemeState
 
 class MainActivity : ComponentActivity() {
     private val vm: GameViewModel by viewModels()
@@ -75,7 +81,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        applySystemBars(light = false)
+        ThemeState.systemLight = isSystemLight(resources.configuration)
+        applySystemBars(light = true)
         ads = AdsManager(applicationContext).also { it.init(this) }
         feedback = Feedback(this)
         if (savedInstanceState == null) handleInvite(intent)
@@ -84,6 +91,9 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Ups, algo ha fallado y hemos vuelto a abrir el juego.", Toast.LENGTH_LONG).show()
         }
     }
+
+    private fun isSystemLight(config: android.content.res.Configuration) =
+        (config.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) != android.content.res.Configuration.UI_MODE_NIGHT_YES
 
     /** Iconos de las barras del sistema que se vean sobre el fondo (oscuros en el tema claro). */
     private fun applySystemBars(light: Boolean) {
@@ -125,10 +135,10 @@ class MainActivity : ComponentActivity() {
         val state by vm.state.collectAsStateWithLifecycle()
         val ou by online.ui.collectAsStateWithLifecycle()
         val adsReady by ads.ready.collectAsStateWithLifecycle()
-        var confirmExit by remember { mutableStateOf(false) }
-        var confirmLeaveRoom by remember { mutableStateOf(false) }
+        var confirmExit by rememberSaveable { mutableStateOf(false) }
+        var confirmLeaveRoom by rememberSaveable { mutableStateOf(false) }
         val phase = state.phase
-        var showSettings by remember { mutableStateOf(false) }
+        var showSettings by rememberSaveable { mutableStateOf(false) }
         val light = ThemeState.light
         LaunchedEffect(light) { applySystemBars(light) }
 
@@ -182,23 +192,31 @@ class MainActivity : ComponentActivity() {
         Column(
             Modifier
                 .fillMaxSize()
-                .background(Brush.radialGradient(listOf(Rustic.Cielo, Rustic.Noche), radius = 1600f)),
+                .background(Rustic.Noche),
         ) {
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                 SettingsBar(onOpen = { showSettings = true }, modifier = Modifier.align(Alignment.TopEnd).zIndex(5f))
                 if (!inOnline && phase is GamePhase.Bridge) {
                     BridgeCrossingScreen(state, phase.result, feedback, vm::onBridgeFinished)
                 } else {
+                    // Las pantallas de puja usan dos columnas en tablet o apaisado ([AdaptivePanes]): más ancho
+                    val wide = if (inOnline) ou.inGame else phase is GamePhase.Turn || phase is GamePhase.OpeningBid
                     Column(
                         Modifier
-                            .widthIn(max = 560.dp)
+                            .widthIn(max = if (wide) 1040.dp else 560.dp)
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                             .statusBarsPadding()
+                            .then(if (showBanner) Modifier.windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)) else Modifier.navigationBarsPadding())
+                            .displayCutoutPadding()
                             .imePadding()
                             .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 60.dp),
                     ) {
-                        if (inOnline) OnlineContent(ou) { confirmLeaveRoom = true } else OfflineContent(phase, state)
+                        // Cada pantalla nueva entra con un fundido corto (nada si el sistema pide quitar animaciones)
+                        val screenKey = if (inOnline) "online-${ou.screen}-${ou.inGame}-${ou.state?.phase}" else phase.javaClass.simpleName
+                        ScreenEnter(screenKey) {
+                            if (inOnline) OnlineContent(ou) { confirmLeaveRoom = true } else OfflineContent(phase, state)
+                        }
                     }
                 }
             }
@@ -207,21 +225,17 @@ class MainActivity : ComponentActivity() {
 
         if (showSettings) SettingsDialog(onTest = feedback::click, onDismiss = { showSettings = false })
         if (confirmExit) {
-            AlertDialog(
-                onDismissRequest = { confirmExit = false },
-                title = { Text("¿Abandonar la partida?") },
-                text = { Text("Se perderán los puntos de esta partida.") },
-                confirmButton = { TextButton({ confirmExit = false; vm.openLobby() }) { Text("Abandonar") } },
-                dismissButton = { TextButton({ confirmExit = false }) { Text("Seguir jugando") } },
+            ConfirmDialog(
+                "¿Abandonar la partida?", "Se perderán los puntos de esta partida.", "Abandonar", "Seguir jugando",
+                onConfirm = { confirmExit = false; vm.openLobby() }, onDismiss = { confirmExit = false },
             )
         }
         if (confirmLeaveRoom) {
-            AlertDialog(
-                onDismissRequest = { confirmLeaveRoom = false },
-                title = { Text(if (ou.isHost) "¿Cerrar la sala?" else "¿Salir de la sala?") },
-                text = { Text(if (ou.isHost) "Saldrán todos los jugadores." else "Podrás volver a entrar con el código si la partida no ha empezado.") },
-                confirmButton = { TextButton({ confirmLeaveRoom = false; online.exitRoom() }) { Text(if (ou.isHost) "Cerrar sala" else "Salir") } },
-                dismissButton = { TextButton({ confirmLeaveRoom = false }) { Text("Quedarme") } },
+            ConfirmDialog(
+                if (ou.isHost) "¿Cerrar la sala?" else "¿Salir de la sala?",
+                if (ou.isHost) "Saldrán todos los jugadores." else "Podrás volver a entrar con el código si la partida no ha empezado.",
+                if (ou.isHost) "Cerrar sala" else "Salir", "Quedarme",
+                onConfirm = { confirmLeaveRoom = false; online.exitRoom() }, onDismiss = { confirmLeaveRoom = false },
             )
         }
     }
@@ -242,7 +256,7 @@ class MainActivity : ComponentActivity() {
         when (phase) {
             GamePhase.Home -> HomeScreen(
                 onCreateRoom = online::openCreate,
-                onJoinRoom = { online.openJoin() },
+                onJoinRoom = { online.openJoin(it) },
                 onPlay = vm::openLobby,
                 onRules = vm::showRules,
             )

@@ -1,8 +1,5 @@
 package com.paraelcarro.ui.online
 
-import com.paraelcarro.ui.components.statusIcon
-import com.paraelcarro.ui.components.Ico
-import com.paraelcarro.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,14 +11,16 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,54 +32,76 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.paraelcarro.R
+import com.paraelcarro.data.online.OnlineBarbaridad
 import com.paraelcarro.data.online.OnlineState
 import com.paraelcarro.data.online.RoomPlayer
+import com.paraelcarro.data.online.vozAbuela
+import com.paraelcarro.domain.GameEngine
 import com.paraelcarro.domain.format
 import com.paraelcarro.domain.model.MAX_PLAYERS
 import com.paraelcarro.domain.model.MIN_PLAYERS
+import com.paraelcarro.domain.model.Question
 import com.paraelcarro.domain.model.QuestionType
 import com.paraelcarro.ui.Feedback
 import com.paraelcarro.ui.components.AbuelaOverlay
+import com.paraelcarro.ui.components.AdaptivePanes
 import com.paraelcarro.ui.components.Avatar
+import com.paraelcarro.ui.components.AvatarAssets
+import com.paraelcarro.ui.components.AvatarPickerDialog
 import com.paraelcarro.ui.components.BarbaridadesPanel
 import com.paraelcarro.ui.components.BarbaridadesSwitch
-import com.paraelcarro.ui.components.culpable as culpableDe
-import com.paraelcarro.ui.components.LearnCard
-import com.paraelcarro.data.online.vozAbuela
-import com.paraelcarro.data.online.OnlineBarbaridad
-import com.paraelcarro.domain.model.Question
-import com.paraelcarro.ui.components.AvatarPickerDialog
-import com.paraelcarro.ui.components.PlayerTag
+import com.paraelcarro.ui.components.Bullseye
 import com.paraelcarro.ui.components.CifraField
+import com.paraelcarro.ui.components.Etiqueta
+import com.paraelcarro.ui.components.Ico
+import com.paraelcarro.ui.components.LearnCard
+import com.paraelcarro.ui.components.OutlinedText
 import com.paraelcarro.ui.components.Panel
-import com.paraelcarro.ui.components.RatingRow
+import com.paraelcarro.ui.components.PlayerTag
 import com.paraelcarro.ui.components.QuestionCard
+import com.paraelcarro.ui.components.RatingRow
+import com.paraelcarro.ui.components.ResultTitle
 import com.paraelcarro.ui.components.RoundHeader
-import com.paraelcarro.ui.components.TimerBar
 import com.paraelcarro.ui.components.Title
 import com.paraelcarro.ui.components.Tone
+import com.paraelcarro.ui.components.TurnTitle
 import com.paraelcarro.ui.components.WoodButton
+import com.paraelcarro.ui.components.avatarColor
+import com.paraelcarro.ui.components.comicShadow
+import com.paraelcarro.ui.components.culpable as culpableDe
+import com.paraelcarro.ui.components.focusRing
+import com.paraelcarro.ui.components.reducedMotion
+import com.paraelcarro.ui.components.statusIcon
+import com.paraelcarro.ui.components.tebeoFieldColors
+import com.paraelcarro.ui.screens.BarraSubida
+import com.paraelcarro.ui.screens.BidCard
 import com.paraelcarro.ui.screens.BridgeAnimState
 import com.paraelcarro.ui.screens.BridgeScene
-import com.paraelcarro.ui.screens.RigPlayer
-import com.paraelcarro.ui.screens.TurnRig
-import com.paraelcarro.ui.theme.Rustic
-import com.paraelcarro.domain.GameEngine
 import com.paraelcarro.ui.screens.PasosSubida
-import com.paraelcarro.ui.screens.BarraSubida
-import com.paraelcarro.ui.screens.textoSubir
+import com.paraelcarro.ui.screens.RIG_SCENE_RATIO
+import com.paraelcarro.ui.screens.RigPlayer
+import com.paraelcarro.ui.screens.StayOrGetOff
+import com.paraelcarro.ui.screens.SubirButton
+import com.paraelcarro.ui.screens.TurnRig
+import com.paraelcarro.ui.screens.sceneLabelColor
+import com.paraelcarro.ui.theme.Rustic
 
-private val fieldColors @Composable get() = OutlinedTextFieldDefaults.colors(focusedBorderColor = Rustic.Ambar, unfocusedBorderColor = Rustic.MaderaClara)
+private val fieldColors @Composable get() = tebeoFieldColors()
 
 // ------------------------------------------------------------------ Crear / unirse
 
@@ -89,7 +110,7 @@ fun OnlineFormScreen(ui: OnlineUi, vm: OnlineViewModel) {
     val creating = ui.screen == OnlineScreen.CREATE
     var picking by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        WoodButton("← Inicio", vm::close, tone = Tone.FANTASMA, small = true)
+        WoodButton("Inicio", vm::close, small = true, description = "Volver al inicio")
         Title(if (creating) "Crear sala privada" else "Unirme a una sala")
         Text(
             if (creating) "Serás el jefe de sala: eliges las rondas y empiezas la partida. Luego invitas a tus amigos con el código o el enlace."
@@ -101,7 +122,7 @@ fun OnlineFormScreen(ui: OnlineUi, vm: OnlineViewModel) {
                 OutlinedTextField(
                     value = ui.codeInput, onValueChange = vm::onCode, singleLine = true,
                     label = { Text("Código de la sala") }, placeholder = { Text("ABCDE") },
-                    textStyle = androidx.compose.ui.text.TextStyle(fontFamily = FontFamily.Monospace, fontSize = 24.sp, letterSpacing = 6.sp, color = Rustic.Texto),
+                    textStyle = androidx.compose.ui.text.TextStyle(fontFamily = Rustic.Titulos, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, letterSpacing = 6.sp, color = Rustic.Texto),
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
                     colors = fieldColors, modifier = Modifier.fillMaxWidth(),
                 )
@@ -109,30 +130,37 @@ fun OnlineFormScreen(ui: OnlineUi, vm: OnlineViewModel) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AvatarCircle(ui.avatar) { picking = true }
                 OutlinedTextField(
-                    value = ui.name, onValueChange = vm::onName, singleLine = true, placeholder = { Text("Tu nombre") },
+                    value = ui.name, onValueChange = vm::onName, singleLine = true, label = { Text("Tu nombre") },
                     colors = fieldColors, modifier = Modifier.weight(1f),
                 )
             }
-            if (ui.error.isNotEmpty()) Text(ui.error, color = Rustic.Rojo, fontWeight = FontWeight.Bold)
+            if (ui.error.isNotEmpty()) Text(ui.error, color = Rustic.Rojo, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive })
             WoodButton(
-                if (creating) "🌐 Crear sala" else "🔑 Entrar en la sala",
+                if (creating) "Crear sala" else "¡Entrar en la sala!",
                 if (creating) vm::create else vm::join,
-                Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.busy,
+                Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.busy, big = true,
             )
         }
     }
-    if (picking) AvatarPickerDialog(ui.avatar, emptySet(), onPick = { vm.onAvatar(it); picking = false }, onDismiss = { picking = false })
+    if (picking) {
+        AvatarPickerDialog(
+            ui.avatar, emptySet(), onPick = { vm.onAvatar(it); picking = false }, onDismiss = { picking = false },
+            name = ui.name, onName = vm::onName,
+        )
+    }
 }
 
 @Composable
 private fun AvatarCircle(avatar: String, enabled: Boolean = true, onClick: () -> Unit = {}) {
     Box(
         Modifier
-            .size(52.dp)
+            .size(56.dp)
             .clip(CircleShape)
-            .border(2.dp, Rustic.Ambar, CircleShape)
-            .background(Color.Black.copy(alpha = .35f))
-            .clickable(enabled = enabled, onClick = onClick),
+            .background(avatarColor(avatar))
+            .border(3.dp, Rustic.Tinta, CircleShape)
+            .focusRing(CircleShape)
+            .clickable(enabled = enabled, role = Role.Button, onClickLabel = "Cambiar personaje", onClick = onClick)
+            .semantics { contentDescription = AvatarAssets.names[avatar].orEmpty() },
         contentAlignment = Alignment.Center,
     ) { Avatar(avatar, 52.dp, background = false) }
 }
@@ -146,16 +174,13 @@ fun OnlineLobbyScreen(ui: OnlineUi, vm: OnlineViewModel, onShare: () -> Unit, on
     var picking by remember { mutableStateOf(false) }
     val online = ui.players.count { it.online }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        WoodButton("← Salir", onExit, tone = Tone.FANTASMA, small = true)
+        WoodButton("Salir", onExit, small = true, description = "Salir de la sala")
         Panel {
             Text("Código de la sala", color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            Text(
-                ui.code, color = Rustic.AmbarClaro, fontSize = 44.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 10.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
-            )
+            OutlinedText(ui.code, Modifier.fillMaxWidth(), size = 42, letterSpacing = 6)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                WoodButton("📤 Invitar amigos", onShare, Modifier.weight(1f), tone = Tone.AMBAR)
-                WoodButton("🔗 Copiar", onCopy, Modifier.weight(.6f), tone = Tone.FANTASMA)
+                WoodButton("Invitar amigos", onShare, Modifier.weight(1f), tone = Tone.AMBAR)
+                WoodButton("Copiar", onCopy, Modifier.weight(.6f), description = "Copiar enlace de invitación")
             }
             Text(ui.inviteLink, color = Rustic.TextoSuave, fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         }
@@ -165,43 +190,43 @@ fun OnlineLobbyScreen(ui: OnlineUi, vm: OnlineViewModel, onShare: () -> Unit, on
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AvatarCircle(p.avatar, enabled = p.id == ui.me) { picking = true }
                     Text(p.name + if (p.id == ui.me) " (tú)" else "", Modifier.weight(1f))
-                    if (p.id == meta.host) Text("👑 Jefe", color = Rustic.Ambar, fontSize = 12.sp)
-                    if (!p.online) Text("📴")
-                    if (host && p.id != ui.me) WoodButton("✕", { vm.kick(p.id) }, tone = Tone.FANTASMA, small = true)
+                    if (p.id == meta.host) Etiqueta("Jefe", icon = R.drawable.ic_t_corona)
+                    if (!p.online) Text("sin conexión", color = Rustic.Rojo, fontSize = 12.sp)
+                    if (host && p.id != ui.me) WoodButton("", { vm.kick(p.id) }, tone = Tone.FANTASMA, small = true, icon = R.drawable.ic_t_cerrar, description = "Echar a ${p.name}")
                 }
             }
         }
-        Title(if (host) "👑 Tú decides" else "👑 El jefe de sala decide")
-        val modes = listOf("fecha" to "📅 Fechas", "numero" to "🔢 Números", "mezcla" to "🎲 Mezcla")
+        Title(if (host) "Tú decides" else "El jefe decide")
+        val modes = listOf("fecha" to "Fechas", "numero" to "Números", "mezcla" to "Mezcla")
         Panel {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Número de rondas", Modifier.weight(1f))
-                if (host) WoodButton("−", { vm.setRounds(meta.rounds - 1) }, small = true)
-                Text("${meta.rounds}", Modifier.size(48.dp, 32.dp), color = Rustic.AmbarClaro, fontSize = 24.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                if (host) WoodButton("+", { vm.setRounds(meta.rounds + 1) }, small = true)
+                if (host) WoodButton("", { vm.setRounds(meta.rounds - 1) }, small = true, icon = R.drawable.ic_t_menos, description = "Menos rondas")
+                Text("${meta.rounds}", Modifier.widthIn(min = 48.dp), color = Rustic.AmbarClaro, fontFamily = Rustic.Titulos, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+                if (host) WoodButton("", { vm.setRounds(meta.rounds + 1) }, small = true, icon = R.drawable.ic_t_mas, description = "Más rondas")
             }
             if (host) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(Modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     modes.forEach { (k, l) ->
-                        WoodButton(l, { vm.setMode(k) }, Modifier.weight(1f), small = true, tone = if (meta.mode == k) Tone.AMBAR else Tone.FANTASMA)
+                        WoodButton(l, { vm.setMode(k) }, Modifier.weight(1f), small = true, tone = if (meta.mode == k) Tone.AMBAR else Tone.FANTASMA, selected = meta.mode == k)
                     }
                 }
             } else {
-                Row { Text("Preguntas", Modifier.weight(1f)); Text(modes.firstOrNull { it.first == meta.mode }?.second ?: "", color = Rustic.Ambar, fontWeight = FontWeight.Bold) }
+                Row { Text("Preguntas", Modifier.weight(1f)); Text(modes.firstOrNull { it.first == meta.mode }?.second ?: "", color = Rustic.AmbarClaro, fontWeight = FontWeight.Bold) }
             }
             BarbaridadesSwitch(meta.barbaridades, if (host) vm::setBarbaridades else null)
         }
         if (host) {
-            WoodButton("¡Arre, burra! Empezar", vm::startGame, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = online >= MIN_PLAYERS)
+            WoodButton("¡Arre, burra! Empezar", vm::startGame, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = online >= MIN_PLAYERS, big = true)
             if (online < MIN_PLAYERS) Hint("Hacen falta al menos $MIN_PLAYERS jugadores conectados.")
         } else {
-            Hint("⏳ Esperando a que el jefe empiece la partida…")
+            Hint("Esperando a que el jefe empiece la partida…")
         }
     }
     if (picking) {
-        val taken = ui.players.filter { it.id != ui.me }.map { it.avatar }.toSet()
+        val owners = ui.players.filter { it.id != ui.me }.associate { it.avatar to it.name }
         val mine = ui.players.firstOrNull { it.id == ui.me }?.avatar ?: ui.avatar
-        AvatarPickerDialog(mine, taken, onPick = { vm.changeAvatar(it); picking = false }, onDismiss = { picking = false })
+        AvatarPickerDialog(mine, emptySet(), onPick = { vm.changeAvatar(it); picking = false }, onDismiss = { picking = false }, owners = owners)
     }
 }
 
@@ -217,12 +242,13 @@ private fun HostOfflineBanner(ui: OnlineUi) {
     val hostId = ui.meta?.host ?: return
     if (ui.isOnline(hostId)) return
     Text(
-        "📴 El jefe de sala se ha desconectado. La partida sigue cuando vuelva.",
+        "El jefe de sala se ha desconectado. La partida sigue cuando vuelva.",
         fontSize = 14.sp,
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
             .background(Rustic.Sangre.copy(alpha = .25f))
+            .border(2.dp, Rustic.Tinta, RoundedCornerShape(10.dp))
             .padding(10.dp),
     )
 }
@@ -230,7 +256,6 @@ private fun HostOfflineBanner(ui: OnlineUi) {
 @Composable
 private fun Header(ui: OnlineUi, st: OnlineState) {
     RoundHeader(st.round, st.rounds, st.question)
-    Text("Sala ${ui.code}", color = Rustic.TextoSuave, fontSize = 12.sp)
     HostOfflineBanner(ui)
 }
 
@@ -252,12 +277,12 @@ private fun OpenView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
     val value = vm.draftValue(ui)
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Header(ui, st)
+        TurnTitle(if (mine) "¡Abres tú!" else "Abre ${ui.player(st.opener).tag()}", ui.secondsLeft, ui.timerFraction)
         QuestionCard(q)
         Text(
-            if (mine) "Te toca abrir: di una cifra.\nTe montarás en la burra como conductor." else "⏳ ${ui.player(st.opener).tag()} está pensando una cifra…",
-            textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
+            if (mine) "Di una cifra: te montarás en la burra como conductor." else "${ui.player(st.opener).tag()} está pensando una cifra…",
+            color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
         )
-        TimerBar(ui.secondsLeft, ui.timerFraction)
         if (mine) {
             Panel {
                 CifraField(q, ui.draft, if (q.type == QuestionType.FECHA) "Año, p. ej. 1890" else "Tu cifra", vm::onDraftText, vm::onDraftBeforeChrist)
@@ -288,12 +313,11 @@ private fun TurnView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
     val minimo = GameEngine.minSubida(q, bid)
     val quedan = vm.subidasQuedan(ui)
     val where = when (r.status[ui.me]) { "conductor" -> "Vas montado en la burra."; "bajado" -> "Te has bajado del carro."; else -> "Vas en el carro." }
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    AdaptivePanes(left = {
         Header(ui, st)
-        QuestionCard(q)
-        Text("${ui.player(r.driver).tag()} va en la burra con", color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        Text(q.format(bid), color = Rustic.AmbarClaro, fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        TimerBar(ui.secondsLeft, ui.timerFraction)
+        TurnTitle(if (mine) "¡Te toca!" else "Le toca a ${ui.player(turnId).tag()}", ui.secondsLeft, ui.timerFraction)
+        QuestionCard(q, small = true)
+        BidCard(ui.player(r.driver)?.avatar ?: "", ui.player(r.driver).tag(), q.format(bid))
         TurnRig(
             players = st.players.map { RigPlayer(it.id, it.avatar) },
             status = ui.rigOverride ?: r.status,
@@ -301,28 +325,25 @@ private fun TurnView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
             cheerId = ui.cheerId,
             cheerKey = ui.cheerId?.let { ui.cheerKey },
         )
+    }, right = {
         if (mine) {
-            Text("¡Te toca! ¿Qué haces?", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            if (quedan <= 0) {
-                WoodButton("Ya has subido ${GameEngine.MAX_SUBIDAS} veces", {}, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = false, icon = R.drawable.ic_subir)
-            } else if (!ui.draft.raiseOpen) {
-                WoodButton(textoSubir(quedan), { vm.openRaise(minimo) }, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent, icon = R.drawable.ic_subir)
-            } else {
+            if (quedan > 0 && ui.draft.raiseOpen) {
                 Panel {
                     Text("Mínimo: ${q.format(minimo)} · desliza para subir más", color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    CifraField(q, ui.draft, "Nueva cifra (mayor)", vm::onDraftText, vm::onDraftBeforeChrist)
                     BarraSubida(q, bid, vm::setDraftValue)
                     PasosSubida(steps, vm::setDraftValue)
-                    CifraField(q, ui.draft, "Nueva cifra (mayor)", vm::onDraftText, vm::onDraftBeforeChrist)
-                    WoodButton("Me monto en la burra", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent && value != null && vm.puedeSubirCon(value, ui), icon = R.drawable.ic_burra)
+                    WoodButton("¡Me monto en la burra!", vm::submitRaise, Modifier.fillMaxWidth(), tone = Tone.AMBAR, enabled = !ui.sent && value != null && vm.puedeSubirCon(value, ui), icon = R.drawable.ic_burra)
                 }
+            } else {
+                SubirButton(quedan, !ui.sent) { vm.openRaise(minimo) }
             }
-            WoodButton("Me quedo en el carro", vm::stay, Modifier.fillMaxWidth(), tone = Tone.MUSGO, enabled = !ui.sent, icon = R.drawable.ic_carreta)
-            WoodButton("Me bajo del carro", vm::getOff, Modifier.fillMaxWidth(), tone = Tone.SANGRE, enabled = !ui.sent, icon = R.drawable.ic_bajar)
+            StayOrGetOff(!ui.sent, vm::stay, vm::getOff)
         } else {
-            Text("⏳ Le toca a ${ui.player(turnId).tag()}\n$where", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            Text(where, color = Rustic.TextoSuave, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         }
         CartPanel(ui, st, turnId)
-    }
+    })
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -338,15 +359,14 @@ private fun CartPanel(ui: OnlineUi, st: OnlineState, turnId: String?) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier
-                        .alpha(if (s == "bajado") .55f else 1f)
                         .clip(RoundedCornerShape(50))
-                        .background(if (s == "conductor") Rustic.Ambar.copy(alpha = .25f) else Rustic.Chip)
-                        .then(if (p.id == turnId) Modifier.border(2.dp, Rustic.AmbarClaro, RoundedCornerShape(50)) else Modifier)
+                        .background(if (s == "conductor") Rustic.Amarillo else Rustic.Chip)
+                        .border(if (p.id == turnId) 3.dp else 2.dp, if (p.id == turnId) Rustic.Foco else Rustic.Tinta, RoundedCornerShape(50))
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                 ) {
                     Ico(icon, 20.dp)
                     Avatar(p.avatar, 20.dp)
-                    Text(p.name + if (!ui.isOnline(p.id)) " 📴" else "", fontSize = 14.sp, textDecoration = if (s == "bajado") TextDecoration.LineThrough else null)
+                    Text(p.name + if (!ui.isOnline(p.id)) " (sin conexión)" else "", color = if (s == "conductor") Rustic.TintaFija else Rustic.Texto, fontSize = 14.sp, textDecoration = if (s == "bajado") TextDecoration.LineThrough else null)
                 }
             }
         }
@@ -358,7 +378,7 @@ private fun CartPanel(ui: OnlineUi, st: OnlineState, turnId: String?) {
                 "bajar" -> "se baja del carro"
                 else -> "se queda (tiempo)"
             }
-            PlayerTag(ui.player(e.id)?.avatar ?: "🙂", "${ui.player(e.id).tag()} $what", size = 18.dp, style = TextStyle(fontSize = 13.sp), color = Rustic.TextoSuave)
+            PlayerTag(ui.player(e.id)?.avatar.orEmpty(), "${ui.player(e.id).tag()} $what", size = 18.dp, style = TextStyle(fontSize = 13.sp), color = Rustic.TextoSuave)
         }
     }
 }
@@ -371,21 +391,28 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
     val q = st.question
     val driver = ui.player(r.driver)
     var anim by remember(st.seq) { mutableStateOf(BridgeAnimState.Walking) }
-    var skip by remember(st.seq) { mutableStateOf(false) }
+    // Con "quitar animaciones" la escena va acelerada desde el principio (como en la partida local)
+    val reduced = reducedMotion()
+    var skip by remember(st.seq) { mutableStateOf(reduced) }
     var abuela by remember(st.seq) { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Header(ui, st)
         QuestionCard(q, small = true)
+        val alto = LocalConfiguration.current.screenHeightDp.dp
         Box(
             Modifier
+                .widthIn(max = alto * 0.55f * RIG_SCENE_RATIO)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .border(1.dp, Rustic.MaderaClara.copy(alpha = .45f), RoundedCornerShape(14.dp)),
+                .align(Alignment.CenterHorizontally)
+                .padding(end = 4.dp, bottom = 4.dp)
+                .comicShadow(18.dp, 4.dp, Rustic.Sombra)
+                .clip(RoundedCornerShape(18.dp))
+                .border(3.dp, Rustic.Tinta, RoundedCornerShape(18.dp)),
         ) {
             key(st.seq) {
                 BridgeScene(
-                    driver = driver?.avatar ?: "🙂",
-                    passengers = res.passengers.map { ui.player(it)?.avatar ?: "🙂" },
+                    driver = driver?.avatar.orEmpty(),
+                    passengers = res.passengers.map { ui.player(it)?.avatar.orEmpty() },
                     success = res.success,
                     fastForward = skip,
                     onStateChange = { s ->
@@ -404,12 +431,12 @@ fun OnlineBridgeScreen(ui: OnlineUi, st: OnlineState, feedback: Feedback) {
             }
             Text(
                 if (anim == BridgeAnimState.Walking) "${driver.tag()} apuesta por ${q.format(r.bid)}" else "Respuesta real: ${q.format(res.answer)}",
-                color = if (anim == BridgeAnimState.Walking) Rustic.AmbarClaro else if (res.success) Rustic.Verde else Rustic.Rojo,
+                color = sceneLabelColor(anim == BridgeAnimState.Walking, res.success),
                 fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().background(Color.Black.copy(alpha = .35f)).padding(6.dp),
+                modifier = Modifier.fillMaxWidth().background(Color(0xD91B1B1B)).padding(6.dp).semantics { liveRegion = LiveRegionMode.Polite },
             )
         }
-        WoodButton("Saltar ⏩", { skip = true }, Modifier.fillMaxWidth(), tone = Tone.FANTASMA, small = true)
+        WoodButton("Saltar", { skip = true }, Modifier.fillMaxWidth(), small = true, description = "Saltar la animación")
     }
     if (abuela) {
         AbuelaOverlay(
@@ -429,16 +456,12 @@ private fun ScoreView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
     val last = st.round >= st.rounds
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Header(ui, st)
-        Text(
-            if (res.success) "¡El carro cruzó el puente!" else "¡Al río con la burra!",
-            color = if (res.success) Rustic.Verde else Rustic.Rojo, fontSize = 26.sp, fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
-        )
-        if (res.bullseye) Text("🎯 ¡Clavada! +2 para el conductor", color = Rustic.AmbarClaro, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        ResultTitle(res.success)
+        if (res.bullseye) Bullseye()
         Panel {
-            Text(q.text, fontFamily = FontFamily.Serif)
+            Text(q.text, fontFamily = Rustic.Titulos)
             Text("Respuesta: ${q.format(res.answer)} · ${ui.player(r.driver).tag()} dijo ${q.format(r.bid)}", fontWeight = FontWeight.Bold, color = Rustic.AmbarClaro)
-            if (res.note.isNotEmpty()) Text("💡 ${res.note}", color = Rustic.TextoSuave)
+            if (res.note.isNotEmpty()) Text(res.note, color = Rustic.TextoSuave)
             LearnCard(q.id)
             RatingRow(q.id, vm.isRated(q.id)) { vm.rate(q.id, it) }
         }
@@ -452,7 +475,7 @@ private fun ScoreView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
             st.players.sortedByDescending { st.scores[it.id] ?: 0 }.forEach { p ->
                 val d = res.delta[p.id] ?: 0
                 val icon = statusIcon(r.status[p.id])
-                HorizontalDivider(color = Rustic.MaderaClara.copy(alpha = .25f))
+                HorizontalDivider(thickness = 2.dp, color = Rustic.Tinta)
                 Row {
                     Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) { Ico(icon, 22.dp); Text(" "); PlayerTag(p.avatar, p.name + if (p.id == ui.me) " (tú)" else "") }
                     Text(if (d > 0) "+$d" else "$d", Modifier.weight(.4f), textAlign = TextAlign.End, fontWeight = FontWeight.ExtraBold,
@@ -461,16 +484,17 @@ private fun ScoreView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel) {
                 }
             }
         }
-        if (ui.isHost) WoodButton(if (last) "🏆 Ver el podio" else "Siguiente ronda ➜", vm::nextAfterScore, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
-        else Hint("⏳ Esperando a que el jefe pase a ${if (last) "el podio" else "la siguiente ronda"}…")
+        if (ui.isHost) WoodButton(if (last) "Ver el podio" else "Siguiente ronda", vm::nextAfterScore, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
+        else Hint("Esperando a que el jefe pase a ${if (last) "el podio" else "la siguiente ronda"}…")
     }
 }
 
 @Composable
 private fun FinalView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel, onExit: () -> Unit) {
     val ranking = st.players.sortedByDescending { st.scores[it.id] ?: 0 }
+    val winner = ranking.firstOrNull() ?: return
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("🏆 ${ranking.first().name} gana", color = Rustic.Ambar, fontSize = 32.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        OutlinedText("¡${winner.name} gana!", Modifier.fillMaxWidth(), size = 34)
         Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Bottom) {
             Podium(ranking.getOrNull(1), st, 70, "2º", Modifier.weight(1f))
             Podium(ranking.getOrNull(0), st, 100, "1º", Modifier.weight(1f))
@@ -485,7 +509,7 @@ private fun FinalView(ui: OnlineUi, st: OnlineState, vm: OnlineViewModel, onExit
             WoodButton("Revancha (mismos jugadores)", vm::startGame, Modifier.fillMaxWidth(), tone = Tone.AMBAR)
             WoodButton("Volver a la sala", vm::backToLobby, Modifier.fillMaxWidth(), tone = Tone.FANTASMA)
         } else {
-            Hint("⏳ El jefe decide si hay revancha…")
+            Hint("El jefe decide si hay revancha…")
         }
         WoodButton("Salir de la sala", onExit, Modifier.fillMaxWidth(), tone = Tone.FANTASMA)
     }
@@ -500,11 +524,12 @@ private fun Podium(p: RoomPlayer?, st: OnlineState, height: Int, pos: String, mo
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(height.dp)
-                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                .background(Brush.verticalGradient(listOf(Rustic.MaderaClara, Rustic.MaderaOscura))),
+                .heightIn(min = height.dp)
+                .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                .background(Rustic.Amarillo)
+                .border(3.dp, Rustic.Tinta, RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
             contentAlignment = Alignment.TopCenter,
-        ) { Text("$pos\n${st.scores[p.id] ?: 0}", color = Color.White, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp)) }
+        ) { Text("$pos\n${st.scores[p.id] ?: 0}", color = Rustic.TintaFija, fontFamily = Rustic.Titulos, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp)) }
     }
 }
 

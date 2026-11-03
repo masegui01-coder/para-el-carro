@@ -8,12 +8,10 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const src = path.join(root, 'shared', 'avatares');
-const NOMBRES = {
-  campesino: 'Campesino', campesina: 'Campesina', abuela: 'Abuela', abuelo: 'Abuelo', raton: 'Ratón', gato: 'Gato',
-  loro: 'Loro', perro: 'Perro', cerdo: 'Cerdo', gallina: 'Gallina', oveja: 'Oveja', zorro: 'Zorro', rana: 'Rana',
-  pirata: 'Pirata', bruja: 'Bruja', bandolero: 'Bandolero',
-};
-const ids = Object.keys(NOMBRES);
+// Nombre, frase y color de cada personaje (shared/personajes.json), los mismos en la web y en Android
+const PERSONAJES = JSON.parse(fs.readFileSync(path.join(root, 'shared', 'personajes.json'), 'utf8'));
+const ids = Object.keys(PERSONAJES);
+const kt = (t) => JSON.stringify(t).replace(/\$/g, '\\$');
 
 const attrs = (s) => Object.fromEntries([...s.matchAll(/([\w-]+)="([^"]*)"/g)].map((m) => [m[1], m[2]]));
 const n = (x) => +(+x).toFixed(3);
@@ -67,7 +65,7 @@ for (const id of iconos) {
 
 fs.writeFileSync(path.join(root, 'js', 'avatares.js'),
   '// Generado por tools/build-avatares.js — no editar a mano.\n' +
-  `window.AVATARES = ${JSON.stringify(ids.map((id) => ({ id: 'av:' + id, nombre: NOMBRES[id] })), null, 1)};\n`);
+  `window.AVATARES = ${JSON.stringify(ids.map((id) => ({ id: 'av:' + id, ...PERSONAJES[id] })), null, 1)};\n`);
 
 fs.writeFileSync(path.join(root, 'android', 'app', 'src', 'main', 'java', 'com', 'paraelcarro', 'ui', 'components', 'AvatarAssets.kt'),
   `package com.paraelcarro.ui.components
@@ -82,7 +80,17 @@ ${ids.map((id) => `        "av:${id}" to R.drawable.av_${id},`).join('\n')}
     )
 
     val names: Map<String, String> = mapOf(
-${ids.map((id) => `        "av:${id}" to "${NOMBRES[id]}",`).join('\n')}
+${ids.map((id) => `        "av:${id}" to ${kt(PERSONAJES[id].nombre)},`).join('\n')}
+    )
+
+    /** Frase de cada personaje, para la pantalla de elegir personaje. */
+    val quotes: Map<String, String> = mapOf(
+${ids.map((id) => `        "av:${id}" to ${kt(PERSONAJES[id].frase)},`).join('\n')}
+    )
+
+    /** Color de fondo de cada personaje (ARGB). */
+    val colors: Map<String, Long> = mapOf(
+${ids.map((id) => `        "av:${id}" to 0xFF${PERSONAJES[id].color.slice(1).toUpperCase()},`).join('\n')}
     )
 }
 `);

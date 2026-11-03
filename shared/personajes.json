@@ -1,0 +1,18 @@
+{
+  "campesino": { "nombre": "Paco", "frase": "Ha arado más tierra que años tiene la burra.", "color": "#FFD6A5" },
+  "campesina": { "nombre": "Remedios", "frase": "Lo sabe todo del pueblo… menos la respuesta.", "color": "#CAFFBF" },
+  "abuela": { "nombre": "La Abuela", "frase": "«¡Qué barbaridad!» Y lo dice muy en serio.", "color": "#FFC6FF" },
+  "abuelo": { "nombre": "El Abuelo", "frase": "En sus tiempos el puente era de piedra.", "color": "#E8DCCF" },
+  "raton": { "nombre": "Ratoncito", "frase": "Pequeño, pero el primero en colarse en el carro.", "color": "#BDB2FF" },
+  "gato": { "nombre": "Michi", "frase": "Siempre cae de pie… salvo cuando cae el puente.", "color": "#FF9F68" },
+  "loro": { "nombre": "Perico", "frase": "Repite tu cifra y la sube un poquito.", "color": "#9BF6FF" },
+  "perro": { "nombre": "Canelo", "frase": "Fiel al carro hasta el final del puente.", "color": "#FDFFB6" },
+  "cerdo": { "nombre": "Gorrino", "frase": "Apuesta lo que sea si hay comida de por medio.", "color": "#FFADAD" },
+  "gallina": { "nombre": "Turuleta", "frase": "Cacarea muy alto, pero puja muy bajo.", "color": "#FFE5A0" },
+  "oveja": { "nombre": "Lanita", "frase": "Sigue al rebaño… y al conductor.", "color": "#E2ECE9" },
+  "zorro": { "nombre": "El Zorro", "frase": "Nunca se sube al carro sin mirar abajo.", "color": "#FFB5A7" },
+  "rana": { "nombre": "Rita", "frase": "Salta del carro antes que nadie.", "color": "#B9FBC0" },
+  "pirata": { "nombre": "Barbanegra", "frase": "Sabe contar doblones, no metros.", "color": "#A0C4FF" },
+  "bruja": { "nombre": "La Meiga", "frase": "Dice que lo ve en su bola… y suele fallar.", "color": "#CDB4DB" },
+  "bandolero": { "nombre": "El Tempranillo", "frase": "Te quita el sitio en la burra y ni te enteras.", "color": "#FFD8BE" }
+}

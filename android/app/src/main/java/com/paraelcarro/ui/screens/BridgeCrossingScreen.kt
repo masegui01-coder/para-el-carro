@@ -5,34 +5,29 @@ import android.graphics.Typeface
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.offset
-import androidx.compose.runtime.key
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.zIndex
-import com.paraelcarro.ui.components.AbuelaOverlay
-import com.paraelcarro.ui.components.Avatar
-import com.paraelcarro.ui.components.culpable
-import com.paraelcarro.domain.model.VozAbuela
-import com.paraelcarro.ui.components.AvatarAssets
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -54,19 +50,32 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.paraelcarro.domain.format
 import com.paraelcarro.domain.model.GameState
 import com.paraelcarro.domain.model.RoundResult
+import com.paraelcarro.domain.model.VozAbuela
 import com.paraelcarro.ui.Feedback
+import com.paraelcarro.ui.components.AbuelaOverlay
+import com.paraelcarro.ui.components.Avatar
+import com.paraelcarro.ui.components.AvatarAssets
 import com.paraelcarro.ui.components.QuestionCard
 import com.paraelcarro.ui.components.RoundHeader
 import com.paraelcarro.ui.components.WoodButton
-import com.paraelcarro.ui.components.Tone
+import com.paraelcarro.ui.components.comicShadow
+import com.paraelcarro.ui.components.culpable
+import com.paraelcarro.ui.components.reducedMotion
 import com.paraelcarro.ui.theme.Rustic
 import kotlin.math.PI
 import kotlin.math.abs
@@ -85,23 +94,32 @@ enum class BridgeAnimState { Walking, Suspense, CrossedSuccessfully, FellIntoRiv
 @Composable
 fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedback, onFinished: () -> Unit) {
     val q = result.question
-    val driver = state.player(result.driverId)!!
+    val driver = state.player(result.driverId) ?: return
     var animState by remember { mutableStateOf(BridgeAnimState.Walking) }
-    var skip by remember { mutableStateOf(false) }
+    // Con "quitar animaciones" la escena va acelerada desde el principio
+    val reduced = reducedMotion()
+    var skip by remember { mutableStateOf(reduced) }
     var abuela by remember { mutableStateOf(false) }
     val voz = remember(result) { VozAbuela.para(result.question.id, state.roundNumber, result.barbaridades.any { it.high }) }
 
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    // En apaisado la escena se limita al 55 % del alto para que "Saltar" siempre quepa
+    val sceneWidth = minOf(maxWidth, maxHeight * 0.55f * (RIG_SCENE_RATIO))
     Column(
-        Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 60.dp),
+        Modifier.widthIn(max = 560.dp).fillMaxSize().align(Alignment.TopCenter).verticalScroll(rememberScrollState()).safeDrawingPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 60.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         RoundHeader(state.roundNumber, state.config.rounds, q)
         QuestionCard(q, small = true)
         Box(
             Modifier
+                .widthIn(max = sceneWidth)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .border(1.dp, Rustic.MaderaClara.copy(alpha = .45f), RoundedCornerShape(14.dp)),
+                .padding(end = 4.dp, bottom = 4.dp)
+                .comicShadow(18.dp, 4.dp, Rustic.Sombra)
+                .clip(RoundedCornerShape(18.dp))
+                .border(3.dp, Rustic.Tinta, RoundedCornerShape(18.dp)),
         ) {
             BridgeScene(
                 driver = driver.avatar,
@@ -127,15 +145,13 @@ fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedba
             else "Respuesta real: ${q.format(q.answer)}"
             Text(
                 label,
-                color = when (animState) {
-                    BridgeAnimState.Walking -> Rustic.AmbarClaro
-                    else -> if (result.success) Rustic.Verde else Rustic.Rojo
-                },
+                color = sceneLabelColor(animState == BridgeAnimState.Walking, result.success),
                 fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().background(Color.Black.copy(alpha = .35f)).padding(6.dp),
+                modifier = Modifier.fillMaxWidth().background(Color(0xD91B1B1B)).padding(6.dp).semantics { liveRegion = LiveRegionMode.Polite },
             )
         }
-        WoodButton("Saltar ⏩", { skip = true }, Modifier.fillMaxWidth(), tone = Tone.FANTASMA, small = true)
+        WoodButton("Saltar", { skip = true }, Modifier.widthIn(max = 520.dp).fillMaxWidth(), small = true, description = "Saltar la animación")
+    }
     }
     if (abuela) {
         AbuelaOverlay(
@@ -148,6 +164,20 @@ fun BridgeCrossingScreen(state: GameState, result: RoundResult, feedback: Feedba
 }
 
 // --------------------------------------------------------------------------- Escena
+
+/** Ancho / alto de la escena del puente (el Canvas mantiene esta proporción). */
+const val RIG_SCENE_RATIO = 400f / 260f
+
+/** Rótulo sobre la escena (siempre oscura): colores fijos con contraste ≥ 4.5:1 en los dos temas. */
+fun sceneLabelColor(walking: Boolean, success: Boolean): Color = when {
+    walking -> Color(0xFFFFC93C)
+    success -> Color(0xFF7BE0A8)
+    else -> Color(0xFFFF8A80)
+}
+
+// Madera del dibujo del puente y del carro (fija: no cambia con el tema)
+private val MADERA = Color(0xFF9A6B3C)
+private val MADERA_OSCURA = Color(0xFF5E3E22)
 
 // Coordenadas lógicas (igual que js/bridge.js); el Canvas se escala a su ancho.
 private const val W = 400f
@@ -487,8 +517,8 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
             val dy = y - CLIFF_Y
             return Triple(ax + dx * cos(a) - dy * sin(a), CLIFF_Y + dx * sin(a) + dy * cos(a), a)
         }
-        drawRect(Rustic.MaderaOscura, Offset(LEFT - 3, CLIFF_Y - 24), Size(4f, 26f))
-        drawRect(Rustic.MaderaOscura, Offset(RIGHT - 1, CLIFF_Y - 24), Size(4f, 26f))
+        drawRect(MADERA_OSCURA, Offset(LEFT - 3, CLIFF_Y - 24), Size(4f, 26f))
+        drawRect(MADERA_OSCURA, Offset(RIGHT - 1, CLIFF_Y - 24), Size(4f, 26f))
         val rope = Color(0xFF8A6A43)
         for (side in listOf(LEFT, RIGHT)) {
             val xs = buildList {
@@ -537,10 +567,10 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
             val a = wheelRot + i * PI.toFloat() / 3
             drawLine(dark, Offset(-28f, -9f), Offset(-28f + cos(a) * 9f, -9f + sin(a) * 9f), 1.2f)
         }
-        drawRect(Rustic.Madera, Offset(-54f, -31f), Size(48f, 19f))
+        drawRect(MADERA, Offset(-54f, -31f), Size(48f, 19f))
         var py = -25f
-        while (py < -12f) { drawLine(Rustic.MaderaOscura, Offset(-54f, py), Offset(-6f, py), 1f); py += 6f }
-        drawRect(Rustic.MaderaOscura, Offset(-54f, -31f), Size(48f, 19f), style = Stroke(1f))
+        while (py < -12f) { drawLine(MADERA_OSCURA, Offset(-54f, py), Offset(-6f, py), 1f); py += 6f }
+        drawRect(MADERA_OSCURA, Offset(-54f, -31f), Size(48f, 19f), style = Stroke(1f))
         oval(Color(0xFFB08A3E), -42f, -35f, 11f, 7f)
         oval(Color(0xFFB08A3E), -20f, -35f, 12f, 7f)
         oval(Color(0xFF8C6A2C), -31f, -40f, 13f, 6f)
@@ -565,7 +595,7 @@ private class BridgeSimulation(val driver: String, val passengers: List<String>,
         val body = Color(0xFF7D6E60)
         oval(body, 26f, -22f, 15f, 8f)
         oval(Color(0xFF9A8B7C), 26f, -18f, 11f, 3.5f)
-        drawLine(Rustic.MaderaOscura, Offset(14f, -19f), Offset(36f, -24f), 1.4f)
+        drawLine(MADERA_OSCURA, Offset(14f, -19f), Offset(36f, -24f), 1.4f)
         drawPath(Path().apply { moveTo(35f, -27f); lineTo(44f, -37f); lineTo(48f, -33f); lineTo(40f, -20f); close() }, body)
         withTransform({ translate(49f, -34f); rotate(deg(if (sad) .5f else .25f), Offset.Zero) }) {
             oval(body, 0f, 0f, 8f, 4.5f)
@@ -602,7 +632,10 @@ fun BridgeScene(
     modifier: Modifier = Modifier,
 ) {
     val sim = remember(driver, passengers, success) { BridgeSimulation(driver, passengers.take(7), success) }
-    sim.painters = (passengers + driver).distinct().mapNotNull { a -> AvatarAssets.drawables[a]?.let { a to painterResource(it) } }.toMap()
+    val avatares = remember(driver, passengers) { (passengers + driver).distinct().mapNotNull { a -> AvatarAssets.drawables[a]?.let { a to it } } }
+    val painters = avatares.map { (a, res) -> a to painterResource(res) }
+    val porAvatar = remember(painters) { painters.toMap() }
+    SideEffect { sim.painters = porAvatar }
     var frame by remember { mutableIntStateOf(0) }
     val speed by rememberUpdatedState(if (fastForward) 5f else 1f)
     val stateCb by rememberUpdatedState(onStateChange)
@@ -669,8 +702,10 @@ fun TurnRig(
         modifier
             .fillMaxWidth()
             .aspectRatio(RIG_W / RIG_H)
-            .clip(RoundedCornerShape(14.dp))
-            .border(1.dp, Rustic.MaderaClara.copy(alpha = .45f), RoundedCornerShape(14.dp)),
+            .padding(end = 4.dp, bottom = 4.dp)
+            .comicShadow(18.dp, 4.dp, Rustic.Sombra)
+            .clip(RoundedCornerShape(18.dp))
+            .border(3.dp, Rustic.Tinta, RoundedCornerShape(18.dp)),
     ) {
         val w = maxWidth
         val h = maxHeight
@@ -696,11 +731,14 @@ fun TurnRig(
                         bounce.animateTo(0f, tween(150))
                     }
                 }
-                val lift = avatarSize * (0.9f * sin(hop.value * PI.toFloat()) + 0.3f * bounce.value)
                 Box(
                     Modifier
                         .zIndex(spot.z)
-                        .offset(x = w * (x / RIG_W) - avatarSize / 2, y = h * (y / RIG_H) - avatarSize / 2 - lift)
+                        .offset {
+                            // Leído en la fase de colocación: el salto no recompone en cada frame
+                            val lift = avatarSize * (0.9f * sin(hop.value * PI.toFloat()) + 0.3f * bounce.value)
+                            IntOffset((w * (x / RIG_W) - avatarSize / 2).roundToPx(), (h * (y / RIG_H) - avatarSize / 2 - lift).roundToPx())
+                        }
                         .alpha(alpha),
                 ) {
                     Avatar(p.avatar, avatarSize, highlight = p.id == highlightId, background = false)
