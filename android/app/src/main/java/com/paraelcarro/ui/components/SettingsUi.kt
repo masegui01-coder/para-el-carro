@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.paraelcarro.R
+import com.paraelcarro.ads.Privacy
 import com.paraelcarro.data.Settings
 import com.paraelcarro.data.ThemeMode
 import com.paraelcarro.ui.sendFeedback
@@ -106,6 +107,10 @@ fun SettingsDialog(onTest: () -> Unit, onDismiss: () -> Unit) {
                     }
                 }
                 WoodButton("Enviar sugerencia o error", { sendFeedback(context) }, Modifier.fillMaxWidth(), small = true, tone = Tone.FANTASMA)
+                if (Privacy.optionsRequired(context)) {
+                    WoodButton("Privacidad y anuncios", { Privacy.showOptions(context) }, Modifier.fillMaxWidth(), small = true, tone = Tone.FANTASMA)
+                }
+                WoodButton("Política de privacidad", { Privacy.openPolicy(context) }, Modifier.fillMaxWidth(), small = true, tone = Tone.FANTASMA)
             }
         },
     )

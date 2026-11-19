@@ -137,7 +137,9 @@ Ahora mismo usa los **IDs de prueba de Google**. Para cobrar:
    admobInterstitialId=ca-app-pub-XXXXXXXX/WWWWWWWW
    ```
 3. Configura el mensaje de consentimiento RGPD en AdMob → *Privacidad y mensajes*.
-4. Antes de subir a Google Play, crea tu clave de firma (en `app/build.gradle.kts` el release se firma con la de depuración).
+4. Para subir a Google Play (clave de subida, AAB, ficha, formularios y prueba cerrada) sigue
+   [`docs/google-play/README.md`](docs/google-play/README.md) y genera el AAB con `powershell -File tools\publicar-play.ps1`.
+   Política de privacidad: `privacidad.html` → https://paraelcarroyomebajo.com/privacidad.html
 
 En la web, el hueco `#ad-banner` y el intersticial simulado de `js/game.js` son donde irían los anuncios de
 **Google AdSense** (requiere dominio propio aprobado; GitHub Pages no suele aceptarse).

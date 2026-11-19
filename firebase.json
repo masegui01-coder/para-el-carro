@@ -6,7 +6,7 @@
     "public": ".",
     "ignore": [
       "firebase.json", ".firebaserc", ".git/**", ".gitignore", ".gitattributes", ".claude/**",
-      "android/**", "tools/**", "shared/**", "firebase/**", "audio/provisional/**",
+      "android/**", "docs/**", "tools/**", "*.aab", "shared/**", "firebase/**", "audio/provisional/**",
       "**/node_modules/**", "*.apk", "README.md"
     ],
     "headers": [

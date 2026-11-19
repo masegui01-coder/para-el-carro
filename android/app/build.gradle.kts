@@ -1,10 +1,15 @@
-﻿plugins {
+plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     // Firebase: google-services.json (Analytics, Crashlytics, App Check)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
 }
+
+// Clave de subida a Google Play: se lee de ~/.gradle/gradle.properties (nunca se sube a GitHub):
+//   uploadStoreFile=C:/Users/TU_USUARIO/claves/paraelcarro-upload.jks
+//   uploadStorePassword=...   uploadKeyAlias=upload   uploadKeyPassword=...
+val uploadStoreFile = project.findProperty("uploadStoreFile") as String?
 
 android {
     namespace = "com.paraelcarro"
@@ -27,14 +32,25 @@ android {
         buildConfigField("String", "ADMOB_BANNER_ID", adUnit("admobBannerId", "ca-app-pub-3940256099942544/9214589741"))
     }
 
+    signingConfigs {
+        if (uploadStoreFile != null) {
+            create("upload") {
+                storeFile = file(uploadStoreFile)
+                storePassword = project.findProperty("uploadStorePassword") as String?
+                keyAlias = (project.findProperty("uploadKeyAlias") as String?) ?: "upload"
+                keyPassword = project.findProperty("uploadKeyPassword") as String?
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Para probar en el mÃ³vil se firma con la clave de depuraciÃ³n. Antes de subir a
-            // Google Play, crea tu propia clave de subida y cambia esto por su signingConfig.
-            signingConfig = signingConfigs.getByName("debug")
+            // Con la clave de subida configurada se firma para Google Play; si no, con la de depuración
+            // (sirve para probar en el móvil, pero Google Play rechaza ese AAB).
+            signingConfig = if (uploadStoreFile != null) signingConfigs.getByName("upload") else signingConfigs.getByName("debug")
         }
     }
 
