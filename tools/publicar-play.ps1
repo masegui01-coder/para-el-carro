@@ -1,4 +1,4 @@
-# Genera el AAB firmado para subirlo a Google Play (prueba cerrada / producción).
+﻿# Genera el AAB firmado para subirlo a Google Play (prueba cerrada / producción).
 # Uso: powershell -File tools\publicar-play.ps1
 # Requisitos en %USERPROFILE%\.gradle\gradle.properties (ver docs\google-play\README.md):
 #   uploadStoreFile, uploadStorePassword, uploadKeyAlias, uploadKeyPassword
@@ -11,8 +11,8 @@ $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
 # y sin los IDs de AdMob la app saldría con anuncios de prueba.
 $props = Join-Path $env:USERPROFILE '.gradle\gradle.properties'
 $texto = if (Test-Path $props) { Get-Content $props -Raw } else { '' }
-$faltan = @('uploadStoreFile', 'uploadStorePassword', 'uploadKeyPassword') | Where-Object { $texto -notmatch "(?m)^\s*$_\s*=" }
-if ($faltan) { throw "Faltan en $props : $($faltan -join ', '). Crea la clave de subida (docs\google-play\README.md, paso 1)." }
+$faltan = @('uploadStoreFile', 'uploadStorePassword', 'uploadKeyPassword') | Where-Object { $texto -notmatch "(?m)^\s*$_\s*=\s*\S" }
+if ($faltan) { throw "Faltan o están vacíos en $props : $($faltan -join ', '). Ejecuta tools\configurar-clave.ps1." }
 $sinAdmob = @('admobAppId', 'admobBannerId', 'admobInterstitialId') | Where-Object { $texto -notmatch "(?m)^\s*$_\s*=" }
 if ($sinAdmob) { Write-Warning "Sin $($sinAdmob -join ', '): la app llevará anuncios de PRUEBA de Google." }
 

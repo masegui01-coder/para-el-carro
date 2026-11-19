@@ -10,6 +10,9 @@ Todo lo que hay en esta carpeta:
 
 ## 1. Crear la clave de subida (una sola vez, en tu PC)
 
+Lo más fácil: abre `tools\configurar-clave.ps1` en VS Code o PowerShell ISE y pulsa ▶. Crea la clave (o comprueba
+la que ya tienes), rellena `gradle.properties` (paso 2) y copia el `.jks` a Google Drive. A mano:
+
 En PowerShell:
 
 ```powershell
