@@ -93,7 +93,9 @@ if (Test-Path 'G:\Mi unidad') {
 
 # 4. Huella SHA-256 (para assetlinks.json y Firebase)
 $ErrorActionPreference = 'Continue'
-$huella = (& $keytool -list -v -keystore $jks -storepass $pass -alias $alias | Select-String 'SHA256:').ToString().Trim()
+# keytool en inglés para que la línea se llame siempre "SHA256:" (en español cambia el texto)
+$salida = & $keytool -J-Duser.language=en -list -v -keystore $jks -storepass $pass -alias $alias 2>&1 | Out-String
+$huella = if ($salida -match 'SHA-?256:\s*([0-9A-F:]{95})') { $Matches[1] } else { '(no se pudo leer; no es importante)' }
 
 Write-Host ''
 Write-Host '================ GUARDA ESTO EN TU GESTOR DE CONTRASEÑAS ================' -ForegroundColor Cyan
