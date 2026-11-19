@@ -16,6 +16,17 @@ if ($faltan) { throw "Faltan o están vacíos en $props : $($faltan -join ', ').
 $sinAdmob = @('admobAppId', 'admobBannerId', 'admobInterstitialId') | Where-Object { $texto -notmatch "(?m)^\s*$_\s*=" }
 if ($sinAdmob) { Write-Warning "Sin $($sinAdmob -join ', '): la app llevará anuncios de PRUEBA de Google." }
 
+# SDK de Android: local.properties no está en GitHub, así que en una copia nueva se crea aquí
+# (Android Studio lo instala por defecto en %LOCALAPPDATA%\Android\Sdk).
+$localProps = Join-Path $raiz 'android\local.properties'
+if (-not $env:ANDROID_HOME -and -not (Test-Path $localProps)) {
+    $sdk = @("$env:LOCALAPPDATA\Android\Sdk", "$env:USERPROFILE\AppData\Local\Android\Sdk", 'C:\Android\Sdk') |
+        Where-Object { Test-Path (Join-Path $_ 'platforms') } | Select-Object -First 1
+    if (-not $sdk) { throw 'No encuentro el SDK de Android. Abre Android Studio > Settings > Android SDK y copia aquí la ruta "Android SDK Location".' }
+    Set-Content $localProps -Value ("sdk.dir=" + ($sdk -replace '\\', '/')) -Encoding ASCII
+    Write-Host "SDK de Android: $sdk"
+}
+
 Push-Location (Join-Path $raiz 'android')
 try {
     & .\gradlew.bat testDebugUnitTest bundleRelease --console=plain -q
