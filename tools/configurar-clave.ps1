@@ -72,7 +72,10 @@ if (Test-Path $jks) {
 
 # 2. Escribir gradle.properties sin duplicados, conservando el resto de líneas
 New-Item -ItemType Directory -Force (Split-Path $props) | Out-Null
-$lineas = if (Test-Path $props) { @(Get-Content $props | Where-Object { $_ -notmatch '^\s*upload(StoreFile|StorePassword|KeyAlias|KeyPassword)\s*=' -and $_.Trim() -ne '' }) } else { @() }
+# [string[]] es necesario: si solo queda una línea, PowerShell la convierte en texto y "+=" las pegaría todas en una
+[string[]]$lineas = if (Test-Path $props) { Get-Content $props | Where-Object { $_ -notmatch '^\s*upload(StoreFile|StorePassword|KeyAlias|KeyPassword)\s*=' -and $_.Trim() -ne '' } } else { @() }
+# Arregla el fichero si una versión anterior de este script pegó las claves al final de otra línea
+$lineas = @($lineas | ForEach-Object { $_ -replace 'uploadStoreFile=.*$', '' } | Where-Object { $_.Trim() -ne '' })
 $lineas += @(
     "uploadStoreFile=$($jks -replace '\\', '/')",
     "uploadStorePassword=$pass",
